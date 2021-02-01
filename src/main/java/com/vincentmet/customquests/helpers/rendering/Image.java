@@ -6,16 +6,16 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 
 public class Image{
-	public static void drawTexture(ResourceLocation resource, double posX, double posY, double width, double height, double zLevel){
+	public static void drawTexture(ResourceLocation resource, float posX, float posY, float width, float height, double zLevel){
 		Minecraft.getInstance().getTextureManager().bindTexture(resource);
 		draw(posX, posY, width, height, zLevel);
 	}
 	
-	public static void draw(double posX, double posY, double width, double height, double zLevel){
-		draw(posX, posY, width, height, zLevel, 0D, 1D, 0D, 1D);
+	public static void draw(float posX, float posY, float width, float height, double zLevel){
+		draw(posX, posY, width, height, zLevel, 0F, 1F, 0F, 1F);
 	}
 	
-	public static void draw(double posX, double posY, double width, double height, double zLevel, double u1, double u2, double v1, double v2){
+	public static void draw(double posX, double posY, double width, double height, double zLevel, float u1, float u2, float v1, float v2){
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder bufferbuilder = tessellator.getBuffer();
 		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);

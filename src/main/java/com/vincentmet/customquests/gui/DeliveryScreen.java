@@ -156,7 +156,7 @@ public class DeliveryScreen extends Screen{
 		renderBackgrounds();
 		font.drawStringWithShadow(TRANSLATION_QUEST.getFormattedText() + ":", questListX.getAsInt(), questListY.getAsInt() - font.FONT_HEIGHT, 0xFFFFFF);
 		questsList.render(mouseX, mouseY, partialTicks);
-		font.drawStringWithShadow(TRANSLATION_TASK.getFormattedText() + ":", (Minecraft.getInstance().mainWindow.getScaledWidth()>>2)+10, 20 - font.FONT_HEIGHT, 0xFFFFFF);
+		font.drawStringWithShadow(TRANSLATION_TASK.getFormattedText() + ":", (Minecraft.getInstance().getMainWindow().getScaledWidth()>>2)+10, 20 - font.FONT_HEIGHT, 0xFFFFFF);
 		taskList.render(mouseX, mouseY, partialTicks);
 		
 		font.drawStringWithShadow(TRANSLATION_SUBTASK.getFormattedText() + ":", (width>>2)+10, height / 2 + 10 - font.FONT_HEIGHT, 0xFFFFFF);
@@ -174,11 +174,11 @@ public class DeliveryScreen extends Screen{
 			if(isCompleted)
 				checkmarkText = TextFormatting.GREEN + " \u2713";
 			String subtaskText = QuestingStorage.getSidedQuestsMap().get(currentSubtask.getLeft()).getTasks().get(currentSubtask.getMiddle()).getSubtasks().get(currentSubtask.getRight()).getSubtask().getText() + checkmarkText;
-			if(Minecraft.getInstance().fontRenderer.getStringWidth(subtaskText) + 5 >= (Minecraft.getInstance().mainWindow.getScaledWidth()>>1) - 90){
-				subtaskText = Minecraft.getInstance().fontRenderer.trimStringToWidth(subtaskText, (Minecraft.getInstance().mainWindow.getScaledWidth()>>1) - 90) + "...";
+			if(Minecraft.getInstance().fontRenderer.getStringWidth(subtaskText) + 5 >= (Minecraft.getInstance().getMainWindow().getScaledWidth()>>1) - 90){
+				subtaskText = Minecraft.getInstance().fontRenderer.trimStringToWidth(subtaskText, (Minecraft.getInstance().getMainWindow().getScaledWidth()>>1) - 90) + "...";
 			}
-			Minecraft.getInstance().fontRenderer.drawStringWithShadow(subtaskText, 27 + (Minecraft.getInstance().mainWindow.getScaledWidth() >> 1) + 25, 55 + 10 - Minecraft.getInstance().fontRenderer.FONT_HEIGHT / 2, 0xFFFFFF);
-			QuestingStorage.getSidedQuestsMap().get(currentSubtask.getLeft()).getTasks().get(currentSubtask.getMiddle()).getSubtasks().get(currentSubtask.getRight()).getSubtask().getIcon().render((Minecraft.getInstance().mainWindow.getScaledWidth() >> 1) + 25 + 1, 55 + 1, mouseX, mouseY);
+			Minecraft.getInstance().fontRenderer.drawStringWithShadow(subtaskText, 27 + (Minecraft.getInstance().getMainWindow().getScaledWidth() >> 1) + 25, 55 + 10 - Minecraft.getInstance().fontRenderer.FONT_HEIGHT / 2, 0xFFFFFF);
+			QuestingStorage.getSidedQuestsMap().get(currentSubtask.getLeft()).getTasks().get(currentSubtask.getMiddle()).getSubtasks().get(currentSubtask.getRight()).getSubtask().getIcon().render((Minecraft.getInstance().getMainWindow().getScaledWidth() >> 1) + 25 + 1, 55 + 1, mouseX, mouseY);
 		}
 		TooltipBuffer.tooltipBuffer.forEach(Runnable::run);
 	}

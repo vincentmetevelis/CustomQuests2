@@ -31,7 +31,7 @@ public class ChapterButton implements ScrollableListEntry{
 		GL11.glPushMatrix();
 		Color.color(0xFFFFFF);
 		this.button.render(mouseX, mouseY, partialTicks);
-		RenderHelper.enableGUIStandardItemLighting();
+		RenderHelper.setupGui3DDiffuseLighting();
 		icon.render(x+2, y+2, mouseX, mouseY);
 		GL11.glPopMatrix();
 	}
@@ -41,7 +41,7 @@ public class ChapterButton implements ScrollableListEntry{
 		GL11.glPushMatrix();
 		Color.color(0xFFFFFF);
 		this.button.renderHover(mouseX, mouseY, partialTicks);
-		RenderHelper.enableGUIStandardItemLighting();
+		RenderHelper.setupGui3DDiffuseLighting();
 		icon.render(x+2, y+2, mouseX, mouseY);
 		GL11.glPopMatrix();
 	}

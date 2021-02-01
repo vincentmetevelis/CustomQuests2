@@ -28,7 +28,7 @@ public class TextButton implements ScrollableListEntry{
 		GL11.glPushMatrix();
 		Color.color(0xFFFFFF);
 		this.button.render(mouseX, mouseY, partialTicks);
-		RenderHelper.enableGUIStandardItemLighting();
+		RenderHelper.setupGui3DDiffuseLighting();
 		GL11.glPopMatrix();
 	}
 	
@@ -37,7 +37,7 @@ public class TextButton implements ScrollableListEntry{
 		GL11.glPushMatrix();
 		Color.color(0xFFFFFF);
 		this.button.renderHover(mouseX, mouseY, partialTicks);
-		RenderHelper.enableGUIStandardItemLighting();
+		RenderHelper.setupGui3DDiffuseLighting();
 		GL11.glPopMatrix();
 	}
 	

@@ -318,7 +318,7 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 	private void renderRewards(int mouseX, int mouseY, float partialTicks){
 		GLScissor.enable(rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentWidth.getAsInt(), rewardContentHeight.getAsInt());
 		rewardSlotsToRender.forEach(variableSlot -> variableSlot.render(mouseX, mouseY, partialTicks));
-		RenderHelper.enableGUIStandardItemLighting();
+		RenderHelper.setupGui3DDiffuseLighting();
 		rewardItemsToRender.forEach(quad ->Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(quad.getLeft(), quad.getMiddle(), quad.getRight()));
 		rewardTextToRender.forEach(triple ->FONT.drawStringWithShadow(triple.getLeft(), triple.getMiddle(), triple.getRight(), 0xFFFFFF));
 		FONT.drawStringWithShadow(new TranslationTextComponent(Ref.MODID + ".screens.rewards").getFormattedText(), rewardContentX.getAsInt(), rewardContentY.getAsInt()-rewardScrollDistance, 0xFFFFFF);

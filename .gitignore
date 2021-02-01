@@ -5,6 +5,7 @@ build/
 run/
 serverrun/
 resourcesrun/
+logs/
 *.iml
 .gitattributes
 BaconIdeas.txt

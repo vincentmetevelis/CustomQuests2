@@ -20,7 +20,7 @@ public class DeliveryBlock extends ContainerBlock{
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit){
+	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit){
 		if(!world.isRemote){
 			TileEntity te = world.getTileEntity(pos);
 			if(te instanceof DeliveryBlockTileEntity){
@@ -30,26 +30,16 @@ public class DeliveryBlock extends ContainerBlock{
 				}else{
 					Minecraft.getInstance().displayGuiScreen(new DeliveryScreen(pos));
 				}
+				return ActionResultType.PASS;
 			}
 		}
-		return true;
-	}
-	
-	@Override
-	public BlockRenderLayer getRenderLayer(){
-		return BlockRenderLayer.CUTOUT;
+		return ActionResultType.FAIL;
 	}
 	
 	@SuppressWarnings("deprecation")
 	@Override
 	public BlockRenderType getRenderType(BlockState state){
 		return BlockRenderType.MODEL;
-	}
-	
-	@SuppressWarnings("deprecation")
-	@Override
-	public boolean doesSideBlockRendering(BlockState state, IEnviromentBlockReader world, BlockPos pos, Direction face){
-		return true;
 	}
 	
 	@Nullable

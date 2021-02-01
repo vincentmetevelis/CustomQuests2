@@ -7,7 +7,7 @@ import static org.lwjgl.opengl.GL11.*;
 @OnlyIn(Dist.CLIENT)
 public class GLScissor{
 	public static void enable(int x, int y, int width, int height){
-		MainWindow mw = Minecraft.getInstance().mainWindow;
+		MainWindow mw = Minecraft.getInstance().getMainWindow();
 		double s = mw.getGuiScaleFactor();
 		
 		if(width<0)width=0;

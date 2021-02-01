@@ -19,28 +19,17 @@ public class QuestingBlock extends Block{
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public boolean onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit){
+	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit){
 		if(world.isRemote){
 			ClientUtils.openQuestingScreen();
+			return ActionResultType.SUCCESS;
 		}
-		return true;
+		return ActionResultType.SUCCESS;
 	}
-	
-	@Override
-	public BlockRenderLayer getRenderLayer(){
-		return BlockRenderLayer.CUTOUT;
-	}
-	
 	@SuppressWarnings("deprecation")
 	@Override
 	public BlockRenderType getRenderType(BlockState state){
 		return BlockRenderType.MODEL;
-	}
-	
-	@SuppressWarnings("deprecation")
-	@Override
-	public boolean doesSideBlockRendering(BlockState state, IEnviromentBlockReader world, BlockPos pos, Direction face){
-		return true;
 	}
 	
 	public void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
