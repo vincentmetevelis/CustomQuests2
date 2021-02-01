@@ -1,0 +1,41 @@
+{
+	"itemGroup.customquests": "Custom Quests",
+	"item.customquests.questing_device": "Questing Device",
+	"block.customquests.questing_block": "Questing Block",
+	"block.customquests.delivery_block": "Delivery Block",
+	"customquests.screens.questing_device": "Questing Device",
+	"customquests.screens.questing_block": "Questing Block",
+	"customquests.screens.delivery_block": "Delivery Block",
+	"customquests.screens.back_to_chapters": "Back to Chapters",
+	"customquests.screens.no_quests": "0 Quests available",
+	"customquests.screens.rewards": "Rewards:",
+	"customquests.screens.claim": "Claim",
+	"customquests.screens.claimed": "Claimed",
+	"customquests.screens.complete_all": "Complete all of these quests to unlock this quest: [%s]",
+	"customquests.screens.complete_one": "Complete one of these quests to unlock this quest: [%s]",
+	"customquests.command.use_subcommand": "Please use a subcommand",
+	"customquests.command.save.success": "All Quests and Chapters have been successfully saved!",
+	"customquests.command.wip": "Command is Work In Progress",
+	"customquests.command.reload.success": "Successfully reloaded questing files!",
+	"customquests.general.tag": "Tag",
+	"customquests.general.quest": "Quest",
+	"customquests.general.task": "Task",
+	"customquests.general.subtask": "Subtask",
+	"customquests.general.quest_completed": "Quest Completed",
+	"customquests.general.hidden": "Hidden",
+	
+	"customquests.standardcontent.tasks.item_detect": "Detect Item(s):",
+	"customquests.standardcontent.tasks.item_craft": "Craft Item(s):",
+	"customquests.standardcontent.tasks.item_submit": "Submit Item(s):",
+	
+	"customquests.standardcontent.tasks.button.item_submit": "Submit",
+	"customquests.standardcontent.delivery.subtask_select": "Select this subtask",
+	
+	
+	"customquests.jei.title.tasks": "Quest Tasks",
+	"customquests.jei.title.rewards": "Quest Rewards",
+	
+	
+	"--TODO REMOVE THESE BELOW LATER": "",
+	"customquests.quests.3.subtitle": "This subtitle is loaded from the translation file"
+}

@@ -1,0 +1,7 @@
+{
+	"replace": false,
+	"values": [
+		"customquests:questing_device",
+		"customquests:questing_block"
+	]
+}

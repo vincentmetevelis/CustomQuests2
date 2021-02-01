@@ -1,0 +1,8 @@
+{
+	"variants": {
+		"facing=north": {"model": "customquests:block/questing_block"},
+		"facing=east": {"model": "customquests:block/questing_block", "y": 90},
+		"facing=south": {"model": "customquests:block/questing_block", "y": 180},
+		"facing=west": {"model": "customquests:block/questing_block", "y": 270}
+	}
+}

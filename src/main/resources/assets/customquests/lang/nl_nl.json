@@ -1,0 +1,26 @@
+{
+	"itemGroup.customquests": "Custom Quests",
+	"item.customquests.questing_device": "Opdrachten Apparaat",
+	"block.customquests.questing_block": "Opdrachten Blok",
+	"block.customquests.delivery_block": "Inlever Block",
+	"customquests.screens.questing_device": "Opdrachten Apparaat",
+	"customquests.screens.questing_block": "Opdrachten Blok",
+	"customquests.screens.delivery_block": "Inlever Blok",
+	"customquests.screens.no_quests": "0 Opdrachten beschikbaar",
+	"customquests.screens.rewards": "Beloningen:",
+	"customquests.screens.claim": "Opeisen",
+	"customquests.screens.claimed": "Klaar!",
+	"customquests.screens.complete_all": "Voltooi alle onderstaande opdrachten om deze opdracht the ontsleutelen: [%s]",
+	"customquests.screens.complete_one": "Voltooi één van de onderstaande opdrachten om deze opdracht the ontsleutelen: [%s]",
+	"customquests.command.use_subcommand": "A.u.b. een subcommando gebruiken!",
+	"customquests.command.wip": "Commando is nog niet geïmplementeerd",
+	"customquests.command.reload.success": "Opdrachtbestanden zijn succesvol herladen!",
+	"customquests.general.tag": "Label",
+	
+	"customquests.standardcontent.tasks.item_detect": "Detecteer Item(s):",
+	"customquests.standardcontent.tasks.item_craft": "Vervaardig Item(s):",
+	"customquests.standardcontent.tasks.item_submit": "Lever Item(s) in:",
+	
+	"customquests.standardcontent.tasks.button.item_submit": "Inleveren",
+	"customquests.standardcontent.delivery.subtask_select": "Selecteer deze deeltaak"
+}

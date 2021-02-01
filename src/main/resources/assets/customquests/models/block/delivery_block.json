@@ -1,0 +1,55 @@
+{
+	"texture_size": [32, 32],
+	"textures": {
+		"1": "customquests:block/questing_block",
+		"particle": "customquests:block/questing_block"
+	},
+	"elements": [
+		{
+			"name": "Screen",
+			"from": [0, 1, 13],
+			"to": [16, 11, 14],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 9, 21]},
+			"faces": {
+				"north": {"uv": [8, 8, 16, 13], "texture": "#1"},
+				"east": {"uv": [0, 10, 0.5, 15], "texture": "#1"},
+				"south": {"uv": [8, 0, 16, 5], "texture": "#1"},
+				"west": {"uv": [0.5, 10, 1, 15], "texture": "#1"},
+				"up": {"uv": [16, 6.5, 8, 6], "texture": "#1"},
+				"down": {"uv": [16, 6.5, 8, 7], "texture": "#1"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [55, -180, 0],
+			"translation": [-6, 8.25, 3.75]
+		},
+		"thirdperson_lefthand": {
+			"rotation": [70, -180, 0],
+			"translation": [-6.25, 6.25, 5.25]
+		},
+		"firstperson_righthand": {
+			"rotation": [-20, -180, 0],
+			"translation": [-9, 8.5, 0.75]
+		},
+		"firstperson_lefthand": {
+			"rotation": [-20, -180, 0],
+			"translation": [-9, 10.25, 0.75]
+		},
+		"ground": {
+			"translation": [0, 4.5, 0]
+		},
+		"gui": {
+			"rotation": [30, 225, 0],
+			"translation": [0, 1.5, 0],
+			"scale": [0.75, 0.75, 0.75]
+		},
+		"head": {
+			"translation": [0, 14.5, 1.25]
+		},
+		"fixed": {
+			"translation": [0, 3.25, -5]
+		}
+	}
+}
