@@ -67,8 +67,8 @@ minecraft {
 dependencies {
     minecraft "net.minecraftforge:forge:${property('mc.version')}-${property('forge.version')}"
 
-    compileOnly fg.deobf("mezz.jei:jei-${property('mc.version')}:${property('jei.version')}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-${property('mc.version')}:${property('jei.version')}")
+    compileOnly fg.deobf("mezz.jei:jei-${property('jei.mcversion')}:${property('jei.version')}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-${property('jei.mcversion')}:${property('jei.version')}")
 
     compileOnly fg.deobf("net.darkhax.wawla:WAWLA-${property('mc.version')}:${property('wawla.version')}")
 
