@@ -14,6 +14,7 @@ apply plugin: 'maven-publish'
 repositories {
     maven { url = 'https://dvs1.progwml6.com/files/maven/' }
     maven { url = 'https://maven.tehnut.info' }
+    maven { url 'https://maven.blamejared.com' }
 }
 
 version = property('version')
@@ -69,8 +70,7 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${property('mc.version')}:${property('jei.version')}:api")
     runtimeOnly fg.deobf("mezz.jei:jei-${property('mc.version')}:${property('jei.version')}")
 
-    compileOnly fg.deobf("mcp.mobius.waila:Hwyla:${property('hwyla.version')}:api")
-    runtimeOnly fg.deobf("mcp.mobius.waila:Hwyla:${property('hwyla.version')}")
+    compileOnly fg.deobf("net.darkhax.wawla:WAWLA-${property('mc.version')}:${property('wawla.version')}")
 
     implementation 'com.intellij:annotations:+@jar'
 }

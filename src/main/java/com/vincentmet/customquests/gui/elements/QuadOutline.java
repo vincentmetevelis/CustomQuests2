@@ -1,5 +1,6 @@
 package com.vincentmet.customquests.gui.elements;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.helpers.Octuple;
 import com.vincentmet.customquests.helpers.math.Vec2i;
 
@@ -26,10 +27,10 @@ public class QuadOutline{
         line4 = new Line(0, 0, point4.getX(), point4.getY(), point1.getX(), point1.getY(), 0xFFFFFF, 1);
     }
     
-    public void render(int mouseX, int mouseY, float partialTicks){
-        line1.render(mouseX, mouseY, partialTicks);
-        line2.render(mouseX, mouseY, partialTicks);
-        line3.render(mouseX, mouseY, partialTicks);
-        line4.render(mouseX, mouseY, partialTicks);
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+        line1.render(matrixStack, mouseX, mouseY, partialTicks);
+        line2.render(matrixStack, mouseX, mouseY, partialTicks);
+        line3.render(matrixStack, mouseX, mouseY, partialTicks);
+        line4.render(matrixStack, mouseX, mouseY, partialTicks);
     }
 }

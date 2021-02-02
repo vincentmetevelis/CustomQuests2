@@ -34,7 +34,7 @@ public class TranslationTextType implements ITextType{
     @Override
     public String getText(){
         if(translationKey != null){
-            return ClientUtils.colorify(translationKey.getFormattedText());
+            return ClientUtils.colorify(translationKey.getString());
         }
         return "";
     }

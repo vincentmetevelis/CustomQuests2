@@ -136,7 +136,7 @@ public class CQCommand{
                                  }else{
                                      PartyInviteCache.addInvite(invitedPlayerUUID, partyId);
                                      context.getSource().sendFeedback(new StringTextComponent("You invited '" + invitedPlayer.getDisplayName().getString() + "' to your party!"), false);
-                                     invitedPlayer.sendMessage(new StringTextComponent(inviter.getDisplayName().getString() + " invited you to their party. Use '/customquests party accept' to accept or '/customquests party deny' to deny the invite!"));
+                                     invitedPlayer.sendMessage(new StringTextComponent(inviter.getDisplayName().getString() + " invited you to their party. Use '/customquests party accept' to accept or '/customquests party deny' to deny the invite!"), inviterUUID);
                                  }
                              }
                              return 0;

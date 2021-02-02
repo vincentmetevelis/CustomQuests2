@@ -96,7 +96,7 @@ public class ItemCraftTaskType implements ITaskType, IItemStacksProvider{
 		if(items.size()==1){
 			return count + "x " + items.get(0).getItem().getName().getString();
 		}else{
-			return count + "x " + new TranslationTextComponent(Ref.MODID + ".general.tag").getFormattedText() + ": " + Arrays.stream(ogRL.getPath().split("/")).map(StringUtils::capitalize).reduce((s, s2) ->s + "/" + s2).orElse("Empty Tag");
+			return count + "x " + new TranslationTextComponent(Ref.MODID + ".general.tag").getString() + ": " + Arrays.stream(ogRL.getPath().split("/")).map(StringUtils::capitalize).reduce((s, s2) ->s + "/" + s2).orElse("Empty Tag");
 		}
 	}
 	

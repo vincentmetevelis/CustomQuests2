@@ -7,7 +7,7 @@ import com.vincentmet.customquests.hierarchy.quest.Quest;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import net.minecraft.entity.player.*;
+import net.minecraft.entity.player.ServerPlayerEntity;
 
 public class PartyHelper {
 	private static final List<Integer> partiesToDelete = new ArrayList<>();

@@ -1,5 +1,6 @@
 package com.vincentmet.customquests.gui.elements;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.helpers.MouseButton;
 import com.vincentmet.customquests.helpers.math.Vec2i;
 import com.vincentmet.customquests.helpers.rendering.*;
@@ -24,19 +25,19 @@ public class TextButton implements ScrollableListEntry{
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks){
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		GL11.glPushMatrix();
 		Color.color(0xFFFFFF);
-		this.button.render(mouseX, mouseY, partialTicks);
+		this.button.render(matrixStack, mouseX, mouseY, partialTicks);
 		RenderHelper.setupGui3DDiffuseLighting();
 		GL11.glPopMatrix();
 	}
 	
 	@Override
-	public void renderHover(int mouseX, int mouseY, float partialTicks){
+	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		GL11.glPushMatrix();
 		Color.color(0xFFFFFF);
-		this.button.renderHover(mouseX, mouseY, partialTicks);
+		this.button.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		RenderHelper.setupGui3DDiffuseLighting();
 		GL11.glPopMatrix();
 	}

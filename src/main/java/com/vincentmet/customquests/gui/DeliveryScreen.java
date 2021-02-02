@@ -1,5 +1,6 @@
 package com.vincentmet.customquests.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.gui.elements.*;
@@ -68,7 +69,7 @@ public class DeliveryScreen extends Screen{
 	
 	private final Triple<Integer, Integer, Integer> currentSubtask = new Triple<>(-1, -1, -1);
 	
-	private VariableButton selectButton = new VariableButton(0, 80, 0, 20, VariableButton.ButtonTexture.DEFAULT_NORMAL, TRANSLATION_SELECT_SUBTASK.getFormattedText(), new Vec2i(0, 0), (mouseButton) -> {}, new ArrayList<>());
+	private VariableButton selectButton = new VariableButton(0, 80, 0, 20, VariableButton.ButtonTexture.DEFAULT_NORMAL, TRANSLATION_SELECT_SUBTASK.getString(), new Vec2i(0, 0), (mouseButton) -> {}, new ArrayList<>());
 	private VariableSlot selectSlot = new VariableSlot(0, 55, SLOT_SIZE, SLOT_SIZE, VariableSlot.SlotTexture.DEFAULT, (mouseButton)->{}, new ArrayList<>());
 	
 	
@@ -151,23 +152,23 @@ public class DeliveryScreen extends Screen{
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks){
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		TooltipBuffer.tooltipBuffer.clear();
-		renderBackgrounds();
-		font.drawStringWithShadow(TRANSLATION_QUEST.getFormattedText() + ":", questListX.getAsInt(), questListY.getAsInt() - font.FONT_HEIGHT, 0xFFFFFF);
-		questsList.render(mouseX, mouseY, partialTicks);
-		font.drawStringWithShadow(TRANSLATION_TASK.getFormattedText() + ":", (Minecraft.getInstance().getMainWindow().getScaledWidth()>>2)+10, 20 - font.FONT_HEIGHT, 0xFFFFFF);
-		taskList.render(mouseX, mouseY, partialTicks);
+		renderBackgrounds(matrixStack);
+		font.drawStringWithShadow(matrixStack, TRANSLATION_QUEST.getString() + ":", questListX.getAsInt(), questListY.getAsInt() - font.FONT_HEIGHT, 0xFFFFFF);
+		questsList.render(matrixStack, mouseX, mouseY, partialTicks);
+		font.drawStringWithShadow(matrixStack, TRANSLATION_TASK.getString() + ":", (Minecraft.getInstance().getMainWindow().getScaledWidth()>>2)+10, 20 - font.FONT_HEIGHT, 0xFFFFFF);
+		taskList.render(matrixStack, mouseX, mouseY, partialTicks);
 		
-		font.drawStringWithShadow(TRANSLATION_SUBTASK.getFormattedText() + ":", (width>>2)+10, height / 2 + 10 - font.FONT_HEIGHT, 0xFFFFFF);
-		subtaskList.render(mouseX, mouseY, partialTicks);
+		font.drawStringWithShadow(matrixStack, TRANSLATION_SUBTASK.getString() + ":", (width>>2)+10, height / 2 + 10 - font.FONT_HEIGHT, 0xFFFFFF);
+		subtaskList.render(matrixStack, mouseX, mouseY, partialTicks);
 		
 		if(currentSubtask.getLeft()>=0 && currentSubtask.getMiddle()>=0 && currentSubtask.getRight()>=0){
-			selectButton.render(mouseX, mouseY, partialTicks);
+			selectButton.render(matrixStack, mouseX, mouseY, partialTicks);
 			String title = QuestingStorage.getSidedQuestsMap().get(currentSubtask.getLeft()) != null ? QuestingStorage.getSidedQuestsMap().get(currentSubtask.getLeft()).getTitle().toString() : "";
-			font.drawStringWithShadow(title, (int)(width * 0.75) - (font.getStringWidth(title) >> 1), 30, 0xFFFFFF);
-			font.drawStringWithShadow(TRANSLATION_ITEMS_TO_HAND_IN.getFormattedText(), (width >> 1) + 25, 40, 0xFFFFFF);
-			selectSlot.render(mouseX, mouseY, partialTicks);
+			font.drawStringWithShadow(matrixStack, title, (int)(width * 0.75) - (font.getStringWidth(title) >> 1), 30, 0xFFFFFF);
+			font.drawStringWithShadow(matrixStack, TRANSLATION_ITEMS_TO_HAND_IN.getString(), (width >> 1) + 25, 40, 0xFFFFFF);
+			selectSlot.render(matrixStack, mouseX, mouseY, partialTicks);
 			
 			boolean isCompleted = QuestingStorage.getSidedPlayersMap().get(clientPlayer.getUniqueID().toString()).getIndividualProgress().get(currentSubtask.getLeft()).get(currentSubtask.getMiddle()).get(currentSubtask.getRight()).getValue() == QuestingStorage.getSidedQuestsMap().get(currentSubtask.getLeft()).getTasks().get(currentSubtask.getMiddle()).getSubtasks().get(currentSubtask.getRight()).getSubtask().getCompletionAmount();
 			String checkmarkText = TextFormatting.DARK_GRAY + " [" + QuestingStorage.getSidedPlayersMap().get(clientPlayer.getUniqueID().toString()).getIndividualProgress().get(currentSubtask.getLeft()).get(currentSubtask.getMiddle()).get(currentSubtask.getRight()).getValue() + "/" + QuestingStorage.getSidedQuestsMap().get(currentSubtask.getLeft()).getTasks().get(currentSubtask.getMiddle()).getSubtasks().get(currentSubtask.getRight()).getSubtask().getCompletionAmount() + "]";
@@ -175,20 +176,20 @@ public class DeliveryScreen extends Screen{
 				checkmarkText = TextFormatting.GREEN + " \u2713";
 			String subtaskText = QuestingStorage.getSidedQuestsMap().get(currentSubtask.getLeft()).getTasks().get(currentSubtask.getMiddle()).getSubtasks().get(currentSubtask.getRight()).getSubtask().getText() + checkmarkText;
 			if(Minecraft.getInstance().fontRenderer.getStringWidth(subtaskText) + 5 >= (Minecraft.getInstance().getMainWindow().getScaledWidth()>>1) - 90){
-				subtaskText = Minecraft.getInstance().fontRenderer.trimStringToWidth(subtaskText, (Minecraft.getInstance().getMainWindow().getScaledWidth()>>1) - 90) + "...";
+				subtaskText = Minecraft.getInstance().fontRenderer.trimStringToWidth(new StringTextComponent(subtaskText), (Minecraft.getInstance().getMainWindow().getScaledWidth() >> 1) - 90) + "...";
 			}
-			Minecraft.getInstance().fontRenderer.drawStringWithShadow(subtaskText, 27 + (Minecraft.getInstance().getMainWindow().getScaledWidth() >> 1) + 25, 55 + 10 - Minecraft.getInstance().fontRenderer.FONT_HEIGHT / 2, 0xFFFFFF);
+			Minecraft.getInstance().fontRenderer.drawStringWithShadow(matrixStack, subtaskText, 27 + (Minecraft.getInstance().getMainWindow().getScaledWidth() >> 1) + 25, 55 + 10 - Minecraft.getInstance().fontRenderer.FONT_HEIGHT / 2, 0xFFFFFF);
 			QuestingStorage.getSidedQuestsMap().get(currentSubtask.getLeft()).getTasks().get(currentSubtask.getMiddle()).getSubtasks().get(currentSubtask.getRight()).getSubtask().getIcon().render((Minecraft.getInstance().getMainWindow().getScaledWidth() >> 1) + 25 + 1, 55 + 1, mouseX, mouseY);
 		}
 		TooltipBuffer.tooltipBuffer.forEach(Runnable::run);
 	}
 	
-	private void renderBackgrounds(){
-		AbstractGui.fill(0, 0, width, height, 0x88000000);
-		AbstractGui.fill(questListX.getAsInt(), questListY.getAsInt(), questListX.getAsInt() + questListWidth.getAsInt(), questListY.getAsInt() + questListHeight.getAsInt(), 0x88000000);
-		AbstractGui.fill(taskListX.getAsInt(), taskListY.getAsInt(), taskListX.getAsInt() + taskListWidth.getAsInt(), taskListY.getAsInt() + taskListHeight.getAsInt(), 0x88000000);
-		AbstractGui.fill(subtaskListX.getAsInt(), subtaskListY.getAsInt(), subtaskListX.getAsInt() + subtaskListWidth.getAsInt(), subtaskListY.getAsInt() + subtaskListHeight.getAsInt(), 0x88000000);
-		AbstractGui.fill(contentAreaX.getAsInt(), contentAreaY.getAsInt(), contentAreaX.getAsInt() + contentAreaWidth.getAsInt(), contentAreaY.getAsInt() + contentAreaHeight.getAsInt(), 0x88000000);
+	private void renderBackgrounds(MatrixStack matrixStack){
+		AbstractGui.fill(matrixStack, 0, 0, width, height, 0x88000000);
+		AbstractGui.fill(matrixStack, questListX.getAsInt(), questListY.getAsInt(), questListX.getAsInt() + questListWidth.getAsInt(), questListY.getAsInt() + questListHeight.getAsInt(), 0x88000000);
+		AbstractGui.fill(matrixStack, taskListX.getAsInt(), taskListY.getAsInt(), taskListX.getAsInt() + taskListWidth.getAsInt(), taskListY.getAsInt() + taskListHeight.getAsInt(), 0x88000000);
+		AbstractGui.fill(matrixStack, subtaskListX.getAsInt(), subtaskListY.getAsInt(), subtaskListX.getAsInt() + subtaskListWidth.getAsInt(), subtaskListY.getAsInt() + subtaskListHeight.getAsInt(), 0x88000000);
+		AbstractGui.fill(matrixStack, contentAreaX.getAsInt(), contentAreaY.getAsInt(), contentAreaX.getAsInt() + contentAreaWidth.getAsInt(), contentAreaY.getAsInt() + contentAreaHeight.getAsInt(), 0x88000000);
 	}
 	
 	@Override

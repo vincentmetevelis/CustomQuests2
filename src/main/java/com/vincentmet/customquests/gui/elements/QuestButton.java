@@ -1,5 +1,6 @@
 package com.vincentmet.customquests.gui.elements;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.api.ApiUtils;
 import com.vincentmet.customquests.helpers.*;
 import com.vincentmet.customquests.hierarchy.quest.*;
@@ -8,7 +9,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.text.*;
 import org.lwjgl.opengl.GL11;
 
 public class QuestButton implements MovableScalableCanvasEntry{
@@ -40,7 +42,7 @@ public class QuestButton implements MovableScalableCanvasEntry{
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks){
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		GL11.glPushMatrix();
 		GL11.glTranslated(parentX + x, parentY + y, 0);
 		GL11.glScaled(buttonScale, buttonScale, 1);
@@ -51,17 +53,17 @@ public class QuestButton implements MovableScalableCanvasEntry{
 		}else if(buttonState.equals(State.NORMAL) || buttonState.equals(State.HOVER)){
 			buttonState = State.NORMAL;
 		}
-		AbstractGui.blit(parentX + x, parentY + y, buttonState.u, buttonState.v, buttonState.WIDTH, buttonState.HEIGHT, 72, 72);
+		AbstractGui.blit(matrixStack, parentX + x, parentY + y, buttonState.u, buttonState.v, buttonState.WIDTH, buttonState.HEIGHT, 72, 72);
 		
 		icon.render(parentX + x + 4, parentY + y + 4, mouseX, mouseY);
 		GL11.glPopMatrix();
 	}
 	
 	@Override
-	public void renderHover(int mouseX, int mouseY, float partialTicks){
+	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, parentX + x, parentY + y, parentX + x + (int)(buttonState.WIDTH * buttonScale), parentY + y + (int)(buttonState.HEIGHT * buttonScale))){
 			TooltipBuffer.tooltipBuffer.add(()->{
-				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.renderTooltip(tooltipLines.stream().map(ITextComponent::getFormattedText).collect(Collectors.toList()), mouseX, mouseY);
+				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, tooltipLines.stream().map(line->IReorderingProcessor.fromString(line.getString(), Style.EMPTY)).collect(Collectors.toList()), mouseX, mouseY);
 			});
 		}
 	}

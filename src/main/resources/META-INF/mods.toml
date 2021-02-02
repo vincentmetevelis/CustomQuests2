@@ -1,9 +1,10 @@
 modLoader="javafml"
-loaderVersion="[31.2,)"
+loaderVersion="[35.1,)"
 credits="vincentmet"
+license="All Rights Reserved"
 [[mods]]
 modId="customquests"
-version="1.15.2-2.0.0"
+version="1.16.4-2.0.0"
 displayName="Custom Quests"
 description='''
 Quests!!!

@@ -113,15 +113,15 @@ public class CommandRewardType implements IRewardType{
 					displayText =  jsonPrimitive.getAsString();
 				}else{
 					Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > text': Value is not a String, defaulting to 'Hidden'!");
-					displayText = new TranslationTextComponent(Ref.MODID + ".general.hidden").getFormattedText();
+					displayText = new TranslationTextComponent(Ref.MODID + ".general.hidden").getString();
 				}
 			}else{
 				Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > text': Value is not a JsonPrimitive, please use a String, defaulting to 'Hidden'!");
-				displayText = new TranslationTextComponent(Ref.MODID + ".general.hidden").getFormattedText();
+				displayText = new TranslationTextComponent(Ref.MODID + ".general.hidden").getString();
 			}
 		}else{
 			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > text': Not detected, defaulting to 'Hidden'!");
-			displayText = new TranslationTextComponent(Ref.MODID + ".general.hidden").getFormattedText();
+			displayText = new TranslationTextComponent(Ref.MODID + ".general.hidden").getString();
 		}
 		
 		if(json.has("command")){

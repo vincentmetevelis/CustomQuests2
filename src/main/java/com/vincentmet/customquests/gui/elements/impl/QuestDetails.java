@@ -1,11 +1,13 @@
 package com.vincentmet.customquests.gui.elements.impl;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.gui.ScreenManager;
 import com.vincentmet.customquests.gui.elements.*;
 import com.vincentmet.customquests.helpers.*;
 import com.vincentmet.customquests.helpers.math.Vec2i;
+import com.vincentmet.customquests.helpers.rendering.Color;
 import com.vincentmet.customquests.helpers.rendering.*;
 import com.vincentmet.customquests.hierarchy.quest.*;
 import com.vincentmet.customquests.network.messages.*;
@@ -16,6 +18,7 @@ import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.text.*;
 import net.minecraftforge.api.distmarker.*;
 import org.lwjgl.opengl.GL11;
@@ -41,7 +44,7 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 	private int taskScrollDistance;
 	private int rewardScrollDistance;
 	
-	private final List<Triple<String, Integer, Integer>> textToRender = new ArrayList<>();
+	private final List<Triple<IReorderingProcessor, Integer, Integer>> textToRender = new ArrayList<>();
 	
 	private Triple<String, Integer, Integer> taskLogicText;
 	private final List<Triple<String, Integer, Integer>> taskTitles = new ArrayList<>();
@@ -94,7 +97,7 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 	
 	private Container<Integer> selectedRewardId = new Container<>(-1);
 	
-	private VariableButton claimRewardButton = new VariableButton(0, 0, 0, 0, CLAIM_BUTTON_WIDTH, CLAIM_BUTTON_HEIGHT, ButtonState.DISABLED.getButtonTexture(), new TranslationTextComponent(Ref.MODID + ".screens.claim").getFormattedText(), new Vec2i(0, 0), (mouseButton)->{
+	private VariableButton claimRewardButton = new VariableButton(0, 0, 0, 0, CLAIM_BUTTON_WIDTH, CLAIM_BUTTON_HEIGHT, ButtonState.DISABLED.getButtonTexture(), new TranslationTextComponent(Ref.MODID + ".screens.claim").getString(), new Vec2i(0, 0), (mouseButton)->{
 		PacketHandler.CHANNEL.sendToServer(new MessageRewardClaim(screenManager.getCurrentlySelectedQuestId(), selectedRewardId.get()));
 	}, new ArrayList<>());
 	
@@ -118,8 +121,9 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 		if(screenManager.getCurrentlySelectedQuestId()>=0){
 			textToRender.clear();
 			IntCounter cumulativeHeight = new IntCounter(textContentY.getAsInt() - textScrollDistance, FONT.FONT_HEIGHT + NEWLINE_MARGIN);
-			for(String line : FONT.listFormattedStringToWidth(ClientUtils.colorify(QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getText().getText()), textContentWidth.getAsInt())){
-				textToRender.add(new Triple<>(ClientUtils.colorify(line), textContentX.getAsInt(), cumulativeHeight.getValue()));
+			ITextProperties questText = new StringTextComponent(ClientUtils.colorify(QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getText().getText()));
+			for(IReorderingProcessor line : FONT.trimStringToWidth(questText, textContentWidth.getAsInt())){
+				textToRender.add(new Triple<>(line, textContentX.getAsInt(), cumulativeHeight.getValue()));
 				cumulativeHeight.count();
 			}
 		}
@@ -142,10 +146,10 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 				//Task descriptor, and some width adjustment for first subtask
 				ButtonContext buttonContext = new ButtonContext();
 				boolean hasButton = CQRegistry.getTaskTypes().get(task.getTaskType()).getSecond().get().hasButton(buttonContext);
-				String labelText = CQRegistry.getTaskTypes().get(task.getTaskType()).getFirst().getFormattedText() + TextFormatting.GRAY + " [" + task.getSubtasks().getLogicType() + "]";
+				String labelText = CQRegistry.getTaskTypes().get(task.getTaskType()).getFirst().getString() + TextFormatting.GRAY + " [" + task.getSubtasks().getLogicType() + "]";
 				if(hasButton){
 					if(getStringWidth(labelText) + CONTENT_MARGIN >= (taskContentWidth.getAsInt() - (2*CONTENT_MARGIN) - CLAIM_BUTTON_WIDTH - CONTENT_MARGIN)){
-						labelText = FONT.trimStringToWidth(labelText, (taskContentWidth.getAsInt() - (2*CONTENT_MARGIN) - CLAIM_BUTTON_WIDTH - CONTENT_MARGIN) - CONTENT_MARGIN) + "...";
+						labelText = FONT.trimStringToWidth(new StringTextComponent(labelText), (taskContentWidth.getAsInt() - (2*CONTENT_MARGIN) - CLAIM_BUTTON_WIDTH - CONTENT_MARGIN) - CONTENT_MARGIN) + "...";
 					}
 				}
 				taskTitles.add(new Triple<>(labelText, taskContentX.getAsInt(), cumulativeHeight.getValue() + CONTENT_MARGIN));
@@ -157,7 +161,7 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 					if(CombinedProgressHelper.isTaskCompleted(clientPlayer.getUniqueID(), screenManager.getCurrentlySelectedQuestId(), taskID)){
 						tex = VariableButton.ButtonTexture.DEFAULT_DISABLED;
 					}
-					VariableButton taskVb = new VariableButton(taskContentX.getAsInt() + taskContentWidth.getAsInt() - (2*CONTENT_MARGIN) - TASK_BUTTON_WIDTH, cumulativeHeight.getValue(), TASK_BUTTON_WIDTH, TASK_BUTTON_HEIGHT, tex, buttonContext.getText().getFormattedText(), new Vec2i(0, 0), (mouseButton)->{
+					VariableButton taskVb = new VariableButton(taskContentX.getAsInt() + taskContentWidth.getAsInt() - (2*CONTENT_MARGIN) - TASK_BUTTON_WIDTH, cumulativeHeight.getValue(), TASK_BUTTON_WIDTH, TASK_BUTTON_HEIGHT, tex, buttonContext.getText().getString(), new Vec2i(0, 0), (mouseButton)->{
 						if(!CombinedProgressHelper.isTaskCompleted(clientPlayer.getUniqueID(), screenManager.getCurrentlySelectedQuestId(), taskID)){
 							PacketHandler.CHANNEL.sendToServer(new MessageTaskButton(screenManager.getCurrentlySelectedQuestId(), taskID));
 						}
@@ -177,9 +181,9 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 					if(isCompleted)checkmarkText = TextFormatting.GREEN + " \u2713";
 					String subtaskText = subtask.getSubtask().getText() + checkmarkText;
 					if(getStringWidth(subtaskText) >= (taskContentWidth.getAsInt() - (4*CONTENT_MARGIN) - SLOT_SIZE - TASK_BUTTON_WIDTH) && subtaskID == 0 && subtask.getSubtask().hasButton(new ButtonContext())){
-						subtaskText = FONT.trimStringToWidth(subtaskText, taskContentWidth.getAsInt() - (5*CONTENT_MARGIN) - SLOT_SIZE - TASK_BUTTON_WIDTH) + "...";
+						subtaskText = FONT.trimStringToWidth(new StringTextComponent(subtaskText), taskContentWidth.getAsInt() - (5*CONTENT_MARGIN) - SLOT_SIZE - TASK_BUTTON_WIDTH) + "...";
 					}else if(getStringWidth(subtaskText) >= (taskContentWidth.getAsInt() - (2*CONTENT_MARGIN) - SLOT_SIZE)){
-						subtaskText = FONT.trimStringToWidth(subtaskText, taskContentWidth.getAsInt() - (3*CONTENT_MARGIN) - SLOT_SIZE) + "...";
+						subtaskText = FONT.trimStringToWidth(new StringTextComponent(subtaskText), taskContentWidth.getAsInt() - (3*CONTENT_MARGIN) - SLOT_SIZE) + "...";
 					}
 					subtaskTextsToRender.add(new Triple<>(subtaskText, SLOT_SIZE + (2*CONTENT_MARGIN) + taskContentX.getAsInt(), cumulativeHeight.getValue() + (SLOT_SIZE>>1) - (FONT.FONT_HEIGHT>>1)));
 					subtaskIconsToRender.add(new Triple<>(subtask.getSubtask().getIcon(), CONTENT_MARGIN + taskContentX.getAsInt() + SLOT_TO_ITEM_OFFSET, cumulativeHeight.getValue() + SLOT_TO_ITEM_OFFSET));
@@ -202,13 +206,13 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 			Color.color(0xFFFFFF);
 			if(((QuestHelper.doesRewardExist(screenManager.getCurrentlySelectedQuestId(), selectedRewardId.get()) && QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getRewards().getLogicType().equals(LogicType.OR)) || QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getRewards().getLogicType().equals(LogicType.AND)) && !CombinedProgressHelper.isQuestClaimed(clientPlayer.getUniqueID(), screenManager.getCurrentlySelectedQuestId()) && CombinedProgressHelper.isQuestCompleted(clientPlayer.getUniqueID(), screenManager.getCurrentlySelectedQuestId())){
 				claimRewardButton.setTexture(ButtonState.NORMAL.getButtonTexture());
-				claimRewardButton.setButtonText(new TranslationTextComponent(Ref.MODID + ".screens.claim").getFormattedText());
+				claimRewardButton.setButtonText(new TranslationTextComponent(Ref.MODID + ".screens.claim").getString());
 			}else if(CombinedProgressHelper.isQuestClaimed(clientPlayer.getUniqueID(), screenManager.getCurrentlySelectedQuestId())){
 				claimRewardButton.setTexture(ButtonState.DISABLED.getButtonTexture());
-				claimRewardButton.setButtonText(new TranslationTextComponent(Ref.MODID + ".screens.claimed").getFormattedText());
+				claimRewardButton.setButtonText(new TranslationTextComponent(Ref.MODID + ".screens.claimed").getString());
 			}else{
 				claimRewardButton.setTexture(ButtonState.DISABLED.getButtonTexture());
-				claimRewardButton.setButtonText(new TranslationTextComponent(Ref.MODID + ".screens.claim").getFormattedText());
+				claimRewardButton.setButtonText(new TranslationTextComponent(Ref.MODID + ".screens.claim").getString());
 			}
 			//Update reward button X/Y if needed, and render it
 			if(claimRewardButton.getX() != rewardContentX.getAsInt() + rewardContentWidth.getAsInt() - (2*CONTENT_MARGIN) - CLAIM_BUTTON_WIDTH){
@@ -242,9 +246,9 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 				reward.getSubRewards().forEach((subRewardID, subReward) -> {
 					String rewardText = subReward.getSubreward().getText();
 					if(getStringWidth(rewardText) >= (rewardContentWidth.getAsInt() - (4*CONTENT_MARGIN) - SLOT_SIZE - CLAIM_BUTTON_WIDTH) && rewardID == 0){
-						rewardText = FONT.trimStringToWidth(rewardText, rewardContentWidth.getAsInt() - (5*CONTENT_MARGIN) - SLOT_SIZE - CLAIM_BUTTON_WIDTH) + "...";
+						rewardText = FONT.trimStringToWidth(new StringTextComponent(rewardText), rewardContentWidth.getAsInt() - (5*CONTENT_MARGIN) - SLOT_SIZE - CLAIM_BUTTON_WIDTH) + "...";
 					}else if(getStringWidth(rewardText) >= (rewardContentWidth.getAsInt() - (2*CONTENT_MARGIN) - SLOT_SIZE)){
-						rewardText = FONT.trimStringToWidth(rewardText, rewardContentWidth.getAsInt() - (3*CONTENT_MARGIN) - SLOT_SIZE) + "...";
+						rewardText = FONT.trimStringToWidth(new StringTextComponent(rewardText), rewardContentWidth.getAsInt() - (3*CONTENT_MARGIN) - SLOT_SIZE) + "...";
 					}
 					rewardSlotsToRender.add(new VariableSlot(rewardContentX.getAsInt() + CONTENT_MARGIN, cumulativeHeight.getValue(), SLOT_SIZE, SLOT_SIZE, VariableSlot.SlotTexture.DEFAULT, (mouseButton)->{
 						subReward.getSubreward().onSlotClick().accept(mouseButton);
@@ -258,108 +262,108 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks){
-		renderBackground(mouseX, mouseY, partialTicks);
-		renderText(mouseX, mouseY, partialTicks);
-		renderTasks(mouseX, mouseY, partialTicks);
-		renderRewards(mouseX, mouseY, partialTicks);
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		renderBackground(matrixStack, mouseX, mouseY, partialTicks);
+		renderText(matrixStack, mouseX, mouseY, partialTicks);
+		renderTasks(matrixStack, mouseX, mouseY, partialTicks);
+		renderRewards(matrixStack, mouseX, mouseY, partialTicks);
 	}
 	
 	@Override
-	public void renderHover(int mouseX, int mouseY, float partialTicks){
-		renderHoverBackground(mouseX, mouseY, partialTicks);
-		renderHoverText(mouseX, mouseY, partialTicks);
-		renderHoverTasks(mouseX, mouseY, partialTicks);
-		renderHoverRewards(mouseX, mouseY, partialTicks);
+	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		renderHoverBackground(matrixStack, mouseX, mouseY, partialTicks);
+		renderHoverText(matrixStack, mouseX, mouseY, partialTicks);
+		renderHoverTasks(matrixStack, mouseX, mouseY, partialTicks);
+		renderHoverRewards(matrixStack, mouseX, mouseY, partialTicks);
 	}
 	
-	private void renderText(int mouseX, int mouseY, float partialTicks){
+	private void renderText(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		GLScissor.enable(textContentX.getAsInt(), textContentY.getAsInt(), textContentWidth.getAsInt(), textContentHeight.getAsInt());
 		textToRender.forEach(triple->{
-			FONT.drawString(triple.getLeft(), triple.getMiddle(), triple.getRight(), 0xFFFFFF);
+			FONT.func_238407_a_(matrixStack, triple.getLeft(), triple.getMiddle(), triple.getRight(), 0xFFFFFF);//renderString
 		});
 		GLScissor.disable();
 	}
 	
-	private void renderHoverBackground(int mouseX, int mouseY, float partialTicks){/*NOOP*/}
-	private void renderHoverText(int mouseX, int mouseY, float partialTicks){/*NOOP*/}
+	private void renderHoverBackground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){/*NOOP*/}
+	private void renderHoverText(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){/*NOOP*/}
 	
-	private void renderTasks(int mouseX, int mouseY, float partialTicks){
+	private void renderTasks(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		//Render logic type outside of the grey rect
-		FONT.drawStringWithShadow(taskLogicText.getLeft(), taskLogicText.getMiddle(), taskLogicText.getRight(), 0xFFFFFF);
+		FONT.drawStringWithShadow(matrixStack, taskLogicText.getLeft(), taskLogicText.getMiddle(), taskLogicText.getRight(), 0xFFFFFF);
 		
 		//Render stuff in the box
 		GLScissor.enable(taskContentX.getAsInt(), taskContentY.getAsInt(), taskContentWidth.getAsInt(), taskContentHeight.getAsInt());
-		taskTitles.forEach(triple->FONT.drawStringWithShadow(triple.getLeft(), triple.getMiddle(), triple.getRight(), 0xFFFFFF));
-		taskButtons.forEach(button->button.render(mouseX, mouseY, partialTicks));
-		subtaskSlotsToRender.forEach(slot->slot.render(mouseX, mouseY, partialTicks));
-		subtaskTextsToRender.forEach(text->FONT.drawStringWithShadow(text.getLeft(), text.getMiddle(), text.getRight(), 0xFFFFFF));
+		taskTitles.forEach(triple->FONT.drawStringWithShadow(matrixStack, triple.getLeft(), triple.getMiddle(), triple.getRight(), 0xFFFFFF));
+		taskButtons.forEach(button->button.render(matrixStack, mouseX, mouseY, partialTicks));
+		subtaskSlotsToRender.forEach(slot->slot.render(matrixStack, mouseX, mouseY, partialTicks));
+		subtaskTextsToRender.forEach(text->FONT.drawStringWithShadow(matrixStack, text.getLeft(), text.getMiddle(), text.getRight(), 0xFFFFFF));
 		subtaskIconsToRender.forEach(icon->icon.getLeft().render(icon.getMiddle(), icon.getRight(), mouseX, mouseY));
 		GLScissor.disable();
 	}
 	
-	private void renderHoverTasks(int mouseX, int mouseY, float partialTicks){
+	private void renderHoverTasks(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		GLScissor.enable(taskContentX.getAsInt(), taskContentY.getAsInt(), taskContentWidth.getAsInt(), taskContentHeight.getAsInt());
 		taskButtons.stream()
 				.filter(button -> ApiUtils.isMouseInBounds(mouseX, mouseY, taskContentX.getAsInt(), taskContentY.getAsInt(), taskContentX.getAsInt() + taskContentWidth.getAsInt(), taskContentY.getAsInt() + taskContentHeight.getAsInt()))
 				.filter(button -> ApiUtils.isMouseInBounds(mouseX, mouseY, button.getX(), button.getY(), button.getX() + button.getWidth(), button.getY() + button.getHeight()))
-				.forEach(button->button.renderHover(mouseX, mouseY, partialTicks));
+				.forEach(button->button.renderHover(matrixStack, mouseX, mouseY, partialTicks));
 		subtaskSlotsToRender.stream()
 				.filter(triple -> ApiUtils.isMouseInBounds(mouseX, mouseY, taskContentX.getAsInt(), taskContentY.getAsInt(), taskContentX.getAsInt() + taskContentWidth.getAsInt(), taskContentY.getAsInt() + taskContentHeight.getAsInt()))
-				.forEach(slot->slot.renderHover(mouseX, mouseY, partialTicks));
+				.forEach(slot->slot.renderHover(matrixStack, mouseX, mouseY, partialTicks));
 		GLScissor.disable();
 		subtaskIconsToRender.stream()
 							.filter(triple -> triple.getLeft() instanceof ICurrentItemStackProvider)
 							.filter(triple -> ApiUtils.isMouseInBounds(mouseX, mouseY, taskContentX.getAsInt(), taskContentY.getAsInt(), taskContentX.getAsInt() + taskContentWidth.getAsInt(), taskContentY.getAsInt() + taskContentHeight.getAsInt()))
 							.filter(triple -> ApiUtils.isMouseInBounds(mouseX, mouseY, triple.getMiddle(), triple.getRight(), triple.getMiddle() + 16, triple.getRight() + 16))
-							.forEach(triple -> Minecraft.getInstance().currentScreen.renderTooltip(Minecraft.getInstance().currentScreen.getTooltipFromItem(((ICurrentItemStackProvider)triple.getLeft()).getCurrentItemStack()), mouseX, mouseY));
+							.forEach(triple -> Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, ((ICurrentItemStackProvider)triple.getLeft()).getCurrentItemStack(), mouseX, mouseY));
 	}
 	
-	private void renderRewards(int mouseX, int mouseY, float partialTicks){
+	private void renderRewards(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		GLScissor.enable(rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentWidth.getAsInt(), rewardContentHeight.getAsInt());
-		rewardSlotsToRender.forEach(variableSlot -> variableSlot.render(mouseX, mouseY, partialTicks));
+		rewardSlotsToRender.forEach(variableSlot -> variableSlot.render(matrixStack, mouseX, mouseY, partialTicks));
 		RenderHelper.setupGui3DDiffuseLighting();
 		rewardItemsToRender.forEach(quad ->Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(quad.getLeft(), quad.getMiddle(), quad.getRight()));
-		rewardTextToRender.forEach(triple ->FONT.drawStringWithShadow(triple.getLeft(), triple.getMiddle(), triple.getRight(), 0xFFFFFF));
-		FONT.drawStringWithShadow(new TranslationTextComponent(Ref.MODID + ".screens.rewards").getFormattedText(), rewardContentX.getAsInt(), rewardContentY.getAsInt()-rewardScrollDistance, 0xFFFFFF);
-		rewardSelectionOutlinesToRender.forEach(quadOutline -> quadOutline.render(mouseX, mouseY, partialTicks));
-		claimRewardButton.render(mouseX, mouseY, partialTicks);//fixme hover tooltips from slots gets rendered behind the reward button
+		rewardTextToRender.forEach(triple ->FONT.drawStringWithShadow(matrixStack, triple.getLeft(), triple.getMiddle(), triple.getRight(), 0xFFFFFF));
+		FONT.drawStringWithShadow(matrixStack, new TranslationTextComponent(Ref.MODID + ".screens.rewards").getString(), rewardContentX.getAsInt(), rewardContentY.getAsInt()-rewardScrollDistance, 0xFFFFFF);
+		rewardSelectionOutlinesToRender.forEach(quadOutline -> quadOutline.render(matrixStack, mouseX, mouseY, partialTicks));
+		claimRewardButton.render(matrixStack, mouseX, mouseY, partialTicks);
 		GLScissor.disable();
 		
 		rewardItemsToRender.stream()
 				.filter(triple -> ApiUtils.isMouseInBounds(mouseX, mouseY, triple.getMiddle(), triple.getRight(), triple.getMiddle() + 16, triple.getRight() + 16))
 				.filter(triple -> ApiUtils.isMouseInBounds(mouseX, mouseY, rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentX.getAsInt() + rewardContentWidth.getAsInt(), rewardContentY.getAsInt() + rewardContentHeight.getAsInt()))
-				.forEach(triple -> Minecraft.getInstance().currentScreen.renderTooltip(Minecraft.getInstance().currentScreen.getTooltipFromItem(triple.getLeft()), mouseX, mouseY));
+				.forEach(triple -> Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, triple.getLeft(), mouseX, mouseY));
 		
 	}
 	
-	private void renderHoverRewards(int mouseX, int mouseY, float partialTicks){
+	private void renderHoverRewards(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		GLScissor.enable(rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentWidth.getAsInt(), rewardContentHeight.getAsInt());
 		rewardSlotsToRender.stream()
 				.filter(triple -> ApiUtils.isMouseInBounds(mouseX, mouseY, rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentX.getAsInt() + rewardContentWidth.getAsInt(), rewardContentY.getAsInt() + rewardContentHeight.getAsInt()))
-				.forEach(variableSlot -> variableSlot.renderHover(mouseX, mouseY, partialTicks));
+				.forEach(variableSlot -> variableSlot.renderHover(matrixStack, mouseX, mouseY, partialTicks));
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentX.getAsInt() + rewardContentWidth.getAsInt(), rewardContentY.getAsInt() + rewardContentHeight.getAsInt())){
-			claimRewardButton.renderHover(mouseX, mouseY, partialTicks);
+			claimRewardButton.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		}
 		GLScissor.disable();
 	}
 	
-	private void renderBackground(int mouseX, int mouseY, float partialTicks){
+	private void renderBackground(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		GL11.glPushMatrix();
 		GLScissor.enable(textX.getAsInt(), textY.getAsInt(), textWidth.getAsInt(), textHeight.getAsInt());
-		AbstractGui.fill(textX.getAsInt(), textY.getAsInt(), textX.getAsInt() + textWidth.getAsInt(), textY.getAsInt() + textHeight.getAsInt(), 0x88000000);
+		AbstractGui.fill(matrixStack, textX.getAsInt(), textY.getAsInt(), textX.getAsInt() + textWidth.getAsInt(), textY.getAsInt() + textHeight.getAsInt(), 0x88000000);
 		GLScissor.disable();
 		GL11.glPopMatrix();
 		
 		GL11.glPushMatrix();
 		GLScissor.enable(tasksX.getAsInt(), tasksY.getAsInt(), tasksWidth.getAsInt(), tasksHeight.getAsInt());
-		AbstractGui.fill(tasksX.getAsInt(), tasksY.getAsInt(), tasksX.getAsInt() + tasksWidth.getAsInt(), tasksY.getAsInt() + tasksHeight.getAsInt(), 0x88000000);
+		AbstractGui.fill(matrixStack, tasksX.getAsInt(), tasksY.getAsInt(), tasksX.getAsInt() + tasksWidth.getAsInt(), tasksY.getAsInt() + tasksHeight.getAsInt(), 0x88000000);
 		GLScissor.disable();
 		GL11.glPopMatrix();
 		
 		GL11.glPushMatrix();
 		GLScissor.enable(rewardsX.getAsInt(), rewardsY.getAsInt(), rewardsWidth.getAsInt(), rewardsHeight.getAsInt());
-		AbstractGui.fill(rewardsX.getAsInt(), rewardsY.getAsInt(), rewardsX.getAsInt() + rewardsWidth.getAsInt(), rewardsY.getAsInt() + rewardsHeight.getAsInt(), 0x88000000);
+		AbstractGui.fill(matrixStack, rewardsX.getAsInt(), rewardsY.getAsInt(), rewardsX.getAsInt() + rewardsWidth.getAsInt(), rewardsY.getAsInt() + rewardsHeight.getAsInt(), 0x88000000);
 		GLScissor.disable();
 		GL11.glPopMatrix();
 	}
@@ -412,7 +416,7 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 	
 	private int getTextContentHeight(){
 		if(screenManager.getCurrentlySelectedQuestId()>=0){
-			return FONT.listFormattedStringToWidth(ClientUtils.colorify(QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getText().getText()), textContentWidth.getAsInt()).size() * (FONT.FONT_HEIGHT + NEWLINE_MARGIN);
+			return FONT.trimStringToWidth(new StringTextComponent(ClientUtils.colorify(QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getText().getText())), textContentWidth.getAsInt()).size() * (FONT.FONT_HEIGHT + NEWLINE_MARGIN);
 		}
 		return 0;
 	}

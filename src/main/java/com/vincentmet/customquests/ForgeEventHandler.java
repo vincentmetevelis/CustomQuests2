@@ -5,30 +5,28 @@ import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.event.*;
 import com.vincentmet.customquests.standardcontent.StandardContentProgressHelper;
 import java.util.UUID;
-import net.minecraft.block.Block;
 import net.minecraft.entity.player.*;
-import net.minecraft.item.Item;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.storage.FolderName;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.*;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.*;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 
-@Mod.EventBusSubscriber(modid = Ref.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class EventHandler{//todo make a dirty system for packet updates (for parties and players) #DooDoo
+@Mod.EventBusSubscriber(modid = Ref.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+public class ForgeEventHandler{//todo make a dirty system for packet updates (for parties and players) #DooDoo
 	@SubscribeEvent
 	public static void onWorldStart(WorldEvent.Load event){
 		//Main
-		if(event.getWorld() instanceof ServerWorld && ((ServerWorld)event.getWorld()).dimension.getType().equals(DimensionType.OVERWORLD)){
+		if(event.getWorld() instanceof ServerWorld && event.getWorld().getDimensionType().isSame(DimensionType.OVERWORLD_TYPE)){
 			Ref.currentServerInstance = ((ServerWorld)event.getWorld()).getServer();
-			Ref.currentWorldDirectory = ((ServerWorld)event.getWorld()).getSaveHandler().getWorldDirectory().toPath();
+			Ref.currentWorldDirectory = ((ServerWorld)event.getWorld()).getServer().func_240776_a_(new FolderName("."));//todo test if this returns worlddir
 			Ref.currentProgressDirectory = Ref.currentWorldDirectory.resolve(Ref.MODID);
 			Ref.progressBackupDirectory = Ref.currentProgressDirectory.resolve("backups");
 			if(!event.getWorld().isRemote()){
@@ -53,29 +51,6 @@ public class EventHandler{//todo make a dirty system for packet updates (for par
 	public static void onWorldSave(WorldEvent.Save event){
 		CQHelper.writeQuestsAndChaptersToFile(Ref.PATH_CONFIG, Ref.FILENAME_QUESTS + Ref.FILE_EXT_JSON);
 		CQHelper.writePlayersAndPartiesToFile(Ref.currentProgressDirectory, Ref.FILENAME_PARTIES + Ref.FILE_EXT_JSON);
-	}
-	
-	@SubscribeEvent
-	public static void registerItem(RegistryEvent.Register<Item> event){
-		//Main
-		event.getRegistry().registerAll(Objects.Items.QUESTING_DEVICE);
-		event.getRegistry().registerAll(Objects.ItemBlocks.QUESTING_BLOCK);
-		//Standard Content
-		//event.getRegistry().registerAll(Objects.ItemBlocks.DELIVERY_BLOCK);
-	}
-	
-	@SubscribeEvent
-	public static void registerBlock(RegistryEvent.Register<Block> event){
-		//Main
-		event.getRegistry().registerAll(Objects.Blocks.QUESTING_BLOCK);
-		//Standard Content
-		//event.getRegistry().registerAll(Objects.Blocks.DELIVERY_BLOCK);
-	}
-	
-	@SubscribeEvent
-	public static void registerTileEntityTypes(RegistryEvent.Register<TileEntityType<?>> event){
-		//Standard Content
-		//event.getRegistry().registerAll(Objects.TileEntities.DELIVERY_BLOCK);
 	}
 	
 	@SubscribeEvent
@@ -135,7 +110,7 @@ public class EventHandler{//todo make a dirty system for packet updates (for par
 					ServerPlayerEntity playerEntity = server.getPlayerList().getPlayerByUUID(uuid);
 					if(playerEntity != null){
 						try{
-							String title = new TranslationTextComponent("customquests.general.quest_completed").getFormattedText();
+							String title = new TranslationTextComponent("customquests.general.quest_completed").getString();
 							server.getCommandManager().getDispatcher().execute("title " + playerEntity.getDisplayName().getString() + " title \"" + title + "\"", server.getCommandSource().withFeedbackDisabled());
 							server.getCommandManager().getDispatcher().execute("title " + playerEntity.getDisplayName().getString() + " subtitle \"" + QuestHelper.getQuestFromId(event.getQuestId()).getTitle().getText()  + " #" + event.getQuestId() + "\"", server.getCommandSource().withFeedbackDisabled());
 						}catch(CommandSyntaxException e){
@@ -145,7 +120,7 @@ public class EventHandler{//todo make a dirty system for packet updates (for par
 				});
 			}else{
 				try{
-					String title = new TranslationTextComponent("customquests.general.quest_completed").getFormattedText();
+					String title = new TranslationTextComponent("customquests.general.quest_completed").getString();
 					server.getCommandManager().getDispatcher().execute("title " + event.getPlayer().getDisplayName().getString() + " title \"" + title + "\"", server.getCommandSource().withFeedbackDisabled());
 					server.getCommandManager().getDispatcher().execute("title " + event.getPlayer().getDisplayName().getString() + " subtitle \"" + QuestHelper.getQuestFromId(event.getQuestId()).getTitle().getText()  + " #" + event.getQuestId() + "\"", server.getCommandSource().withFeedbackDisabled());
 				}catch(CommandSyntaxException e){

@@ -12,6 +12,7 @@ import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class SummonRewardType implements IRewardType{
@@ -31,7 +32,7 @@ public class SummonRewardType implements IRewardType{
     @Override
 	public void executeReward(PlayerEntity player){
 		for(int i=0; i<count;i++){
-			(player.getEntityWorld().getWorld()).addEntity(Objects.requireNonNull(entity.create(player.world, new CompoundNBT(), new TranslationTextComponent("Your Reward <3"), player, player.getPosition(), SpawnReason.COMMAND, true, false)));
+			(player.getEntityWorld()).addEntity(Objects.requireNonNull(entity.create((ServerWorld)player.getEntityWorld(), new CompoundNBT(), new TranslationTextComponent("Your Reward <3"), player, player.getPosition(), SpawnReason.COMMAND, true, false)));
 		}
 	}
 	

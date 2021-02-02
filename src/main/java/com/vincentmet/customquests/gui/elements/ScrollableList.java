@@ -1,10 +1,11 @@
 package com.vincentmet.customquests.gui.elements;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.IntCounter;
 import com.vincentmet.customquests.helpers.rendering.GLScissor;
 import java.util.*;
-import net.minecraft.client.gui.*;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraftforge.api.distmarker.*;
 import org.lwjgl.opengl.GL11;
 
@@ -22,23 +23,23 @@ public class ScrollableList implements IGuiEventListener, IHoverRenderable{
 		this.height = height;
 	}
 	
-	public void render(int mouseX, int mouseY, float partialTicks){
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		GL11.glPushMatrix();
 		GLScissor.enable(x, y, width, height);
 		//AbstractGui.fill(x, y, x + width, y + height, 0x88000000);
 		entries.forEach(entry->{
-			entry.render(mouseX, mouseY, partialTicks);
+			entry.render(matrixStack, mouseX, mouseY, partialTicks);
 		});
 		GLScissor.disable();
 		GL11.glPopMatrix();
 	}
 	
-	public void renderHover(int mouseX, int mouseY, float partialTicks){
+	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		GL11.glPushMatrix();
 		GLScissor.enable(x, y, width, height);
 		//AbstractGui.fill(x, y, x + width, y + height, 0x88000000);
 		entries.forEach(entry->{
-			entry.renderHover(mouseX, mouseY, partialTicks);
+			entry.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		});
 		GLScissor.disable();
 		GL11.glPopMatrix();

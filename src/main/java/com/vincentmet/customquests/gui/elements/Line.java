@@ -1,5 +1,6 @@
 package com.vincentmet.customquests.gui.elements;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.helpers.rendering.Color;
 import com.vincentmet.customquests.hierarchy.quest.*;
@@ -67,7 +68,7 @@ public class Line implements MovableScalableCanvasEntry {
     }
     
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks){
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
         int posX = parentX + this.x;
         int posY = parentY + this.y;
         GL11.glPushMatrix();
@@ -76,13 +77,13 @@ public class Line implements MovableScalableCanvasEntry {
         GL11.glTranslatef(-posX, -posY, 0);
         Color.color(color);
         Minecraft.getInstance().textureManager.bindTexture(TEX);
-        AbstractGui.blit(posX, posY, 0, 0, this.length, this.thickness, 1,  1);
+        AbstractGui.blit(matrixStack, posX, posY, 0, 0, this.length, this.thickness, 1,  1);
         Color.color(0xFFFFFF);
         GL11.glPopMatrix();
     }
     
     @Override
-    public void renderHover(int mouseX, int mouseY, float partialTicks){
+    public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
     
     }
     

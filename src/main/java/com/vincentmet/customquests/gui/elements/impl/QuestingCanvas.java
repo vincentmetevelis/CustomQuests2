@@ -1,5 +1,6 @@
 package com.vincentmet.customquests.gui.elements.impl;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.gui.*;
 import com.vincentmet.customquests.gui.elements.QuestButton;
@@ -99,18 +100,18 @@ public class QuestingCanvas implements IHoverRenderable, IGuiEventListener{
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks){
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		GLScissor.enable(x, y, width, height);
 		entries.forEach(entry ->{
-			entry.render(mouseX, mouseY, partialTicks);
+			entry.render(matrixStack, mouseX, mouseY, partialTicks);
 		});
 		GLScissor.disable();
 	}
 	
 	@Override
-	public void renderHover(int mouseX, int mouseY, float partialTicks){
+	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		entries.forEach(entry ->{
-			entry.renderHover(mouseX, mouseY, partialTicks);
+			entry.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		});
 	}
 	

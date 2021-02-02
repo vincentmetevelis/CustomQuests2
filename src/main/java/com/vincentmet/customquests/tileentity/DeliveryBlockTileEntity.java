@@ -1,7 +1,8 @@
 package com.vincentmet.customquests.tileentity;
 
-import com.vincentmet.customquests.*;
+import com.vincentmet.customquests.ItemStackHandlerCapability;
 import javax.annotation.*;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
@@ -49,8 +50,8 @@ public class DeliveryBlockTileEntity extends TileEntity{
 	}
 	
 	@Override
-	public void read(CompoundNBT compound){
-		super.read(compound);
+	public void read(BlockState state, CompoundNBT compound){
+		super.read(state, compound);
 		if(compound.contains("currentSubmitter")){
 			//setCurrentSubmitter(compound.getUniqueId("currentSubmitter"));//fixme DELIVERYBLOCK
 		}

@@ -1,5 +1,6 @@
 package com.vincentmet.customquests.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.gui.elements.*;
@@ -100,19 +101,19 @@ public class QuestingScreen extends Screen{
 	}
 	
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks){
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		TooltipBuffer.tooltipBuffer.clear();
-		renderBackgrounds();
+		renderBackgrounds(matrixStack);
 		
 		if(screenManager.shouldShowQuestDetails()){
 			//Non-hover
-			buttonToChapters.render(mouseX, mouseY, partialTicks);
+			buttonToChapters.render(matrixStack, mouseX, mouseY, partialTicks);
 			if(questDetails.getWidth() != questDetailsWidth.getAsInt())questDetails.setWidth(questDetailsWidth.getAsInt());
 			if(questDetails.getHeight() != questDetailsHeight.getAsInt())questDetails.setHeight(questDetailsHeight.getAsInt());
-			questDetails.render(mouseX, mouseY, partialTicks);
+			questDetails.render(matrixStack, mouseX, mouseY, partialTicks);
 			//Hover
-			buttonToChapters.renderHover(mouseX, mouseY, partialTicks);
-			questDetails.renderHover(mouseX, mouseY, partialTicks);
+			buttonToChapters.renderHover(matrixStack, mouseX, mouseY, partialTicks);
+			questDetails.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		}else{
 			//Non-hover
 			if(chapterList.getWidth() != chapterListWidth.getAsInt()){
@@ -128,31 +129,31 @@ public class QuestingScreen extends Screen{
 					chapterListCounter.count();
 				});
 			}
-			chapterList.render(mouseX, mouseY, partialTicks);
+			chapterList.render(matrixStack, mouseX, mouseY, partialTicks);
 			//Check if window got resized
 			if((questingCanvas.getX() != questingCanvasX.getAsInt()) || (questingCanvas.getY() != questingCanvasY.getAsInt()) || (questingCanvas.getWidth() != questingCanvasWidth.getAsInt()) || (questingCanvas.getHeight() != questingCanvasHeight.getAsInt())){
 				questingCanvas.reInit(questingCanvasX.getAsInt(), questingCanvasY.getAsInt(), questingCanvasWidth.getAsInt(), questingCanvasHeight.getAsInt());
 				questingCanvas.applyDraggingLimits();
 			}
-			questingCanvas.render(mouseX, mouseY, partialTicks);
+			questingCanvas.render(matrixStack, mouseX, mouseY, partialTicks);
 			
 			//Hover
-			chapterList.renderHover(mouseX, mouseY, partialTicks);
-			questingCanvas.renderHover(mouseX, mouseY, partialTicks);
+			chapterList.renderHover(matrixStack, mouseX, mouseY, partialTicks);
+			questingCanvas.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 			
 			//Show message if there are no quests loaded
 			if(QuestingStorage.getSidedQuestsMap().isEmpty()){
-				Minecraft.getInstance().fontRenderer.drawStringWithShadow(localization_noQuests.getFormattedText(), questingCanvas.getX() + 5, questingCanvas.getY() + 5, 0xFFFFFF);
+				Minecraft.getInstance().fontRenderer.drawStringWithShadow(matrixStack, localization_noQuests.getString(), questingCanvas.getX() + 5, questingCanvas.getY() + 5, 0xFFFFFF);
 			}
 		}
 		TooltipBuffer.tooltipBuffer.forEach(Runnable::run);
 	}
 	
-	private void renderBackgrounds(){
-		AbstractGui.fill(0, 0, width, height, 0x88000000);
+	private void renderBackgrounds(MatrixStack matrixStack){
+		AbstractGui.fill(matrixStack, 0, 0, width, height, 0x88000000);
 		if(!screenManager.shouldShowQuestDetails()){
-			AbstractGui.fill(chapterListX.getAsInt(), chapterListY.getAsInt(), chapterListX.getAsInt() + chapterListWidth.getAsInt(), chapterListY.getAsInt() + chapterListHeight.getAsInt(), 0x88000000);
-			AbstractGui.fill(questingCanvasX.getAsInt(), questingCanvasY.getAsInt(), questingCanvasX.getAsInt() + questingCanvasWidth.getAsInt(), questingCanvasY.getAsInt() + questingCanvasHeight.getAsInt(), 0x88000000);
+			AbstractGui.fill(matrixStack, chapterListX.getAsInt(), chapterListY.getAsInt(), chapterListX.getAsInt() + chapterListWidth.getAsInt(), chapterListY.getAsInt() + chapterListHeight.getAsInt(), 0x88000000);
+			AbstractGui.fill(matrixStack, questingCanvasX.getAsInt(), questingCanvasY.getAsInt(), questingCanvasX.getAsInt() + questingCanvasWidth.getAsInt(), questingCanvasY.getAsInt() + questingCanvasHeight.getAsInt(), 0x88000000);
 		}
 	}
 	
@@ -198,7 +199,9 @@ public class QuestingScreen extends Screen{
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int mods){
 		if(keyCode == GLFW.GLFW_KEY_ESCAPE){
-			this.onClose();
+			if(Minecraft.getInstance().currentScreen != null){
+				Minecraft.getInstance().currentScreen.closeScreen();
+			}
 			return true;
 		}
 		chapterList.keyPressed(keyCode, scanCode, mods);

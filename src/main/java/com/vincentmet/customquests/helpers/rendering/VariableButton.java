@@ -1,5 +1,6 @@
 package com.vincentmet.customquests.helpers.rendering;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.*;
@@ -10,8 +11,8 @@ import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.*;
+import net.minecraft.util.text.*;
 import net.minecraftforge.api.distmarker.*;
 
 @OnlyIn(Dist.CLIENT)
@@ -53,25 +54,25 @@ public class VariableButton implements IHoverRenderable, IGuiEventListener{
 		return Minecraft.getInstance().fontRenderer.getStringWidth(text);
 	}
 	
-	public void render(int mouseX, int mouseY, float partialTicks) {
-		internalRender(mouseX, mouseY, partialTicks, texture);
+	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		internalRender(matrixStack, mouseX, mouseY, partialTicks, texture);
 	}
 	
 	@Override
-	public void renderHover(int mouseX, int mouseY, float partialTicks){
+	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, x, y, x+width, y+height)){
 			TooltipBuffer.tooltipBuffer.add(()->{
-				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.renderTooltip(tooltipLines.stream().map(ITextComponent::getFormattedText).collect(Collectors.toList()), mouseX, mouseY);
+				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, tooltipLines.stream().map(textComponent -> IReorderingProcessor.fromString(textComponent.getString(), Style.EMPTY)).collect(Collectors.toList()), mouseX, mouseY);
 			});
 		}
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, x, y, x+width, y+height) && texture == ButtonTexture.DEFAULT_NORMAL){
-			internalRender(mouseX, mouseY, partialTicks, ButtonTexture.DEFAULT_PRESSED);
+			internalRender(matrixStack, mouseX, mouseY, partialTicks, ButtonTexture.DEFAULT_PRESSED);
 		}else{
-			internalRender(mouseX, mouseY, partialTicks, texture);
+			internalRender(matrixStack, mouseX, mouseY, partialTicks, texture);
 		}
 	}
 	
-	private void internalRender(int mouseX, int mouseY, float partialTicks, ButtonTexture texture){
+	private void internalRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks, ButtonTexture texture){
 		Color.color(0xFFFFFF);
 		RenderHelper.disableStandardItemLighting();
 		
@@ -92,10 +93,10 @@ public class VariableButton implements IHoverRenderable, IGuiEventListener{
 		int texRight = texU + texture.getWidth() - texP;
 		int texBottom = texV + texture.getWidth() - texP;
 		
-		AbstractGui.blit(x, y, texU, texV, texP, texP, texWidth, texHeight);// Left Top corner
-		AbstractGui.blit(right, y, texRight, texV, texP, texP, texWidth, texHeight);// Right Top corner
-		AbstractGui.blit(right, bottom, texRight, texBottom, texP, texP, texWidth, texHeight);// Right Bottom corner
-		AbstractGui.blit(x, bottom, texU, texBottom, texP, texP, texWidth, texHeight);// Left Bottom corner
+		AbstractGui.blit(matrixStack, x, y, texU, texV, texP, texP, texWidth, texHeight);// Left Top corner
+		AbstractGui.blit(matrixStack, right, y, texRight, texV, texP, texP, texWidth, texHeight);// Right Top corner
+		AbstractGui.blit(matrixStack, right, bottom, texRight, texBottom, texP, texP, texWidth, texHeight);// Right Bottom corner
+		AbstractGui.blit(matrixStack, x, bottom, texU, texBottom, texP, texP, texWidth, texHeight);// Left Bottom corner
 		
 		
 		int strippedButtonTexWidth = texture.getWidth() - 2*texP;
@@ -103,23 +104,23 @@ public class VariableButton implements IHoverRenderable, IGuiEventListener{
 		
 		for (int left = x + texP; left < right; left += strippedButtonTexWidth) {// Fill the Middle
 			for (int top = y + texP; top < bottom; top += strippedButtonTexHeight) {
-				AbstractGui.blit(left, top, texU + texP, texV + texP, Math.min(strippedButtonTexWidth, right - left), Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);
+				AbstractGui.blit(matrixStack, left, top, texU + texP, texV + texP, Math.min(strippedButtonTexWidth, right - left), Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);
 			}
 		}
 		for (int left = x + texP; left < right; left += strippedButtonTexWidth) {// Top and Bottom Edges
-			AbstractGui.blit(left, y, texU + texP, texV, Math.min(strippedButtonTexWidth, right - left), texP, texWidth, texHeight);// Top
-			AbstractGui.blit(left, bottom, texU + texP, texBottom, Math.min(strippedButtonTexWidth, right - left), texP, texWidth, texHeight);// Bottom
+			AbstractGui.blit(matrixStack, left, y, texU + texP, texV, Math.min(strippedButtonTexWidth, right - left), texP, texWidth, texHeight);// Top
+			AbstractGui.blit(matrixStack, left, bottom, texU + texP, texBottom, Math.min(strippedButtonTexWidth, right - left), texP, texWidth, texHeight);// Bottom
 		}
 		for (int top = y + texP; top < bottom; top += strippedButtonTexHeight) {// Left and Right Edges
-			AbstractGui.blit(x, top, texU, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Left
-			AbstractGui.blit(right, top, texRight, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Right
+			AbstractGui.blit(matrixStack, x, top, texU, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Left
+			AbstractGui.blit(matrixStack, right, top, texRight, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Right
 		}
 		String buttonTextToRender = buttonText;
 		if(buttonText != null && !buttonText.equals("")){
 			if(getStringWidth(buttonText) + 5 >= getMaxTextWidth()){
-				buttonTextToRender = Minecraft.getInstance().fontRenderer.trimStringToWidth(buttonText, getMaxTextWidth() - 5) + "...";
+				buttonTextToRender = Minecraft.getInstance().fontRenderer.trimStringToWidth(new StringTextComponent(buttonText), getMaxTextWidth() - 5) + "...";
 			}
-			Minecraft.getInstance().fontRenderer.drawStringWithShadow(buttonTextToRender, textOffsetFromCenter.getX() + x + (width>>1) - (getStringWidth(buttonTextToRender)>>1), textOffsetFromCenter.getY() + y + (height>>1) - (Minecraft.getInstance().fontRenderer.FONT_HEIGHT>>1), 0x00FFFFFF);
+			Minecraft.getInstance().fontRenderer.drawStringWithShadow(matrixStack, buttonTextToRender, textOffsetFromCenter.getX() + x + (width>>1) - (getStringWidth(buttonTextToRender)>>1), textOffsetFromCenter.getY() + y + (height>>1) - (Minecraft.getInstance().fontRenderer.FONT_HEIGHT>>1), 0x00FFFFFF);
 		}
 	}
 	

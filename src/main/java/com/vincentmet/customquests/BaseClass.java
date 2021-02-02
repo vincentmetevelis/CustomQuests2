@@ -15,7 +15,6 @@ public class BaseClass{
     public BaseClass(){
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setupCommon);
 		MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.register(EventHandler.class);
         MinecraftForge.EVENT_BUS.addListener(this::serverStartup);
 	}
 	
@@ -36,6 +35,6 @@ public class BaseClass{
 	private void serverStartup(final FMLServerStartingEvent event){
     	//Main
 		Ref.currentServerInstance = event.getServer();
-        CQCommand.register(event.getCommandDispatcher());
+        CQCommand.register(event.getServer().getCommandManager().getDispatcher());
 	}
 }
