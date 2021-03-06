@@ -1,0 +1,36 @@
+{
+	"itemGroup.customquests": "Custom Quests",
+	"item.customquests.questing_device": "Questing Device",
+	"block.customquests.questing_block": "Questing Block",
+	"block.customquests.delivery_block": "Auslieferungsblock",
+	"customquests.screens.questing_device": "Questing Device",
+	"customquests.screens.questing_block": "Questing Block",
+	"customquests.screens.delivery_block": "Auslieferungsblock",
+	"customquests.screens.back_to_chapters": "Zurück zum Kapitel",
+	"customquests.screens.no_quests": "0 Aufgaben verfügbar",
+	"customquests.screens.rewards": "Belohnung:",
+	"customquests.screens.claim": "Abholen",
+	"customquests.screens.claimed": "Abgeholt",
+	"customquests.screens.complete_all": "Vervollständige folgende Aufgaben, um diese Aufgabe freizuschalten: [%s]",
+	"customquests.screens.complete_one": "Vervollständige eine dieser Aufgaben, um diese Aufgabe freizuschalten: [%s]",
+	"customquests.command.use_subcommand": "Bitte nutze einen Subcommand",
+	"customquests.command.save.success": "Alle Aufgaben und Kapitel wurden erfolgreich gespeichert!",
+	"customquests.command.wip": "Dieser Befehl ist noch nicht verfügbar",
+	"customquests.command.reload.success": "Neuladen der Aufgabendatei erfolgreich!",
+	"customquests.general.tag": "Tag",
+	"customquests.general.quest": "Aufgabe",
+	"customquests.general.task": "Auftrag",
+	"customquests.general.subtask": "Zusatzauftrag",
+	"customquests.general.quest_completed": "Aufgabe erledigt",
+	"customquests.general.hidden": "Versteckt",
+	
+	"customquests.standardcontent.tasks.item_detect": "Gegenstände erkennen:",
+	"customquests.standardcontent.tasks.item_craft": "Gegenstände herstellen:",
+	"customquests.standardcontent.tasks.item_submit": "Gegenstände einreichen:",
+	
+	"customquests.standardcontent.tasks.button.item_submit": "Einreichen",
+	"customquests.standardcontent.delivery.subtask_select": "Wähle diesen Zusatzauftrag",
+	
+	"customquests.jei.title.tasks": "Aufträge",
+	"customquests.jei.title.rewards": "Aufgabenbelohnungen"
+}
