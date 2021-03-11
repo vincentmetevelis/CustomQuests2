@@ -93,7 +93,7 @@ public class ProgressHelper{
 	public static boolean isQuestUnlocked(UUID uuid, int questId){
 		if(doesPlayerExist(uuid) && QuestHelper.doesQuestExist(questId)){
 			Quest quest = QuestHelper.getQuestFromId(questId);
-			List<Integer> playerCompletedQuests = QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().getIndividuallyCompletedQuests();
+			Set<Integer> playerCompletedQuests = QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().getIndividuallyCompletedQuests();
 			List<Boolean> boolsToEval = new ArrayList<>();
 			quest.getDependencyList().forEach(depId->boolsToEval.add(playerCompletedQuests.contains(depId)));
 			return CQHelper.evalBool(quest.getDependencyList().getLogicType(), boolsToEval, true);

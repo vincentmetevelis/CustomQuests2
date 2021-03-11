@@ -7,13 +7,9 @@ import com.vincentmet.customquests.helpers.IntCounter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DependencyList extends ArrayList<Integer> implements IJsonObjectProcessor, IJsonObjectProvider{
+public class DependencyList extends HashSet<Integer> implements IJsonObjectProcessor, IJsonObjectProvider{
 	private LogicType logicType = LogicType.AND;
-	private int parentQuestId;
-	
-	public DependencyList(){
-	
-	}
+	private final int parentQuestId;
 	
 	public DependencyList(int parentQuestId){
 		this.parentQuestId = parentQuestId;
@@ -24,7 +20,7 @@ public class DependencyList extends ArrayList<Integer> implements IJsonObjectPro
 	}
 	
 	public boolean add(Integer id){
-		if(id >= 0 && stream().noneMatch(integer -> integer.equals(id))){
+		if(id >= 0){
 			return super.add(id);
 		}
 		return false;

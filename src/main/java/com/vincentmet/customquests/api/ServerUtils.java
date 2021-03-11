@@ -1,6 +1,6 @@
 package com.vincentmet.customquests.api;
 
-import com.vincentmet.customquests.Config;
+import com.vincentmet.customquests.*;
 import com.vincentmet.customquests.network.messages.*;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -54,6 +54,10 @@ public class ServerUtils{
     }
     
     public static void sendServerConfigToClient(ServerPlayerEntity player){
-        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new MessageUpdateServerSettings(Config.ServerConfig.EDIT_MODE, Config.ServerConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE));
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new MessageUpdateServerSettings(Config.ServerConfig.EDIT_MODE, Config.ServerConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE, Config.ServerConfig.GIVE_DEVICE_ON_FIRST_LOGIN));
+    }
+    
+    public static void sendServerConfigToAllPlayers(){
+        Ref.currentServerInstance.getPlayerList().getPlayers().forEach(ServerUtils::sendServerConfigToClient);
     }
 }

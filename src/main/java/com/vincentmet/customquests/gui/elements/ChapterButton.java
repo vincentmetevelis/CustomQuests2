@@ -1,21 +1,18 @@
 package com.vincentmet.customquests.gui.elements;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.vincentmet.customquests.api.IQuestingTexture;
 import com.vincentmet.customquests.helpers.MouseButton;
 import com.vincentmet.customquests.helpers.math.Vec2i;
 import com.vincentmet.customquests.helpers.rendering.*;
-import com.vincentmet.customquests.hierarchy.quest.IQuestingTexture;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.text.ITextComponent;
-import org.lwjgl.opengl.GL11;
 
 public class ChapterButton implements ScrollableListEntry{
 	private final VariableButton button;
-	private int x, y;
-	private int width;
-	private int height;
+	private int x, y, width, height;
 	private final IQuestingTexture icon;
 	
 	public ChapterButton(int x, int y, int width, int height, IQuestingTexture icon, String text, ButtonState buttonState, Consumer<MouseButton> onClickCallback, List<ITextComponent> tooltipLines){
@@ -24,27 +21,27 @@ public class ChapterButton implements ScrollableListEntry{
 		this.width = width;
 		this.height = height;
 		this.icon = icon;
-		this.button = new VariableButton(0, 0, x, y, width, height, buttonState.getButtonTexture(), text, new Vec2i(8, 0), onClickCallback, tooltipLines);
+		this.button = new VariableButton(0, 0, x, y, width, height, buttonState.getButtonTexture(), text, new Vec2i(10, 0), onClickCallback, tooltipLines);
 	}
 	
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GL11.glPushMatrix();
-		Color.color(0xFFFFFF);
+		matrixStack.push();
+		Color.color(0xFFFFFFFF);
 		this.button.render(matrixStack, mouseX, mouseY, partialTicks);
 		RenderHelper.setupGui3DDiffuseLighting();
-		icon.render(x+2, y+2, mouseX, mouseY);
-		GL11.glPopMatrix();
+		icon.render(matrixStack, 1, x + 2, y + 2, mouseX, mouseY);
+		matrixStack.pop();
 	}
 	
 	@Override
 	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GL11.glPushMatrix();
-		Color.color(0xFFFFFF);
+		matrixStack.push();
+		Color.color(0xFFFFFFFF);
 		this.button.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		RenderHelper.setupGui3DDiffuseLighting();
-		icon.render(x+2, y+2, mouseX, mouseY);
-		GL11.glPopMatrix();
+		icon.render(matrixStack, 1, x + 2, y + 2, mouseX, mouseY);
+		matrixStack.pop();
 	}
 	
 	@Override

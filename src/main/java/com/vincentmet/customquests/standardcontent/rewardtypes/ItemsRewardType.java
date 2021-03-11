@@ -1,20 +1,22 @@
 package com.vincentmet.customquests.standardcontent.rewardtypes;
 
 import com.google.gson.*;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.ApiUtils;
-import com.vincentmet.customquests.api.logic.IRewardType;
+import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.MouseButton;
 import com.vincentmet.customquests.integrations.jei.JEIHelper;
+import java.util.*;
 import java.util.function.Consumer;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class ItemsRewardType implements IRewardType{
+public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	private static ResourceLocation ID = new ResourceLocation(Ref.MODID, "items");
 	private ItemStack stack = new ItemStack(Blocks.AIR);
 	
@@ -38,6 +40,11 @@ public class ItemsRewardType implements IRewardType{
 	@Override
 	public Item getIcon(){
 		return stack.getItem();
+	}
+	
+	@Override
+	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		return ()->Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, stack, mouseX, mouseY);
 	}
 	
 	@Override
@@ -153,7 +160,8 @@ public class ItemsRewardType implements IRewardType{
 			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > nbt': Not detected, defaulting to '{ }'!");
 			ogNBT = "{}";
 		}
-		stack = new ItemStack(ForgeRegistries.ITEMS.getValue(ogRL), count, ApiUtils.getNbtFromJson(ogNBT));
+		stack = new ItemStack(ForgeRegistries.ITEMS.getValue(ogRL), count);
+		stack.setTag(ApiUtils.getNbtFromJson(ogNBT));
 	}
 	
 	@Override
@@ -165,7 +173,9 @@ public class ItemsRewardType implements IRewardType{
 		return json;
 	}
 	
-	public ItemStack getStack(){
-		return stack;
+	public List<ItemStack> getItemStacks(){
+		ArrayList<ItemStack> list = new ArrayList<>();
+		list.add(stack);
+		return list;
 	}
 }

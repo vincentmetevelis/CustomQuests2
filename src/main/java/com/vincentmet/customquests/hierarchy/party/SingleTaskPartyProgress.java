@@ -1,13 +1,10 @@
 package com.vincentmet.customquests.hierarchy.party;
 
 import com.google.gson.*;
-import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.*;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.*;
-import com.vincentmet.customquests.hierarchy.quest.LogicType;
 import java.util.*;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class SingleTaskPartyProgress extends HashMap<Integer, SingleSubtaskPartyProgress> implements IJsonObjectProcessor, IJsonObjectProvider{
 	private boolean allSubtasksCompleted = false;
@@ -31,15 +28,15 @@ public class SingleTaskPartyProgress extends HashMap<Integer, SingleSubtaskParty
 					boolean jsonPrimitiveBooleanValue = jsonPrimitive.getAsBoolean();
 					setAllSubtasksCompleted(jsonPrimitiveBooleanValue);
 				}else{
-					if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > all_subtasks_completed': Value is not a Boolean, defaulting to 'false'!");
+					if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > all_subtasks_completed': Value is not a Boolean, defaulting to 'false'!");
 					setAllSubtasksCompleted(false);
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > all_subtasks_completed': Value is not a JsonPrimitive, please use a boolean, defaulting to 'false'!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > all_subtasks_completed': Value is not a JsonPrimitive, please use a boolean, defaulting to 'false'!");
 				setAllSubtasksCompleted(false);
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > all_subtasks_completed': Not detected, defaulting to 'false'!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > all_subtasks_completed': Not detected, defaulting to 'false'!");
 			setAllSubtasksCompleted(false);
 		}
 		
@@ -58,15 +55,15 @@ public class SingleTaskPartyProgress extends HashMap<Integer, SingleSubtaskParty
 						singleSubtaskProgress.processJson(jsonObjectValue);
 						put(keyInt, singleSubtaskProgress);
 					}else{
-						if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + counter.getValue() + "': Value is not a JsonObject, discarding it for now!");
+						if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + counter.getValue() + "': Value is not a JsonObject, discarding it for now!");
 					}
 					counter.count();
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress': Value is not a JsonObject, generating a new one!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress': Value is not a JsonObject, generating a new one!");
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress': Not detected, generating a new JsonObject!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress': Not detected, generating a new JsonObject!");
 		}
 	}
 	
@@ -110,7 +107,9 @@ public class SingleTaskPartyProgress extends HashMap<Integer, SingleSubtaskParty
 			switch(type){
 				case OR:
 					forEach((taskId, singleSubtaskProgress) -> {
-						completed.set(singleSubtaskProgress.isCompleted());
+						if(singleSubtaskProgress.isCompleted()){
+							completed.set(true);
+						}
 					});
 					break;
 				case AND:
@@ -141,13 +140,5 @@ public class SingleTaskPartyProgress extends HashMap<Integer, SingleSubtaskParty
 	
 	public int getTaskId(){
 		return taskId;
-	}
-	
-	public void executeTaskButton(PlayerEntity player){
-		if(EffectiveSide.get().isServer()){
-			QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().forEach((subtaskId, subTask) -> {
-				subTask.getSubtask().executeSubtaskButton().execute(player, questId, taskId, subtaskId);
-			});
-		}
 	}
 }

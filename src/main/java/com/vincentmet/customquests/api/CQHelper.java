@@ -1,11 +1,11 @@
 package com.vincentmet.customquests.api;
 
 import com.google.gson.*;
-import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.*;
 import com.vincentmet.customquests.hierarchy.chapter.Chapter;
 import com.vincentmet.customquests.hierarchy.party.Party;
 import com.vincentmet.customquests.hierarchy.progress.QuestingPlayer;
-import com.vincentmet.customquests.hierarchy.quest.*;
+import com.vincentmet.customquests.hierarchy.quest.Quest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -95,7 +95,9 @@ public class CQHelper{
 	
 	private static JsonObject loadParties(Path path, String filename){
 		try {
-			ApiUtils.backupProgress();
+			if(Config.SidedConfig.areBackupsEnabled()){
+				ApiUtils.backupProgress();
+			}
 			StringBuilder res = new StringBuilder();
 			Files.readAllLines(path.resolve(filename), StandardCharsets.UTF_8).forEach(res::append);
 			return new JsonParser().parse(res.toString()).getAsJsonObject();
@@ -107,7 +109,9 @@ public class CQHelper{
 	
 	private static JsonObject loadQuests(Path path, String filename){
 		try {
-			ApiUtils.backupData();
+			if(Config.SidedConfig.areBackupsEnabled()){
+				ApiUtils.backupData();
+			}
 			StringBuilder res = new StringBuilder();
 			Files.readAllLines(path.resolve(filename), StandardCharsets.UTF_8).forEach(res::append);
 			return new JsonParser().parse(res.toString()).getAsJsonObject();
@@ -133,10 +137,14 @@ public class CQHelper{
 		});
 	}
 	public static void generateMissingPartyProgress(){
-		QuestingStorage.getSidedPartiesMap().forEach((partyId, party) -> {
-			party.getCollectiveProgress().deleteExcessValues();
-			party.getCollectiveProgress().generateMissingValues();
-		});
+		QuestingStorage.getSidedPartiesMap().keySet().forEach(CQHelper::generateMissingPartyProgress);
+	}
+	
+	public static void generateMissingPartyProgress(int partyId){
+		if(PartyHelper.doesPartyExist(partyId)){
+			QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().deleteExcessValues();
+			QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().generateMissingValues();
+		}
 	}
 	
 	public static boolean evalBool(LogicType logicType, List<Boolean> booleans, boolean orElse){

@@ -1,12 +1,12 @@
 package com.vincentmet.customquests.hierarchy.party;
 
 import com.google.gson.*;
-import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.*;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.IntCounter;
 import java.util.*;
 
-public class CollectivelyCompletedQuestList extends ArrayList<Integer> implements IJsonArrayProcessor, IJsonArrayProvider{//todo maybe change ArrayList to Set
+public class CollectivelyCompletedQuestList extends HashSet<Integer> implements IJsonArrayProcessor, IJsonArrayProvider{
 	private final int parentPartyId;
 	
 	public CollectivelyCompletedQuestList(int parentPartyId){
@@ -14,7 +14,7 @@ public class CollectivelyCompletedQuestList extends ArrayList<Integer> implement
 	}
 	
 	public boolean add(Integer id){
-		if(id >= 0 && stream().noneMatch(integer -> integer.equals(id))){
+		if(id >= 0){
 			super.add(id);
 			return true;
 		}
@@ -38,10 +38,10 @@ public class CollectivelyCompletedQuestList extends ArrayList<Integer> implement
 					int jsonEntriesPrimitiveIntValue = jsonEntriesPrimitive.getAsInt();
 					add(jsonEntriesPrimitiveIntValue);
 				}else{
-					if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + parentPartyId + " > quests_collectively_completed > " + counter.getValue() + "': Value is not an Integer, discarding it for now!");
+					if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + parentPartyId + " > quests_collectively_completed > " + counter.getValue() + "': Value is not an Integer, discarding it for now!");
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'User > " + parentPartyId + " > quests_collectively_completed > " + counter.getValue() + "': Value is not a JsonPrimitive, please use an Integer, discarding it for now!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'User > " + parentPartyId + " > quests_collectively_completed > " + counter.getValue() + "': Value is not a JsonPrimitive, please use an Integer, discarding it for now!");
 			}
 			counter.count();
 		}

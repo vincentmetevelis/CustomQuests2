@@ -6,7 +6,7 @@ import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.IntCounter;
 import java.util.*;
 
-public class IndividuallyCompletedQuestList extends ArrayList<Integer> implements IJsonArrayProvider, IJsonArrayProcessor{
+public class IndividuallyCompletedQuestList extends  HashSet<Integer> implements IJsonArrayProvider, IJsonArrayProcessor{
 	private final UUID uuid;
 	
 	public IndividuallyCompletedQuestList(UUID uuid){
@@ -14,7 +14,7 @@ public class IndividuallyCompletedQuestList extends ArrayList<Integer> implement
 	}
 	
 	public boolean add(Integer id){
-		if(id >= 0 && stream().noneMatch(integer -> integer.equals(id))){
+		if(id >= 0){
 			super.add(id);
 			return true;
 		}

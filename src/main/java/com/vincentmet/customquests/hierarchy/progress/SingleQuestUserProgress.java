@@ -4,7 +4,6 @@ import com.google.gson.*;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.*;
-import com.vincentmet.customquests.hierarchy.quest.LogicType;
 import java.util.*;
 
 public class SingleQuestUserProgress extends HashMap<Integer, SingleTaskProgress> implements IJsonObjectProvider, IJsonObjectProcessor{

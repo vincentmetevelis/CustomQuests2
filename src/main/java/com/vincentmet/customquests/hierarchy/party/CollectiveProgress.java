@@ -1,7 +1,7 @@
 package com.vincentmet.customquests.hierarchy.party;
 
 import com.google.gson.*;
-import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.*;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.IntCounter;
 import java.util.*;
@@ -26,7 +26,7 @@ public class CollectiveProgress extends HashMap<Integer, SingleQuestPartyProgres
                 singlePartyTaskProgress.processJson(jsonObjectValue);
                 put(keyInt, singlePartyTaskProgress);
             }else{
-                if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + parentPartyId + " > collective_progress > " + keyInt + "': Value is not a JsonObject, discarding it for now!");
+                if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + parentPartyId + " > collective_progress > " + keyInt + "': Value is not a JsonObject, discarding it for now!");
             }
             counter.count();
         }

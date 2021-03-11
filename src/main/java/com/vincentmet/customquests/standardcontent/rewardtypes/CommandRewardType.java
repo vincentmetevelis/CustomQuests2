@@ -1,10 +1,11 @@
 package com.vincentmet.customquests.standardcontent.rewardtypes;
 
 import com.google.gson.*;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.logic.IRewardType;
+import com.vincentmet.customquests.api.IRewardType;
 import com.vincentmet.customquests.helpers.MouseButton;
 import java.util.function.Consumer;
 import net.minecraft.command.CommandSource;
@@ -45,6 +46,11 @@ public class CommandRewardType implements IRewardType{
 	@Override
 	public Item getIcon(){
 		return icon;
+	}
+	
+	@Override
+	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		return ()->{/*NOOP*/};
 	}
 	
 	@Override

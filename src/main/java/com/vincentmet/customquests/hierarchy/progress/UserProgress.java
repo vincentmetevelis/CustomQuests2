@@ -1,7 +1,7 @@
 package com.vincentmet.customquests.hierarchy.progress;
 
 import com.google.gson.*;
-import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.*;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.IntCounter;
 import java.util.*;
@@ -23,11 +23,11 @@ public class UserProgress extends HashMap<Integer, SingleQuestUserProgress> impl
 				JsonArray jsonObject = jsonElement.getAsJsonArray();
 				individuallyCompletedQuests.processJson(jsonObject);
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress > quests_individually_completed': Value is not a JsonArray, generating a new one!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress > quests_individually_completed': Value is not a JsonArray, generating a new one!");
 				individuallyCompletedQuests.processJson(new JsonArray());
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress > quests_individually_completed': Not detected, generating a new JsonArray!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress > quests_individually_completed': Not detected, generating a new JsonArray!");
 			individuallyCompletedQuests.processJson(new JsonArray());
 		}
 		
@@ -46,15 +46,15 @@ public class UserProgress extends HashMap<Integer, SingleQuestUserProgress> impl
 						singleQuestUserProgress.processJson(jsonObjectValue);
 						put(keyInt, singleQuestUserProgress);
 					}else{
-						if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress > entries > " + counter.getValue() + "': Value is not a JsonObject, discarding it for now!");
+						if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress > entries > " + counter.getValue() + "': Value is not a JsonObject, discarding it for now!");
 					}
 					counter.count();
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress > entries': Value is not a JsonObject, generating a new one!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress > entries': Value is not a JsonObject, generating a new one!");
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress > entries': Not detected, generating a new JsonObject!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress > entries': Not detected, generating a new JsonObject!");
 		}
 	}
 	

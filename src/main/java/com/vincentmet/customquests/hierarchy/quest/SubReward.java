@@ -3,7 +3,6 @@ package com.vincentmet.customquests.hierarchy.quest;
 import com.google.gson.*;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.api.logic.IRewardType;
 import net.minecraft.util.ResourceLocation;
 
 public class SubReward implements IJsonObjectProvider, IJsonObjectProcessor{

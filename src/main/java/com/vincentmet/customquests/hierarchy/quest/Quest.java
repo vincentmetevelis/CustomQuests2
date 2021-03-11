@@ -7,7 +7,7 @@ import com.vincentmet.customquests.hierarchy.chapter.Chapter;
 import java.util.stream.Collectors;
 
 public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
-	private final int id;
+	private final int questId;
 	private final QuestButton button;
 	private TextType title;
 	private TextType subtitle;
@@ -20,8 +20,8 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 	private final Rewards rewards;
 	private final Position position;
 	
-	public Quest(int id, QuestButton button, TextType title, TextType subtitle, TextType text, boolean isGlobal, DependencyList dependencyList, LockingList lockingList, UnlockingList unlockingList, Tasks tasks, Rewards rewards, Position position){
-		this.id = id;
+	public Quest(int questId, QuestButton button, TextType title, TextType subtitle, TextType text, boolean isGlobal, DependencyList dependencyList, LockingList lockingList, UnlockingList unlockingList, Tasks tasks, Rewards rewards, Position position){
+		this.questId = questId;
 		this.button = button;
 		this.title = title;
 		this.subtitle = subtitle;
@@ -35,8 +35,8 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 		this.position = position;
 	}
 	
-	public Quest(int id){
-		this(id, new QuestButton(id), new TextType(id, "title"), new TextType(id, "subtitle"), new TextType(id, "text"), false, new DependencyList(id), new LockingList(id), new UnlockingList(id), new Tasks(id), new Rewards(id), new Position(id));
+	public Quest(int questId){
+		this(questId, new QuestButton(questId), new TextType(questId, "Quest", "title"), new TextType(questId, "Quest", "subtitle"), new TextType(questId, "Quest", "text"), false, new DependencyList(questId), new LockingList(questId), new UnlockingList(questId), new Tasks(questId), new Rewards(questId), new Position(questId));
 	}
 	
 	@Override
@@ -47,11 +47,11 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				button.processJson(jsonObject);
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > button': Value is not a JsonObject, generating a new one!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > button': Value is not a JsonObject, generating a new one!");
 				button.processJson(new JsonObject());
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > button': Not detected, generating a new JsonObject!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > button': Not detected, generating a new JsonObject!");
 			button.processJson(new JsonObject());
 		}
 		
@@ -61,11 +61,11 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				title.processJson(jsonObject);
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > title': Value is not a JsonObject, generating a new one!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > title': Value is not a JsonObject, generating a new one!");
 				title.processJson(new JsonObject());
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > title': Not detected, generating a new JsonObject!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > title': Not detected, generating a new JsonObject!");
 			title.processJson(new JsonObject());
 		}
 		
@@ -75,11 +75,11 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				subtitle.processJson(jsonObject);
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > subtitle': Value is not a JsonObject, generating a new one!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > subtitle': Value is not a JsonObject, generating a new one!");
 				subtitle.processJson(new JsonObject());
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > subtitle': Not detected, generating a new JsonObject!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > subtitle': Not detected, generating a new JsonObject!");
 			subtitle.processJson(new JsonObject());
 		}
 		
@@ -89,11 +89,11 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				text.processJson(jsonObject);
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > text': Value is not a JsonObject, generating a new one!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > text': Value is not a JsonObject, generating a new one!");
 				text.processJson(new JsonObject());
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > text': Not detected, generating a new JsonObject!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > text': Not detected, generating a new JsonObject!");
 			text.processJson(new JsonObject());
 		}
 		
@@ -123,11 +123,11 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				dependencyList.processJson(jsonObject);
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > dependencies': Value is not a JsonObject, generating a new one!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > dependencies': Value is not a JsonObject, generating a new one!");
 				dependencyList.processJson(new JsonObject());
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > dependencies': Not detected, generating a new JsonObject!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > dependencies': Not detected, generating a new JsonObject!");
 			dependencyList.processJson(new JsonObject());
 		}
 		
@@ -165,11 +165,11 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				tasks.processJson(jsonObject);
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > tasks': Value is not a JsonObject, generating a new one!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks': Value is not a JsonObject, generating a new one!");
 				tasks.processJson(new JsonObject());
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > tasks': Not detected, generating a new JsonObject!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks': Not detected, generating a new JsonObject!");
 			tasks.processJson(new JsonObject());
 		}
 		
@@ -179,11 +179,11 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				rewards.processJson(jsonObject);
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > rewards': Value is not a JsonObject, generating a new one!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards': Value is not a JsonObject, generating a new one!");
 				rewards.processJson(new JsonObject());
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > rewards': Not detected, generating a new JsonObject!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards': Not detected, generating a new JsonObject!");
 			rewards.processJson(new JsonObject());
 		}
 		
@@ -193,11 +193,11 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				position.processJson(jsonObject);
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > position': Value is not a JsonObject, generating a new one!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > position': Value is not a JsonObject, generating a new one!");
 				position.processJson(new JsonObject());
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > position': Not detected, generating a new JsonObject!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > position': Not detected, generating a new JsonObject!");
 			position.processJson(new JsonObject());
 		}
 	}
@@ -223,8 +223,8 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 		isGlobal = global;
 	}
 	
-	public int getId(){
-		return id;
+	public int getQuestId(){
+		return questId;
 	}
 	
 	public QuestButton getButton(){
@@ -273,12 +273,12 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 	
 	public Chapter getChapter(){
 		if(hasChapter()){
-			return QuestingStorage.getSidedChaptersMap().values().stream().filter(chapter->chapter.getQuests().contains(id)).collect(Collectors.toList()).get(0);
+			return QuestingStorage.getSidedChaptersMap().values().stream().filter(chapter->chapter.getQuests().contains(questId)).collect(Collectors.toList()).get(0);
 		}
 		return null;
 	}
 	
 	public boolean hasChapter(){
-		return QuestingStorage.getSidedChaptersMap().values().stream().anyMatch(chapter->chapter.getQuests().contains(id));
+		return QuestingStorage.getSidedChaptersMap().values().stream().anyMatch(chapter->chapter.getQuests().contains(questId));
 	}
 }

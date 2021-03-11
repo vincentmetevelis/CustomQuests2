@@ -2,29 +2,28 @@ package com.vincentmet.customquests.hierarchy.quest;
 
 import com.google.gson.JsonObject;
 import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.api.logic.ITaskType;
 import com.vincentmet.customquests.helpers.JsonContainer;
 import net.minecraft.util.ResourceLocation;
 
 public class SubTask implements IJsonObjectProvider, IJsonObjectProcessor{
 	private final ResourceLocation type;
-	private final int parentQuestId;
-	private final int parentTaskId;
+	private final int questId;
+	private final int taskId;
 	private final int subtaskId;
 	private ITaskType subTask;
 	
-	public SubTask(int parentQuestId, int parentTaskId, int subtaskId, ResourceLocation type){
+	public SubTask(int questId, int taskId, int subtaskId, ResourceLocation type){
 		this.type = type;
-		this.parentQuestId = parentQuestId;
-		this.parentTaskId = parentTaskId;
+		this.questId = questId;
+		this.taskId = taskId;
 		this.subtaskId = subtaskId;
 	}
 	
 	@Override
 	public void processJson(JsonObject json){
-		json.addProperty("parent_quest_id", parentQuestId);
-		json.addProperty("parent_task_id", parentTaskId);
-		json.addProperty("parent_subtask_id", subtaskId);
+		json.addProperty("quest_id", questId);
+		json.addProperty("task_id", taskId);
+		json.addProperty("subtask_id", subtaskId);
 		CQRegistry.getTaskTypes().entrySet()
 				  .stream()
 				  .filter(entry -> entry.getKey().toString().equals(type.toString()))
@@ -46,9 +45,12 @@ public class SubTask implements IJsonObjectProvider, IJsonObjectProcessor{
 		return subTask;
 	}
 	
-	@Override
-	public String toString(){
-		return "SubTask{" + "type=" + type + ", subTask=" + subTask + '}';
+	public int getQuestId(){
+		return questId;
+	}
+	
+	public int getTaskId(){
+		return taskId;
 	}
 	
 	public int getSubtaskId(){

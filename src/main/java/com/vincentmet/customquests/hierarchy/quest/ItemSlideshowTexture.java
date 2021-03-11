@@ -1,6 +1,7 @@
 package com.vincentmet.customquests.hierarchy.quest;
 
-import com.vincentmet.customquests.api.ICurrentItemStackProvider;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.vincentmet.customquests.api.*;
 import java.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderHelper;
@@ -29,8 +30,7 @@ public class ItemSlideshowTexture implements IQuestingTexture, ICurrentItemStack
     }
     
     @OnlyIn(Dist.CLIENT)
-	@Override
-	public void render(int x, int y, int mouseX, int mouseY){
+	public void render(MatrixStack stack, float scale, int x, int y, int mouseX, int mouseY){
 		if(!items.isEmpty()){
 			int arrSize = items.size();
 			int currentIndex = (int)(System.currentTimeMillis()/50/delay%arrSize);

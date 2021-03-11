@@ -1,7 +1,7 @@
 package com.vincentmet.customquests.hierarchy.party;
 
 import com.google.gson.*;
-import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.*;
 import com.vincentmet.customquests.api.*;
 import java.util.UUID;
 
@@ -29,13 +29,13 @@ public class Party implements IJsonObjectProvider, IJsonObjectProcessor{
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
 					setName(jsonPrimitiveStringValue);
 				}else{
-					if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > name': Value is not a String, defaulting to an empty String!");
+					if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > name': Value is not a String, defaulting to an empty String!");
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > name': Value is not a JsonPrimitive, please use a String, defaulting to an empty String!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > name': Value is not a JsonPrimitive, please use a String, defaulting to an empty String!");
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > name': Not detected, defaulting to an empty String!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > name': Not detected, defaulting to an empty String!");
 		}
 		
 		if(json.has("type")){
@@ -54,15 +54,15 @@ public class Party implements IJsonObjectProvider, IJsonObjectProcessor{
 							break;
 					}
 				}else{
-					if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > type': Value is not a String, defaulting to 'INVITE_ONLY'!");
+					if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > type': Value is not a String, defaulting to 'INVITE_ONLY'!");
 					setPartyType(PartyType.INVITE_ONLY);
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > type': Value is not a JsonPrimitive, please use a String, defaulting to 'INVITE_ONLY'!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > type': Value is not a JsonPrimitive, please use a String, defaulting to 'INVITE_ONLY'!");
 				setPartyType(PartyType.INVITE_ONLY);
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > type': Not detected, defaulting to 'INVITE_ONLY'!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > type': Not detected, defaulting to 'INVITE_ONLY'!");
 			setPartyType(PartyType.INVITE_ONLY);
 		}
 		
@@ -74,15 +74,15 @@ public class Party implements IJsonObjectProvider, IJsonObjectProcessor{
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
 					setOwner(UUID.fromString(jsonPrimitiveStringValue));
 				}else{
-					if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > owner': Value is not a UUID String, deleting party!");
+					if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > owner': Value is not a UUID String, deleting party!");
 					PartyHelper.addPartyToDeletionQueue(id);
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > owner': Value is not a JsonPrimitive, deleting party!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > owner': Value is not a JsonPrimitive, deleting party!");
 				PartyHelper.addPartyToDeletionQueue(id);
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > owner': Not detected, deleting party!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > owner': Not detected, deleting party!");
 			PartyHelper.addPartyToDeletionQueue(id);
 		}
 		
@@ -92,11 +92,11 @@ public class Party implements IJsonObjectProvider, IJsonObjectProcessor{
 				JsonArray jsonObject = jsonElement.getAsJsonArray();
 				collectivelyCompletedQuestList.processJson(jsonObject);
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > quests_collectively_completed': Value is not a JsonArray, generating a new one!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > quests_collectively_completed': Value is not a JsonArray, generating a new one!");
 				collectivelyCompletedQuestList.processJson(new JsonArray());
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > quests_collectively_completed': Not detected, generating a new JsonArray!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > quests_collectively_completed': Not detected, generating a new JsonArray!");
 			collectivelyCompletedQuestList.processJson(new JsonArray());
 		}
 		
@@ -106,11 +106,11 @@ public class Party implements IJsonObjectProvider, IJsonObjectProcessor{
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				collectiveProgress.processJson(jsonObject);
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > collective_progress': Value is not a JsonObject, generating a new one!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > collective_progress': Value is not a JsonObject, generating a new one!");
 				collectiveProgress.processJson(new JsonObject());
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > collective_progress': Not detected, generating a new JsonObject!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + id + " > collective_progress': Not detected, generating a new JsonObject!");
 			collectiveProgress.processJson(new JsonObject());
 		}
 	}

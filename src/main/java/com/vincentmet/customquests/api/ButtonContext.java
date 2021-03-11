@@ -1,10 +1,12 @@
 package com.vincentmet.customquests.api;
 
+import com.vincentmet.customquests.helpers.*;
+import java.util.UUID;
 import net.minecraft.util.text.*;
 
 public class ButtonContext{
 	private ITextComponent text = new StringTextComponent("uwu");
-	private Runnable onClick = ()->{};
+	private QuadConsumer<MouseButton, UUID, Integer, Integer> onClick = (mouseButton, uuid, questId, taskId)->{};
 	
 	public ITextComponent getText(){
 		return text;
@@ -15,11 +17,11 @@ public class ButtonContext{
 		return this;
 	}
 	
-	public Runnable onClick(){
+	public QuadConsumer<MouseButton, UUID, Integer, Integer> onClick(){
 		return onClick;
 	}
 	
-	public void setOnClick(Runnable onClick){
+	public void setOnClick(QuadConsumer<MouseButton, UUID, Integer, Integer> onClick){
 		this.onClick = onClick;
 	}
 }

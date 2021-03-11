@@ -3,26 +3,26 @@ package com.vincentmet.customquests.helpers.rendering;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
+import com.vincentmet.customquests.gui.elements.ScrollingLabel;
 import com.vincentmet.customquests.helpers.*;
 import com.vincentmet.customquests.helpers.math.Vec2i;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.util.*;
-import net.minecraft.util.text.*;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.*;
 
 @OnlyIn(Dist.CLIENT)
 public class VariableButton implements IHoverRenderable, IGuiEventListener{
-	private int parentX;
-	private int parentY;
+	private final int parentX;
+	private final int parentY;
 	
 	private int x, y, width, height;
 	private ButtonTexture texture;
-	private String buttonText;
+	private ScrollingLabel buttonText;
 	private Vec2i textOffsetFromCenter;
 	private Consumer<MouseButton> onClickCallback;
 	private List<ITextComponent> tooltipLines;
@@ -36,10 +36,11 @@ public class VariableButton implements IHoverRenderable, IGuiEventListener{
 		this.width = width;
 		this.height = height;
 		this.texture = texture;
-		this.buttonText = buttonText;
 		this.textOffsetFromCenter = textOffsetFromCenter;
 		this.onClickCallback = onClickCallback;
 		this.tooltipLines = tooltipLines;
+		
+		this.buttonText = new ScrollingLabel(parentX + x + textOffsetFromCenter.getX() + (width>>1) - (Math.min(getStringWidth(buttonText), getMaxTextWidth())>>1), parentY + y + textOffsetFromCenter.getY() + (height>>1) - (Minecraft.getInstance().fontRenderer.FONT_HEIGHT>>1), buttonText, Math.min(getMaxTextWidth(), getStringWidth(buttonText)), 30, 1);
 	}
 	
 	public VariableButton(int x, int y, int width, int height, ButtonTexture texture, String buttonText, Vec2i textOffsetFromCenter, Consumer<MouseButton> onClickCallback, List<ITextComponent> tooltipLines){
@@ -62,18 +63,16 @@ public class VariableButton implements IHoverRenderable, IGuiEventListener{
 	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, x, y, x+width, y+height)){
 			TooltipBuffer.tooltipBuffer.add(()->{
-				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, tooltipLines.stream().map(textComponent -> IReorderingProcessor.fromString(textComponent.getString(), Style.EMPTY)).collect(Collectors.toList()), mouseX, mouseY);
+				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.func_243308_b(matrixStack, tooltipLines, mouseX, mouseY);
 			});
 		}
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, x, y, x+width, y+height) && texture == ButtonTexture.DEFAULT_NORMAL){
 			internalRender(matrixStack, mouseX, mouseY, partialTicks, ButtonTexture.DEFAULT_PRESSED);
-		}else{
-			internalRender(matrixStack, mouseX, mouseY, partialTicks, texture);
 		}
 	}
 	
 	private void internalRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks, ButtonTexture texture){
-		Color.color(0xFFFFFF);
+		Color.color(0xFFFFFFFF);
 		RenderHelper.disableStandardItemLighting();
 		
 		int x = parentX + this.x;
@@ -115,13 +114,7 @@ public class VariableButton implements IHoverRenderable, IGuiEventListener{
 			AbstractGui.blit(matrixStack, x, top, texU, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Left
 			AbstractGui.blit(matrixStack, right, top, texRight, texV + texP, texP, Math.min(strippedButtonTexHeight, bottom - top), texWidth, texHeight);// Right
 		}
-		String buttonTextToRender = buttonText;
-		if(buttonText != null && !buttonText.equals("")){
-			if(getStringWidth(buttonText) + 5 >= getMaxTextWidth()){
-				buttonTextToRender = Minecraft.getInstance().fontRenderer.trimStringToWidth(new StringTextComponent(buttonText), getMaxTextWidth() - 5) + "...";
-			}
-			Minecraft.getInstance().fontRenderer.drawStringWithShadow(matrixStack, buttonTextToRender, textOffsetFromCenter.getX() + x + (width>>1) - (getStringWidth(buttonTextToRender)>>1), textOffsetFromCenter.getY() + y + (height>>1) - (Minecraft.getInstance().fontRenderer.FONT_HEIGHT>>1), 0x00FFFFFF);
-		}
+		buttonText.render(matrixStack, mouseX, mouseY, partialTicks);
 	}
 	
 	public boolean mouseClicked(double mouseX, double mouseY, int mouseButton){
@@ -156,7 +149,7 @@ public class VariableButton implements IHoverRenderable, IGuiEventListener{
 		return texture;
 	}
 	
-	public String getButtonText(){
+	public ScrollingLabel getButtonText(){
 		return buttonText;
 	}
 	
@@ -174,10 +167,12 @@ public class VariableButton implements IHoverRenderable, IGuiEventListener{
 	
 	public void setX(int x){
 		this.x = x;
+		this.buttonText.setX(parentX + x + textOffsetFromCenter.getX() + (width>>1) - (getStringWidth(buttonText.getText())>>1));
 	}
 	
 	public void setY(int y){
 		this.y = y;
+		this.buttonText.setY(parentY + y + textOffsetFromCenter.getY() + (height>>1) - (Minecraft.getInstance().fontRenderer.FONT_HEIGHT>>1));
 	}
 	
 	public void setWidth(int width){
@@ -193,7 +188,7 @@ public class VariableButton implements IHoverRenderable, IGuiEventListener{
 	}
 	
 	public void setButtonText(String buttonText){
-		this.buttonText = buttonText;
+		this.buttonText = new ScrollingLabel(x + textOffsetFromCenter.getX() + (width>>1) - (getStringWidth(buttonText)>>1), y + textOffsetFromCenter.getY() + (height>>1) - (Minecraft.getInstance().fontRenderer.FONT_HEIGHT>>1), buttonText, getMaxTextWidth(), 30, 1);
 	}
 	
 	public void setTextOffsetFromCenter(Vec2i textOffsetFromCenter){
