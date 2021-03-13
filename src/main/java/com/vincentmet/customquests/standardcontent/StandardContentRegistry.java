@@ -19,7 +19,6 @@ public class StandardContentRegistry{
 		CQRegistry.registerTaskType(BlockMinedTaskType::new);
 		CQRegistry.registerTaskType(BlockPlacedTaskType::new);
 		CQRegistry.registerTaskType(CheckboxTaskType::new);
-		CQRegistry.registerTaskType(AdvancementTaskType::new);
 	}
 	
 	public static void registerRewardTypes(){

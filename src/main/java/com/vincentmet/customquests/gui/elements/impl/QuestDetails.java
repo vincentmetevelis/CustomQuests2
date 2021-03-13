@@ -370,10 +370,6 @@ public class QuestDetails implements IHoverRenderable, IGuiEventListener{
 		GLScissorStack.pop();
 	}
 	
-	private int getStringWidth(String text){
-		return FONT.getStringWidth(text);
-	}
-	
 	private void applyScrollLimits(){
 		if(this.textScrollDistance < 0){
 			this.textScrollDistance = 0;

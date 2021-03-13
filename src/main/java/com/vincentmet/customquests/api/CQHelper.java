@@ -42,6 +42,10 @@ public class CQHelper{
 				exception.printStackTrace();
 			}
 		}
+		//for loop below checks if all dependencies are quests that actually exist, and otherwise removes the reference in the dependency list
+		for(Quest q : questMap.values()){
+			q.getDependencyList().removeIf(dependencyQuestId -> !questMap.containsKey(dependencyQuestId));
+		}
 		return questMap;
 	}
 	

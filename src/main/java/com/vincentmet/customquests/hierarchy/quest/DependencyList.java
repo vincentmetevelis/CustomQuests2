@@ -16,7 +16,7 @@ public class DependencyList extends HashSet<Integer> implements IJsonObjectProce
 	}
 	
 	public List<Quest> asQuestList(){
-		return stream().map(QuestHelper::getQuestFromId).collect(Collectors.toList());
+		return stream().map(QuestHelper::getQuestFromId).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 	
 	public boolean add(Integer id){
@@ -36,7 +36,7 @@ public class DependencyList extends HashSet<Integer> implements IJsonObjectProce
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String operator = jsonPrimitive.getAsString();
-					if(operator.toUpperCase().equals("AND") || operator.toUpperCase().equals("OR")){
+					if(operator.equalsIgnoreCase("AND") || operator.equalsIgnoreCase("OR")){
 						setLogicType(LogicType.valueOf(operator.toUpperCase()));
 					}else{
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > dependencies > logic': Value is not a valid operator, please use 'AND' or 'OR', defaulting to 'AND'!");
