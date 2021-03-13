@@ -2,6 +2,7 @@ package com.vincentmet.customquests.api;
 
 import com.google.gson.JsonObject;
 import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.helpers.BooleanContainer;
 import com.vincentmet.customquests.hierarchy.party.Party;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
 import java.util.*;
@@ -45,23 +46,29 @@ public class PartyHelper {
 			json.addProperty("owner", creatorUUID.toString());
 			json.addProperty("name", name);
 			party.processJson(json);
-			QuestingStorage.getSidedPartiesMap().put(party.getId(), party);
-			party.getCollectiveProgress().deleteExcessValues();
-			party.getCollectiveProgress().generateMissingValues();
-			ProgressHelper.setPlayerParty(creatorUUID, newPartyId);
-			return party.getId();
-		}else{
-			return -1;
+			if(!executePartyDeletionQueue()){
+				QuestingStorage.getSidedPartiesMap().put(party.getId(), party);
+				party.getCollectiveProgress().deleteExcessValues();
+				party.getCollectiveProgress().generateMissingValues();
+				ProgressHelper.setPlayerParty(creatorUUID, newPartyId);
+				return party.getId();
+			}
 		}
+		return Ref.NO_PARTY;
 	}
 	
 	public static void addPartyToDeletionQueue(int partyId){ //Only use this when deleting a party during data processing
 		partiesToDelete.add(partyId);
 	}
 	
-	public static void executePartyDeletionQueue(){ // Only used by CustomQuests' EventHandler
-		partiesToDelete.forEach(PartyHelper::deleteParty);
+	private static boolean executePartyDeletionQueue(){
+		BooleanContainer anyPartiesDeleted = new BooleanContainer(false);
+		partiesToDelete.forEach(party -> {
+			PartyHelper.deleteParty(party);
+			anyPartiesDeleted.set(true);
+		});
 		partiesToDelete.clear();
+		return anyPartiesDeleted.get();
 	}
 	
 	public static void deleteParty(int partyId){ // Only use this when deleting a party during runtime
@@ -117,7 +124,7 @@ public class PartyHelper {
 	public static boolean isQuestUnlocked(int partyId, int questId){
 		if(doesPartyExist(partyId) && QuestHelper.doesQuestExist(questId)){
 			Quest quest = QuestHelper.getQuestFromId(questId);
-			List<Integer> partyCompletedQuests = QuestingStorage.getSidedPartiesMap().get(partyId).getCollectivelyCompletedQuestList();
+			Set<Integer> partyCompletedQuests = QuestingStorage.getSidedPartiesMap().get(partyId).getCollectivelyCompletedQuestList();
 			List<Boolean> boolsToEval = new ArrayList<>();
 			quest.getDependencyList().forEach(dependencyQuestId -> boolsToEval.add(partyCompletedQuests.contains(dependencyQuestId)));
 			return CQHelper.evalBool(quest.getDependencyList().getLogicType(), boolsToEval, true);
@@ -160,29 +167,39 @@ public class PartyHelper {
 	}
 	
 	public static void syncDataBetweenPartyMembers(int partyId){
+		BooleanContainer shouldSync = new BooleanContainer();
 		if(doesPartyExist(partyId)){
 			List<UUID> allPartyUuids = PartyHelper.getAllUUIDsInParty(partyId);
 			allPartyUuids.forEach(uuid -> {
 				//Sync all players in the party their progress to the party
+				int sizeCompletedPartyQuestIds = QuestingStorage.getSidedPartiesMap().get(partyId).getCollectivelyCompletedQuestList().size();
+				int sizeCompletedPlayerQuestIds = QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().getIndividuallyCompletedQuests().size();
+				if(sizeCompletedPartyQuestIds != sizeCompletedPlayerQuestIds){
+					shouldSync.set(true);
+				}
 				QuestingStorage.getSidedPartiesMap().get(partyId).getCollectivelyCompletedQuestList().addAll(QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().getIndividuallyCompletedQuests());
 				QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().forEach((questId, singleQuestPartyProgress) -> {
 					boolean areAllPlayerTasksCompleted = QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().get(questId).areAllTasksCompleted();
 					if(!singleQuestPartyProgress.areAllTasksCompleted() && areAllPlayerTasksCompleted){
 						singleQuestPartyProgress.setAllTasksCompleted(true);
+						shouldSync.set(true);
 					}
 					singleQuestPartyProgress.forEach((taskId, singleTaskPartyProgress) -> {
 						boolean areAllPlayerSubtasksCompleted = QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().get(questId).get(taskId).areAllSubtasksCompleted();
 						if(!singleTaskPartyProgress.areAllSubtasksCompleted() && areAllPlayerSubtasksCompleted){
 							singleTaskPartyProgress.setAllSubtasksCompleted(true);
+							shouldSync.set(true);
 						}
 						singleTaskPartyProgress.forEach((subtaskId, singleSubtaskPartyProgress) -> {
 							boolean isSubtaskCompleted = QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().get(questId).get(taskId).get(subtaskId).isCompleted();
 							int subtaskValue = QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().get(questId).get(taskId).get(subtaskId).getValue();
 							if(!singleSubtaskPartyProgress.isCompleted() && isSubtaskCompleted){
 								singleSubtaskPartyProgress.setCompleted(true);
+								shouldSync.set(true);
 							}
 							if(subtaskValue > singleSubtaskPartyProgress.getValue()){
 								singleSubtaskPartyProgress.setValue(subtaskValue);
+								shouldSync.set(true);
 							}
 						});
 					});
@@ -191,29 +208,48 @@ public class PartyHelper {
 			allPartyUuids.forEach(uuid -> {
 				//Sync the party's progress to all the party members
 				QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().getIndividuallyCompletedQuests().addAll(QuestingStorage.getSidedPartiesMap().get(partyId).getCollectivelyCompletedQuestList());
+				int sizeCompletedPartyQuestIds = QuestingStorage.getSidedPartiesMap().get(partyId).getCollectivelyCompletedQuestList().size();
+				int sizeCompletedPlayerQuestIds = QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().getIndividuallyCompletedQuests().size();
+				if(sizeCompletedPartyQuestIds != sizeCompletedPlayerQuestIds){
+					shouldSync.set(true);
+				}
 				QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().forEach((questId, singleQuestUserProgress) -> {
 					boolean areAllPartyTasksCompleted = QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().get(questId).areAllTasksCompleted();
 					if(!singleQuestUserProgress.areAllTasksCompleted() && areAllPartyTasksCompleted){
 						singleQuestUserProgress.setAllTasksCompleted(true);
+						shouldSync.set(true);
 					}
 					singleQuestUserProgress.forEach((taskId, singleTaskProgress) -> {
 						boolean areAllPartySubtasksCompleted = QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().get(questId).get(taskId).areAllSubtasksCompleted();
 						if(!singleTaskProgress.areAllSubtasksCompleted() && areAllPartySubtasksCompleted){
 							singleTaskProgress.setAllSubtasksCompleted(true);
+							shouldSync.set(true);
 						}
 						singleTaskProgress.forEach((subtaskId, singleSubtaskProgress) -> {
 							boolean isPartySubtaskCompleted = QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().get(questId).get(taskId).get(subtaskId).isCompleted();
 							int subtaskPartyValue = QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().get(questId).get(taskId).get(subtaskId).getValue();
 							if(!singleSubtaskProgress.isCompleted() && isPartySubtaskCompleted){
 								singleSubtaskProgress.setCompleted(true);
+								shouldSync.set(true);
 							}
 							if(subtaskPartyValue > singleSubtaskProgress.getValue()){
 								singleSubtaskProgress.setValue(subtaskPartyValue);
+								shouldSync.set(true);
 							}
 						});
 					});
 				});
 			});
+		}
+		if(shouldSync.get()) PartyHelper.forEachPlayerInPartyCurrentlyOnline(partyId, ServerUtils::sendProgressAndParties);
+	}
+	
+	public static void deleteProgress(int partyId){
+		if(doesPartyExist(partyId)){
+			Party party = QuestingStorage.getSidedPartiesMap().get(partyId);
+			party.getCollectiveProgress().clear();
+			party.getCollectivelyCompletedQuestList().clear();
+			CQHelper.generateMissingPartyProgress(partyId);
 		}
 	}
 }

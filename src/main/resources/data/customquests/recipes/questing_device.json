@@ -11,7 +11,7 @@
       "item": "minecraft:redstone"
     },
     "G": {
-      "item": "minecraft:glass"
+      "tag": "forge:glass"
     }
   },
   "result": {

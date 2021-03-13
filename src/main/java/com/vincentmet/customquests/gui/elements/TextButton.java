@@ -8,12 +8,9 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.util.text.ITextComponent;
-import org.lwjgl.opengl.GL11;
 
 public class TextButton implements ScrollableListEntry{
-	private int x, y;
-	private int width;
-	private int height;
+	private int x, y, width, height;
 	private final VariableButton button;
 	
 	public TextButton(int x, int y, int width, int height, String text, ButtonState buttonState, Consumer<MouseButton> onClickCallback, List<ITextComponent> tooltipLines){
@@ -26,20 +23,20 @@ public class TextButton implements ScrollableListEntry{
 	
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GL11.glPushMatrix();
-		Color.color(0xFFFFFF);
+		matrixStack.push();
+		Color.color(0xFFFFFFFF);
 		this.button.render(matrixStack, mouseX, mouseY, partialTicks);
 		RenderHelper.setupGui3DDiffuseLighting();
-		GL11.glPopMatrix();
+		matrixStack.pop();
 	}
 	
 	@Override
 	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GL11.glPushMatrix();
-		Color.color(0xFFFFFF);
+		matrixStack.push();
+		Color.color(0xFFFFFFFF);
 		this.button.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		RenderHelper.setupGui3DDiffuseLighting();
-		GL11.glPopMatrix();
+		matrixStack.pop();
 	}
 	
 	@Override
@@ -75,6 +72,11 @@ public class TextButton implements ScrollableListEntry{
 	}
 	
 	@Override
+	public int getHeight(){
+		return height;
+	}
+	
+	@Override
 	public void setWidth(int width){
 		this.width = width;
 		this.button.setWidth(width);
@@ -84,11 +86,6 @@ public class TextButton implements ScrollableListEntry{
 	public void setHeight(int height){
 		this.height = height;
 		this.button.setHeight(height);
-	}
-	
-	@Override
-	public int getHeight(){
-		return height;
 	}
 	
 	public void setButtonState(ButtonState buttonState){

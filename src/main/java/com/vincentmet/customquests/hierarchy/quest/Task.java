@@ -6,16 +6,16 @@ import com.vincentmet.customquests.api.*;
 import net.minecraft.util.ResourceLocation;
 
 public class Task implements IJsonObjectProcessor, IJsonObjectProvider{
-	private int parentQuestId;
-	private int taskId;
+	private final int questId;
+	private final int taskId;
 	private ResourceLocation taskType;
 	private final SubTasks subtasks;
 	
-	public Task(int parentQuestId, int taskId, ResourceLocation taskType){
-		this.parentQuestId = parentQuestId;
+	public Task(int questId, int taskId, ResourceLocation taskType){
+		this.questId = questId;
 		this.taskId = taskId;
 		this.taskType = taskType;
-		this.subtasks = new SubTasks(parentQuestId, taskId, taskType);
+		this.subtasks = new SubTasks(questId, taskId, taskType);
 	}
 	
 	@Override
@@ -29,16 +29,16 @@ public class Task implements IJsonObjectProcessor, IJsonObjectProvider{
 					if(CQRegistry.getTaskTypes().keySet().stream().anyMatch(tasktypeId -> tasktypeId.toString().equals(jsonString))){
 						setTaskType(new ResourceLocation(jsonString));
 					}else{
-						Ref.CustomQuests.LOGGER.fatal("'Quest > " + parentQuestId + " > tasks > entries > " + taskId + " > type': Value does not match a registered TaskType, please download the addon mod it belongs to, or change it to something valid, discarding it for now! THIS ERROR SHOULDN'T HAPPEN!");
+						Ref.CustomQuests.LOGGER.fatal("'Quest > " + questId + " > tasks > entries > " + taskId + " > type': Value does not match a registered TaskType, please download the addon mod it belongs to, or change it to something valid, discarding it for now! THIS ERROR SHOULDN'T HAPPEN!");
 					}
 				}else{
-					Ref.CustomQuests.LOGGER.fatal("'Quest > " + parentQuestId + " > tasks > entries > " + taskId + " > type': Value is not a String, discarding it for now! THIS ERROR SHOULDN'T HAPPEN!");
+					Ref.CustomQuests.LOGGER.fatal("'Quest > " + questId + " > tasks > entries > " + taskId + " > type': Value is not a String, discarding it for now! THIS ERROR SHOULDN'T HAPPEN!");
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.fatal("'Quest > " + parentQuestId + " > tasks > entries > " + taskId + " > type': Value is not a JsonPrimitive, please use a String, discarding it for now! THIS ERROR SHOULDN'T HAPPEN!");
+				Ref.CustomQuests.LOGGER.fatal("'Quest > " + questId + " > tasks > entries > " + taskId + " > type': Value is not a JsonPrimitive, please use a String, discarding it for now! THIS ERROR SHOULDN'T HAPPEN!");
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.fatal("'Quest > " + parentQuestId + " > tasks > entries > " + taskId + " > type': Not detected, discarding it for now! THIS ERROR SHOULDN'T HAPPEN!");
+			Ref.CustomQuests.LOGGER.fatal("'Quest > " + questId + " > tasks > entries > " + taskId + " > type': Not detected, discarding it for now! THIS ERROR SHOULDN'T HAPPEN!");
 		}
 		
 		if(json.has("sub_tasks")){
@@ -47,11 +47,11 @@ public class Task implements IJsonObjectProcessor, IJsonObjectProvider{
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				subtasks.processJson(jsonObject);
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + taskId + " > sub_tasks': Value is not a JsonObject, generating a new one!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks': Value is not a JsonObject, generating a new one!");
 				subtasks.processJson(new JsonObject());
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + taskId + " > sub_tasks': Not detected, generating a new JsonObject!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks': Not detected, generating a new JsonObject!");
 			subtasks.processJson(new JsonObject());
 		}
 	}

@@ -1,8 +1,6 @@
 package com.vincentmet.customquests.api;
 
 import com.mojang.datafixers.util.Pair;
-import com.vincentmet.customquests.api.logic.*;
-import com.vincentmet.customquests.hierarchy.quest.*;
 import java.util.*;
 import java.util.function.Supplier;
 import net.minecraft.util.ResourceLocation;

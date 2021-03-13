@@ -1,6 +1,7 @@
 package com.vincentmet.customquests.network.messages;
 
 import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.standardcontent.messages.MessageCheckboxClick;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
@@ -21,6 +22,7 @@ public class PacketHandler{
 	}
 	
 	public static void init() {
+		//Main
 		CHANNEL.registerMessage(nextID(), MessageDiscord.class, MessageDiscord::encode, MessageDiscord::decode, MessageDiscord::handle);
 		CHANNEL.registerMessage(nextID(), MessageTaskButton.class, MessageTaskButton::encode, MessageTaskButton::decode, MessageTaskButton::handle);
 		CHANNEL.registerMessage(nextID(), MessageRewardClaim.class, MessageRewardClaim::encode, MessageRewardClaim::decode, MessageRewardClaim::handle);
@@ -35,5 +37,8 @@ public class PacketHandler{
 		CHANNEL.registerMessage(nextID(), MessageClearParties.class, MessageClearParties::encode, MessageClearParties::decode, MessageClearParties::handle);
 		CHANNEL.registerMessage(nextID(), MessageReloadResources.class, MessageReloadResources::encode, MessageReloadResources::decode, MessageReloadResources::handle);
 		CHANNEL.registerMessage(nextID(), MessageUpdateServerSettings.class, MessageUpdateServerSettings::encode, MessageUpdateServerSettings::decode, MessageUpdateServerSettings::handle);
+		
+		//Standard Content
+		CHANNEL.registerMessage(nextID(), MessageCheckboxClick.class, MessageCheckboxClick::encode, MessageCheckboxClick::decode, MessageCheckboxClick::handle);
 	}
 }

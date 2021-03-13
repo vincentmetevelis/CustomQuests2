@@ -14,12 +14,12 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor{
 	private final int id;
 	private IQuestingTexture icon;
-	private String title;
-	private String text;
+	private TextType title;
+	private TextType text;
 	private final QuestList quests;
 	
 	
-	public Chapter(int id, IQuestingTexture icon, String title, String text, QuestList quests){
+	public Chapter(int id, IQuestingTexture icon, TextType title, TextType text, QuestList quests){
 		this.id = id;
 		this.icon = icon;
 		this.title = title;
@@ -28,7 +28,7 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor{
 	}
 	
 	public Chapter(int id){
-		this(id, null, "", "", new QuestList(id));
+		this(id, null, new TextType(id, "Chapter", "title"), new TextType(id, "Chapter", "text"), new QuestList(id));
 	}
 	
 	@Override
@@ -67,34 +67,30 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor{
 		
 		if(json.has("title")){
 			JsonElement jsonElement = json.get("title");
-			if(jsonElement.isJsonPrimitive()){
-				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
-				if(jsonPrimitive.isString()){
-					setTitle(jsonPrimitive.getAsString());
-				}else{
-					Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > title': Value is not a String, defaulting to an empty String");
-				}
+			if(jsonElement.isJsonObject()){
+				JsonObject jsonObject = jsonElement.getAsJsonObject();
+				title.processJson(jsonObject);
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > title': Value is not a JsonPrimitive, please use a String, defaulting to an empty String");
+				Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > title': Value is not a JsonObject, generating a new one!");
+				title.processJson(new JsonObject());
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > title': Not detected, defaulting to an empty String");
+			Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > title': Not detected, generating a new JsonObject!");
+			title.processJson(new JsonObject());
 		}
 		
 		if(json.has("text")){
 			JsonElement jsonElement = json.get("text");
-			if(jsonElement.isJsonPrimitive()){
-				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
-				if(jsonPrimitive.isString()){
-					setText(jsonPrimitive.getAsString());
-				}else{
-					Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > text': Value is not a String, defaulting to an empty String");
-				}
+			if(jsonElement.isJsonObject()){
+				JsonObject jsonObject = jsonElement.getAsJsonObject();
+				text.processJson(jsonObject);
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > text': Value is not a JsonPrimitive, please use a String, defaulting to an empty String");
+				Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > text': Value is not a JsonObject, generating a new one!");
+				text.processJson(new JsonObject());
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > text': Not detected, defaulting to an empty String");
+			Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > text': Not detected, generating a new JsonObject!");
+			text.processJson(new JsonObject());
 		}
 		
 		if(json.has("quests")){
@@ -114,8 +110,8 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor{
 	public JsonObject getJson(){
 		JsonObject json = new JsonObject();
 		json.addProperty("icon", icon.toString());
-		json.addProperty("title", title);
-		json.addProperty("text", text);
+		json.add("title", title.getJson());
+		json.add("text", text.getJson());
 		json.add("quests", quests.getJson());
 		return json;
 	}
@@ -128,11 +124,11 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor{
 		return icon;
 	}
 	
-	public String getTitle(){
+	public TextType getTitle(){
 		return title;
 	}
 	
-	public String getText(){
+	public TextType getText(){
 		return text;
 	}
 	
@@ -144,11 +140,11 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor{
 		this.icon = icon;
 	}
 	
-	public void setTitle(String title){
+	public void setTitle(TextType title){
 		this.title = title;
 	}
 	
-	public void setText(String text){
+	public void setText(TextType text){
 		this.text = text;
 	}
 }

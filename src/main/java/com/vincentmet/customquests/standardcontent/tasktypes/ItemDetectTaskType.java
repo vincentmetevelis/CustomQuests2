@@ -1,16 +1,17 @@
 package com.vincentmet.customquests.standardcontent.tasktypes;
 
 import com.google.gson.*;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.api.logic.*;
 import com.vincentmet.customquests.helpers.*;
-import com.vincentmet.customquests.hierarchy.quest.*;
+import com.vincentmet.customquests.hierarchy.quest.ItemSlideshowTexture;
 import com.vincentmet.customquests.integrations.jei.JEIHelper;
-import com.vincentmet.customquests.standardcontent.StandardContentProgressHelper;
 import java.util.*;
 import java.util.function.Consumer;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.player.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -22,7 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 	private static final ResourceLocation ID = new ResourceLocation(Ref.MODID, "item_detect");
 	private static final ITextComponent TRANSLATION = new TranslationTextComponent(Ref.MODID + ".standardcontent.tasks.item_detect");
-	private UUID uuid;
+	public static final List<PlayerBoundSubtaskReference> TRACKING_LIST = new ArrayList<>();
 	private int questId;
 	private int taskId;
 	private int subtaskId;
@@ -30,10 +31,6 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 	private ResourceLocation ogRL;
 	private int count;
 	private String ogNBT;
-	
-	private int parentQuestId;
-	private int parentTaskId;
-	private int parentSubtaskId;
 	
 	ItemSlideshowTexture icon;
 	private List<ItemStack> items = new ArrayList<>();
@@ -47,6 +44,11 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
     public ITextComponent getTranslation(){
         return TRANSLATION;
     }
+	
+	@Override
+	public List<PlayerBoundSubtaskReference> getCurrentlyTrackingList(){
+		return TRACKING_LIST;
+	}
     
     @Override
 	public boolean hasButton(ButtonContext context){
@@ -55,16 +57,26 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 	
 	@Override
 	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		IntCounter correctItemInInvCount = new IntCounter();
-		player.inventory.mainInventory.forEach(invStack -> {
-			items.forEach(itemStack -> {
-				if(invStack.getItem() == itemStack.getItem()){
-					correctItemInInvCount.add(invStack.getCount());
-				}
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
+			IntCounter correctItemInInvCount = new IntCounter();
+			player.inventory.mainInventory.forEach(invStack -> {
+				items.stream()
+					 .filter(itemStack -> itemStack.getItem().equals(invStack.getItem()))
+					 .filter(itemStack -> {
+						 BooleanContainer invalid = new BooleanContainer(false);
+						 if(invStack.hasTag() && itemStack.hasTag()){
+							 itemStack.getTag().keySet().forEach(key -> {
+								 invalid.set(!invStack.getTag().contains(key));
+							 });
+						 }
+						 return !invalid.get();
+					 })
+					 .forEach(itemStack -> {
+						 correctItemInInvCount.add(invStack.getCount());
+					 });
 			});
-			
-		});
-		processValue(correctItemInInvCount, player);
+			processValue(correctItemInInvCount, player);
+		}
 	}
 	
 	public void processValue(IntCounter correctItemInInvCount, PlayerEntity player){
@@ -82,30 +94,26 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 	}
 	
 	@Override
-	public ITaskButtonClick executeSubtaskButton(){
-		return (player, questId, taskId, subtaskId) -> {/*NOP*/};
+	public void executeSubtaskButton(PlayerEntity player){
+		/*NOOP*/
 	}
 	
 	@Override
-	public void onLoad(UUID uuid, int questId, int taskId, int subtaskId){
-		this.uuid = uuid;
-		this.questId = questId;
-		this.taskId = taskId;
-		this.subtaskId = subtaskId;
-		StandardContentProgressHelper.ITEM_DETECT_SUBTASKS_TO_CHECK.add(new Quadruple<>(uuid, questId, taskId, subtaskId));
-	}
-	
-	@Override
-	public IQuestingTexture getIcon(){
+	public IQuestingTexture getIcon(ClientPlayerEntity player){
 		return icon;
 	}
 	
 	@Override
-	public String getText(){
+	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks, ClientPlayerEntity player){
+		return ()->Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, icon.getCurrentItemStack(), mouseX, mouseY);
+	}
+	
+	@Override
+	public String getText(ClientPlayerEntity player){
 		if(items.size()==1){
 			return count + "x " + items.get(0).getItem().getName().getString();
 		}else{
-			return count + "x " + new TranslationTextComponent(Ref.MODID + ".general.tag").getString() + ": " + Arrays.stream(ogRL.getPath().split("/")).map(StringUtils::capitalize).reduce((s, s2) ->s + "/" + s2).orElse("Empty Tag");
+			return count + "x " + new TranslationTextComponent(Ref.MODID + ".general.tag").getString() + ": " + Arrays.stream(ogRL.getPath().split("/")).map(StringUtils::capitalize).reduce((s, s2) ->s + "/" + s2).orElse(new TranslationTextComponent(Ref.MODID + ".general.tag.empty").getString());
 		}
 	}
 	
@@ -115,42 +123,44 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 	}
 	
 	@Override
-	public Consumer<MouseButton> onSlotClick(){
+	public Consumer<MouseButton> onSlotClick(ClientPlayerEntity player){
 		return (mouseButton)->{
-			if(mouseButton == MouseButton.LEFT){
-				if(JEIHelper.hasRecipe(icon.getCurrentItemStack()))JEIHelper.openRecipe(icon.getCurrentItemStack());
-			}else if(mouseButton == MouseButton.RIGHT){
-				if(JEIHelper.hasUse(icon.getCurrentItemStack()))JEIHelper.openUses(icon.getCurrentItemStack());
+			if(!icon.getResourceLocation().equals(new ResourceLocation("air"))){
+				if(mouseButton == MouseButton.LEFT){
+					if(JEIHelper.hasRecipe(icon.getCurrentItemStack()))JEIHelper.openRecipe(icon.getCurrentItemStack());
+				}else if(mouseButton == MouseButton.RIGHT){
+					if(JEIHelper.hasUse(icon.getCurrentItemStack()))JEIHelper.openUses(icon.getCurrentItemStack());
+				}
 			}
 		};
 	}
 	
 	@Override
 	public void processJson(JsonObject json){
-		if(json.has("parent_quest_id")){
-			JsonElement jsonElement = json.get("parent_quest_id");
+		if(json.has("quest_id")){
+			JsonElement jsonElement = json.get("quest_id");
 			if(jsonElement.isJsonPrimitive()){
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isNumber()){
-					parentQuestId = jsonPrimitive.getAsInt();
+					questId = jsonPrimitive.getAsInt();
 				}
 			}
 		}
-		if(json.has("parent_task_id")){
-			JsonElement jsonElement = json.get("parent_task_id");
+		if(json.has("task_id")){
+			JsonElement jsonElement = json.get("task_id");
 			if(jsonElement.isJsonPrimitive()){
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isNumber()){
-					parentTaskId = jsonPrimitive.getAsInt();
+					taskId = jsonPrimitive.getAsInt();
 				}
 			}
 		}
-		if(json.has("parent_subtask_id")){
-			JsonElement jsonElement = json.get("parent_subtask_id");
+		if(json.has("subtask_id")){
+			JsonElement jsonElement = json.get("subtask_id");
 			if(jsonElement.isJsonPrimitive()){
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isNumber()){
-					parentSubtaskId = jsonPrimitive.getAsInt();//todo might be able to remove onload quest/task/subtask
+					subtaskId = jsonPrimitive.getAsInt();
 				}
 			}
 		}
@@ -163,19 +173,19 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
 					ogRL = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
 					if(ogRL == null){
-						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > item': Value is not a valid item, please use a valid item id, defaulting to 'minecraft:grass_block'!");
+						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > item': Value is not a valid item, please use a valid item id, defaulting to 'minecraft:grass_block'!");
 						ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 					}
 				}else{
-					Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > item': Value is not a String, defaulting to 'minecraft:grass_block'!");
+					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > item': Value is not a String, defaulting to 'minecraft:grass_block'!");
 					ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > item': Value is not a JsonPrimitive, please use a String, defaulting to 'minecraft:grass_block'!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > item': Value is not a JsonPrimitive, please use a String, defaulting to 'minecraft:grass_block'!");
 				ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > item': Not detected, defaulting to 'minecraft:grass_block'!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > item': Not detected, defaulting to 'minecraft:grass_block'!");
 			ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 		}
 		
@@ -188,19 +198,19 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 					if(jsonPrimitiveIntValue >= 1){
 						count = jsonPrimitiveIntValue;
 					}else{
-						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > count': Value is not >= 1, defaulting to '1'!");
+						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > count': Value is not >= 1, defaulting to '1'!");
 						count = 1;
 					}
 				}else{
-					Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > count': Value is not an Integer, defaulting to '1'!");
+					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > count': Value is not an Integer, defaulting to '1'!");
 					count = 1;
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > count': Value is not a JsonPrimitive, please use a Double, defaulting to '1'!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > count': Value is not a JsonPrimitive, please use a Double, defaulting to '1'!");
 				count = 1;
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > count': Not detected, defaulting to '1'!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > count': Not detected, defaulting to '1'!");
 			count = 1;
 		}
 		
@@ -211,28 +221,41 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 				if(jsonPrimitive.isString()){
 					ogNBT = jsonPrimitive.getAsString();
 					if(ogNBT == null || ogNBT.equals("")){
-						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > nbt': Value is not valid NBT, defaulting to '{ }'!");
+						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Value is not valid NBT, defaulting to '{ }'!");
 						ogNBT = "{}";
 					}
 				}else{
-					Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > nbt': Value is not a String, defaulting to '{ }'!");
+					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Value is not a String, defaulting to '{ }'!");
 					ogNBT = "{}";
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > nbt': Value is not a JsonPrimitive, please use a String, defaulting to '{ }'!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Value is not a JsonPrimitive, please use a String, defaulting to '{ }'!");
 				ogNBT = "{}";
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > sub_tasks > entries > " + parentSubtaskId + " > nbt': Not detected, defaulting to '{ }'!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Not detected, defaulting to '{ }'!");
 			ogNBT = "{}";
 		}
 		
 		CompoundNBT nbt = ApiUtils.getNbtFromJson(ogNBT);
 		if(TagHelper.doesTagExist(ogRL)){
-			TagHelper.getEntries(ogRL).stream().map(item1 -> new ItemStack(item1, count, nbt)).forEach(items::add);
+			TagHelper.getEntries(ogRL).stream().map(item1 ->{
+				ItemStack stack = new ItemStack(item1, count);
+				if(stack.getTag() != null){
+					stack.getTag().merge(nbt);
+				}else{
+					stack.setTag(nbt);
+				}
+				return stack;
+			}).forEach(items::add);
 			icon = new ItemSlideshowTexture(ogRL, items);
 		}else{
 			ItemStack stack = new ItemStack(ForgeRegistries.ITEMS.getValue(ogRL), count, nbt);
+			if(stack.getTag() != null){
+				stack.getTag().merge(nbt);
+			}else{
+				stack.setTag(nbt);
+			}
 			items.add(stack);
 			icon = new ItemSlideshowTexture(ogRL, stack);
 		}
@@ -245,11 +268,6 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 		json.addProperty("count", count);
 		json.addProperty("nbt", ogNBT);
 		return json;
-	}
-	
-	@Override
-	public String toString(){
-		return "ITaskType{" + "uuid=" + uuid + ", questId=" + questId + ", taskId=" + taskId + ", subtaskId=" + subtaskId + ", ogRL=" + ogRL + ", ogNBT='" + ogNBT + '\'' + ", count=" + count + ", icon=" + icon + '}';
 	}
 	
 	@Override

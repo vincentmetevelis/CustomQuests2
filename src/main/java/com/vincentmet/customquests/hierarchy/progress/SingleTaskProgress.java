@@ -4,7 +4,6 @@ import com.google.gson.*;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.*;
-import com.vincentmet.customquests.hierarchy.quest.LogicType;
 import java.util.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
@@ -110,7 +109,9 @@ public class SingleTaskProgress extends HashMap<Integer, SingleSubtaskProgress> 
 			switch(type){
 				case OR:
 					forEach((taskId, singleSubtaskProgress) -> {
-						completed.set(singleSubtaskProgress.isCompleted());
+						if(singleSubtaskProgress.isCompleted()){
+							completed.set(true);
+						}
 					});
 					break;
 				case AND:
@@ -145,9 +146,7 @@ public class SingleTaskProgress extends HashMap<Integer, SingleSubtaskProgress> 
 	
 	public void executeTaskButton(PlayerEntity player){
 		if(EffectiveSide.get().isServer()){
-			QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().forEach((subtaskId, subTask) -> {
-				subTask.getSubtask().executeSubtaskButton().execute(player, questId, taskId, subtaskId);
-			});
+			QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().entrySet().stream().filter(entry->!CombinedProgressHelper.isSubtaskCompleted(player.getUniqueID(), questId, taskId, entry.getKey())).forEach(entry -> entry.getValue().getSubtask().executeSubtaskButton(player));
 		}
 	}
 }

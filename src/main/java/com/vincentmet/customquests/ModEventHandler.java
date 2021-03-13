@@ -31,4 +31,14 @@ public class ModEventHandler{
         //Standard Content
         //event.getRegistry().registerAll(Objects.TileEntities.DELIVERY_BLOCK);
     }
+	
+	/*@SubscribeEvent
+	public static void registerSounds(RegistryEvent.Register<SoundEvent> event){
+		//SoundEvent se = new SoundEvent(new ResourceLocation(Ref.MODID, "quest0")).setRegistryName(new ResourceLocation(Ref.MODID, "quest0"));
+		//QuestingStorage.SOUNDS.put("quest0", se); //todo SOUNDS make this some kind of modular system
+		//Main
+		event.getRegistry().registerAll(
+				//QuestingStorage.SOUNDS.get("quest0")
+		);
+	}*/
 }
