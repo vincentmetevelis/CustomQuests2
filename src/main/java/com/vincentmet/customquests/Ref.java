@@ -8,7 +8,7 @@ import org.apache.logging.log4j.*;
 public class Ref{
 	public static final String MODID = "customquests";
 	public static final String VERSION_MOD = "2.1.0";
-	public static final String VERSION_MC = "1.16.4";
+	public static final String VERSION_MC = "1.15.2";
 	public static final String VERSION_COMBINED = VERSION_MC + "-" + VERSION_MOD;
 	public static Path currentWorldDirectory;
 	public static Path currentProgressDirectory;
