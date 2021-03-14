@@ -1,10 +1,9 @@
 package com.vincentmet.customquests.hierarchy.party;
 
 import com.google.gson.*;
-import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.*;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.*;
-import com.vincentmet.customquests.hierarchy.quest.LogicType;
 import java.util.*;
 
 public class SingleQuestPartyProgress extends HashMap<Integer, SingleTaskPartyProgress> implements IJsonObjectProvider, IJsonObjectProcessor{
@@ -28,15 +27,15 @@ public class SingleQuestPartyProgress extends HashMap<Integer, SingleTaskPartyPr
 					boolean jsonPrimitiveBooleanValue = jsonPrimitive.getAsBoolean();
 					setClaimed(jsonPrimitiveBooleanValue);
 				}else{
-					if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > claimed': Value is not a Boolean, defaulting to 'false'!");
+					if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > claimed': Value is not a Boolean, defaulting to 'false'!");
 					setClaimed(false);
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > claimed': Value is not a JsonPrimitive, please use a boolean, defaulting to 'false'!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > claimed': Value is not a JsonPrimitive, please use a boolean, defaulting to 'false'!");
 				setClaimed(false);
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > claimed': Not detected, defaulting to 'false'!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > claimed': Not detected, defaulting to 'false'!");
 			setClaimed(false);
 		}
 		
@@ -48,15 +47,15 @@ public class SingleQuestPartyProgress extends HashMap<Integer, SingleTaskPartyPr
 					boolean jsonPrimitiveBooleanValue = jsonPrimitive.getAsBoolean();
 					setAllTasksCompleted(jsonPrimitiveBooleanValue);
 				}else{
-					if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > all_tasks_completed': Value is not a Boolean, defaulting to 'false'!");
+					if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > all_tasks_completed': Value is not a Boolean, defaulting to 'false'!");
 					setAllTasksCompleted(false);
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > all_tasks_completed': Value is not a JsonPrimitive, please use a boolean, defaulting to 'false'!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > all_tasks_completed': Value is not a JsonPrimitive, please use a boolean, defaulting to 'false'!");
 				setAllTasksCompleted(false);
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > all_tasks_completed': Not detected, defaulting to 'false'!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > all_tasks_completed': Not detected, defaulting to 'false'!");
 			setAllTasksCompleted(false);
 		}
 		
@@ -75,15 +74,15 @@ public class SingleQuestPartyProgress extends HashMap<Integer, SingleTaskPartyPr
 						singleTaskProgress.processJson(jsonObjectValue);
 						put(keyInt, singleTaskProgress);
 					}else{
-						if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + counter.getValue() + "': Value is not a JsonObject, discarding it for now!");
+						if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + counter.getValue() + "': Value is not a JsonObject, discarding it for now!");
 					}
 					counter.count();
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress': Value is not a JsonObject, generating a new one!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress': Value is not a JsonObject, generating a new one!");
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress': Not detected, generating a new JsonObject!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress': Not detected, generating a new JsonObject!");
 		}
 	}
 	

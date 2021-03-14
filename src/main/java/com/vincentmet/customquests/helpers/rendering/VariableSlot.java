@@ -29,7 +29,7 @@ public class VariableSlot implements IHoverRenderable{
 	}
 	
 	public void render(int mouseX, int mouseY, float partialTicks) {
-		Color.color(0xFFFFFF);
+		Color.color(0xFFFFFFFF);
 		RenderHelper.disableStandardItemLighting();
 		
 		int texU = this.texture.getU();
@@ -70,7 +70,7 @@ public class VariableSlot implements IHoverRenderable{
 	public void renderHover(int mouseX, int mouseY, float partialTicks){
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, x, y, x+width, y+height)){
 			TooltipBuffer.tooltipBuffer.add(()->{
-				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.renderTooltip(tooltipLines, (int)mouseX, (int)mouseY);
+				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.renderTooltip(tooltipLines, mouseX, mouseY);
 			});
 		}
 	}

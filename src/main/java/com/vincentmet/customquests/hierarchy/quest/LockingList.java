@@ -3,36 +3,24 @@ package com.vincentmet.customquests.hierarchy.quest;
 import com.google.gson.*;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.api.exception.JsonValueTypeMismatch;
-import java.util.ArrayList;
+import java.util.HashSet;
 
-public class LockingList extends ArrayList<Integer> implements IJsonArrayProcessor, IJsonArrayProvider{
-	private int parentQuestId;
-	
-	public LockingList(){
-	
-	}
+public class LockingList extends HashSet<Integer> implements IJsonArrayProcessor, IJsonArrayProvider{
+	private final int parentQuestId;
 	
 	public LockingList(int parentQuestId){
 		this.parentQuestId = parentQuestId;
 	}
 	
 	public LockingList add(int id){
-		if(id >= 0 && stream().noneMatch(integer -> integer == id)){
+		if(id >= 0){
 			super.add(id);
 		}
 		return this;
 	}
 	
-	public Integer get(int index){
-		if(index<size()){
-			return super.get(index);
-		}
-		throw new IllegalArgumentException("An index was given that was '< 0' or '>= size()'");
-	}
-	
 	@Override
-	public void processJson(JsonArray json) throws JsonValueTypeMismatch{
+	public void processJson(JsonArray json){
 		clear();
 		
 		for(JsonElement jsonEntriesElement : json){

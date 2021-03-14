@@ -2,7 +2,7 @@ package com.vincentmet.customquests.standardcontent.rewardtypes;
 
 import com.google.gson.*;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.logic.IRewardType;
+import com.vincentmet.customquests.api.IRewardType;
 import com.vincentmet.customquests.helpers.MouseButton;
 import java.util.function.Consumer;
 import net.minecraft.entity.player.PlayerEntity;
@@ -37,8 +37,13 @@ public class XpRewardType implements IRewardType{
 	}
 	
 	@Override
+	public Runnable onSlotHover(int mouseX, int mouseY, float partialTicks){
+		return ()->{/*NOOP*/};
+	}
+	
+	@Override
 	public String getText(){
-		return amount + " Experience" + (inLevels?" Levels":"");
+		return amount + " Experience" + (inLevels?" Levels":" Points");
 	}
 	
 	@Override

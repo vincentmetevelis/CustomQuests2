@@ -3,6 +3,7 @@ package com.vincentmet.customquests;
 import com.vincentmet.customquests.block.QuestingBlock;
 import com.vincentmet.customquests.item.QuestingDevice;
 import net.minecraft.block.Block;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.*;
 import net.minecraft.util.ResourceLocation;
 
@@ -32,5 +33,10 @@ public class Objects{
 				return new ItemStack(Items.QUESTING_DEVICE);
 			}
 		};
+	}
+	
+	public static final class KeyBinds{
+		public static final KeyBinding OPEN_QUESTING_SCREEN = new KeyBinding("customquests.keys.open_quests", 67, "customquests.keys.category");
+		public static final KeyBinding CLAIM_ALL_REWARDS = new KeyBinding("customquests.keys.claim_all_rewards", 86, "customquests.keys.category");
 	}
 }

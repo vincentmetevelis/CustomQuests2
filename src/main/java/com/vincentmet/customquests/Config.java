@@ -8,53 +8,154 @@ import java.nio.file.*;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class Config {
-    public static class ReadWrite{
-        public static void readFromFile(Path path, String file){
-            JsonObject json = loadConfig(path, file);
-            if(json.has("can_reward_only_be_claimed_once") && json.get("can_reward_only_be_claimed_once").isJsonPrimitive() && json.get("can_reward_only_be_claimed_once").getAsJsonPrimitive().isBoolean()){
-                ServerConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE = json.get("can_reward_only_be_claimed_once").getAsBoolean();
+    
+    public static void processJson(JsonObject json){
+        if(json.has("can_reward_only_be_claimed_once")){
+            JsonElement jsonElement = json.get("can_reward_only_be_claimed_once");
+            if(jsonElement.isJsonPrimitive()){
+                JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
+                if(jsonPrimitive.isBoolean()){
+                    ServerConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE = jsonPrimitive.getAsBoolean();
+                }else{
+                    ServerConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE = false;
+                }
+            }else{
+                ServerConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE = false;
             }
-            if(json.has("edit_mode") && json.get("edit_mode").isJsonPrimitive() && json.get("edit_mode").getAsJsonPrimitive().isBoolean()){
-                ServerConfig.EDIT_MODE = json.get("edit_mode").getAsBoolean();
-            }
+        }else{
+            ServerConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE = false;
         }
         
-        private static JsonObject loadConfig(Path path, String filename){
-            try {
-                StringBuilder res = new StringBuilder();
-                Files.readAllLines(path.resolve(filename), StandardCharsets.UTF_8).forEach(res::append);
-                return new JsonParser().parse(res.toString()).getAsJsonObject();
-            }catch (IOException e) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                String out = gson.toJson(getDefaultConfigJson());
-                ApiUtils.writeTo(path, filename, out);
-                return loadConfig(path, filename);
+        if(json.has("give_device_on_first_login")){
+            JsonElement jsonElement = json.get("give_device_on_first_login");
+            if(jsonElement.isJsonPrimitive()){
+                JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
+                if(jsonPrimitive.isBoolean()){
+                    ServerConfig.GIVE_DEVICE_ON_FIRST_LOGIN = jsonPrimitive.getAsBoolean();
+                }else{
+                    ServerConfig.GIVE_DEVICE_ON_FIRST_LOGIN = false;
+                }
+            }else{
+                ServerConfig.GIVE_DEVICE_ON_FIRST_LOGIN = false;
             }
+        }else{
+            ServerConfig.GIVE_DEVICE_ON_FIRST_LOGIN = false;
         }
         
-        private static JsonObject getDefaultConfigJson(){
-            JsonObject json = new JsonObject();
-            json.addProperty("__comment1", "Whether or not only one party member can claim a the reward, or all party members can...");
-            json.addProperty("can_reward_only_be_claimed_once", false);
-            json.addProperty("__comment2", "[NOT IMPLEMENTED YET] Whether or not edit mode is turned on by default.");
-            json.addProperty("edit_mode", false);
-            return json;
+        if(json.has("debug_mode")){
+            JsonElement jsonElement = json.get("debug_mode");
+            if(jsonElement.isJsonPrimitive()){
+                JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
+                if(jsonPrimitive.isBoolean()){
+                    ServerConfig.DEBUG_MODE = jsonPrimitive.getAsBoolean();
+                }else{
+                    ServerConfig.DEBUG_MODE = false;
+                }
+            }else{
+                ServerConfig.DEBUG_MODE = false;
+            }
+        }else{
+            ServerConfig.DEBUG_MODE = false;
+        }
+        
+        if(json.has("backups")){
+            JsonElement jsonElement = json.get("backups");
+            if(jsonElement.isJsonPrimitive()){
+                JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
+                if(jsonPrimitive.isBoolean()){
+                    ServerConfig.BACKUPS = jsonPrimitive.getAsBoolean();
+                }else{
+                    ServerConfig.BACKUPS = false;
+                }
+            }else{
+                ServerConfig.BACKUPS = false;
+            }
+        }else{
+            ServerConfig.BACKUPS = false;
+        }
+        
+        if(json.has("edit_mode")){
+            JsonElement jsonElement = json.get("edit_mode");
+            if(jsonElement.isJsonPrimitive()){
+                JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
+                if(jsonPrimitive.isBoolean()){
+                    ServerConfig.EDIT_MODE = jsonPrimitive.getAsBoolean();
+                }else{
+                    ServerConfig.EDIT_MODE = false;
+                }
+            }else{
+                ServerConfig.EDIT_MODE = false;
+            }
+        }else{
+            ServerConfig.EDIT_MODE = false;
+        }
+    }
+    
+    public static JsonObject getJson(){
+        JsonObject json = new JsonObject();
+        json.addProperty("can_reward_only_be_claimed_once", ServerConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE);
+        json.addProperty("give_device_on_first_login", ServerConfig.GIVE_DEVICE_ON_FIRST_LOGIN);
+        json.addProperty("debug_mode", ServerConfig.DEBUG_MODE);
+        json.addProperty("backups", ServerConfig.BACKUPS);
+        json.addProperty("edit_mode", ServerConfig.EDIT_MODE);
+        return json;
+    }
+    
+    public static void readConfigToMemory(Path path, String file){
+        processJson(loadConfig(path, file));
+        writeConfigToDisk(path, file);
+    }
+    
+    public static void writeConfigToDisk(Path path, String file){
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String out = gson.toJson(getJson());
+        ApiUtils.writeTo(path, file, out);
+    }
+    
+    private static JsonObject loadConfig(Path path, String filename){
+        try {
+            StringBuilder res = new StringBuilder();
+            Files.readAllLines(path.resolve(filename), StandardCharsets.UTF_8).forEach(res::append);
+            return new JsonParser().parse(res.toString()).getAsJsonObject();
+        }catch (IOException e) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String out = gson.toJson(new JsonObject());
+            ApiUtils.writeTo(path, filename, out);
+            return loadConfig(path, filename);
         }
     }
     
     public static class ServerConfig{
         public static boolean CAN_REWARD_ONLY_BE_CLAIMED_ONCE = false;
+        public static boolean GIVE_DEVICE_ON_FIRST_LOGIN = false;
+        public static boolean DEBUG_MODE = false;
+        public static boolean BACKUPS = false;
         public static boolean EDIT_MODE = false;
     }
     
     public static class ServerToClientSyncedConfig{
         public static boolean CAN_REWARD_ONLY_BE_CLAIMED_ONCE = false;
+        public static boolean GIVE_DEVICE_ON_FIRST_LOGIN = false;
+        public static boolean DEBUG_MODE = false;
+        public static boolean BACKUPS = false;
         public static boolean EDIT_MODE = false;
     }
     
     public static class SidedConfig{
         public static boolean canRewardOnlyBeClaimedOnce(){
             return EffectiveSide.get().isClient() ? ServerToClientSyncedConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE : ServerConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE;
+        }
+        
+        public static boolean giveDeviceOnFirstLogin(){
+            return EffectiveSide.get().isClient() ? ServerToClientSyncedConfig.GIVE_DEVICE_ON_FIRST_LOGIN : ServerConfig.GIVE_DEVICE_ON_FIRST_LOGIN;
+        }
+        
+        public static boolean isDebugModeOn(){
+            return EffectiveSide.get().isClient() ? ServerToClientSyncedConfig.DEBUG_MODE : ServerConfig.DEBUG_MODE;
+        }
+        
+        public static boolean areBackupsEnabled(){
+            return EffectiveSide.get().isClient() ? ServerToClientSyncedConfig.BACKUPS : ServerConfig.BACKUPS;
         }
         
         public static boolean isEditModeOnByDefault(){

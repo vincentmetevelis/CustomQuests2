@@ -1,8 +1,7 @@
 package com.vincentmet.customquests.standardcontent.texttypes;
 
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.ClientUtils;
-import com.vincentmet.customquests.hierarchy.quest.ITextType;
+import com.vincentmet.customquests.api.*;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 

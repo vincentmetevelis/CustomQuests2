@@ -2,7 +2,6 @@ package com.vincentmet.customquests.api;
 
 import com.vincentmet.customquests.*;
 import com.vincentmet.customquests.event.QuestEvent;
-import com.vincentmet.customquests.hierarchy.quest.LogicType;
 import java.util.*;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -73,7 +72,7 @@ public class CombinedProgressHelper{
         return false;
     }
     
-    public static void claimReward(UUID claimer, int questId, int chosenRewardId){//todo
+    public static void claimReward(UUID claimer, int questId, int chosenRewardId){
         if(ProgressHelper.doesPlayerExist(claimer) && canClaimReward(claimer, questId)){
             if(ProgressHelper.isPlayerInParty(claimer)){
                 int partyId = ProgressHelper.getPlayerParty(claimer);
@@ -92,7 +91,9 @@ public class CombinedProgressHelper{
                                 QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().get(questId).setClaimed(true);
                             }
                         }else{
-                            Ref.CustomQuests.LOGGER.warn("Quest " + questId + " doesn't have any rewards!");
+                            QuestingStorage.getSidedPlayersMap().get(claimer.toString()).getIndividualProgress().get(questId).setClaimed(true);
+                            QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().get(questId).setClaimed(true);
+                            Ref.CustomQuests.LOGGER.warn("Quest " + questId + " doesn't have any rewards, but still setting status to claimed!");
                         }
                     }
                 }else{
@@ -108,7 +109,8 @@ public class CombinedProgressHelper{
                                 QuestingStorage.getSidedPlayersMap().get(claimer.toString()).getIndividualProgress().get(questId).setClaimed(true);
                             }
                         }else{
-                            Ref.CustomQuests.LOGGER.warn("Quest " + questId + " doesn't have any rewards!");
+                            QuestingStorage.getSidedPlayersMap().get(claimer.toString()).getIndividualProgress().get(questId).setClaimed(true);
+                            Ref.CustomQuests.LOGGER.warn("Quest " + questId + " doesn't have any rewards, but still setting status to claimed!");
                         }
                     }
                 }
@@ -125,7 +127,8 @@ public class CombinedProgressHelper{
                             QuestingStorage.getSidedPlayersMap().get(claimer.toString()).getIndividualProgress().get(questId).setClaimed(true);
                         }
                     }else{
-                        Ref.CustomQuests.LOGGER.warn("Quest " + questId + " doesn't have any rewards!");
+                        QuestingStorage.getSidedPlayersMap().get(claimer.toString()).getIndividualProgress().get(questId).setClaimed(true);
+                        Ref.CustomQuests.LOGGER.warn("Quest " + questId + " doesn't have any rewards, but still setting status to claimed!");
                     }
                 }
             }

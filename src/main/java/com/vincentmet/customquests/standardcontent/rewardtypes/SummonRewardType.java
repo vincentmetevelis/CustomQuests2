@@ -2,7 +2,7 @@ package com.vincentmet.customquests.standardcontent.rewardtypes;
 
 import com.google.gson.*;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.logic.IRewardType;
+import com.vincentmet.customquests.api.IRewardType;
 import com.vincentmet.customquests.helpers.MouseButton;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -38,6 +38,11 @@ public class SummonRewardType implements IRewardType{
 	@Override
 	public Item getIcon(){
 		return icon;
+	}
+	
+	@Override
+	public Runnable onSlotHover(int mouseX, int mouseY, float partialTicks){
+		return ()->{/*NOOP*/};
 	}
 	
 	@Override

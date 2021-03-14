@@ -2,16 +2,14 @@ package com.vincentmet.customquests.gui.elements;
 
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.IntCounter;
-import com.vincentmet.customquests.helpers.rendering.GLScissor;
+import com.vincentmet.customquests.helpers.rendering.GLScissorStack;
 import java.util.*;
 import net.minecraft.client.gui.*;
 import net.minecraftforge.api.distmarker.*;
-import org.lwjgl.opengl.GL11;
 
 @OnlyIn(Dist.CLIENT)
 public class ScrollableList implements IGuiEventListener, IHoverRenderable{
-	private int x, y;
-	private int width, height;
+	private int x, y, width, height;
 	private int scrollDistance = 0;
 	private final List<ScrollableListEntry> entries = new ArrayList<>();
 	
@@ -23,25 +21,19 @@ public class ScrollableList implements IGuiEventListener, IHoverRenderable{
 	}
 	
 	public void render(int mouseX, int mouseY, float partialTicks){
-		GL11.glPushMatrix();
-		GLScissor.enable(x, y, width, height);
-		//AbstractGui.fill(x, y, x + width, y + height, 0x88000000);
+		GLScissorStack.push(x, y, width, height);
 		entries.forEach(entry->{
 			entry.render(mouseX, mouseY, partialTicks);
 		});
-		GLScissor.disable();
-		GL11.glPopMatrix();
+		GLScissorStack.pop();
 	}
 	
 	public void renderHover(int mouseX, int mouseY, float partialTicks){
-		GL11.glPushMatrix();
-		GLScissor.enable(x, y, width, height);
-		//AbstractGui.fill(x, y, x + width, y + height, 0x88000000);
+		GLScissorStack.push(x, y, width, height);
 		entries.forEach(entry->{
 			entry.renderHover(mouseX, mouseY, partialTicks);
 		});
-		GLScissor.disable();
-		GL11.glPopMatrix();
+		GLScissorStack.pop();
 	}
 	
 	@Override

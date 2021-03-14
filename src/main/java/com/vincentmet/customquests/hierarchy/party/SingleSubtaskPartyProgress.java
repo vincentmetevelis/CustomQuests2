@@ -1,7 +1,7 @@
 package com.vincentmet.customquests.hierarchy.party;
 
 import com.google.gson.*;
-import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.*;
 import com.vincentmet.customquests.api.*;
 
 public class SingleSubtaskPartyProgress implements IJsonObjectProcessor, IJsonObjectProvider{
@@ -29,15 +29,15 @@ public class SingleSubtaskPartyProgress implements IJsonObjectProcessor, IJsonOb
 					boolean jsonPrimitiveBooleanValue = jsonPrimitive.getAsBoolean();
 					setCompleted(jsonPrimitiveBooleanValue);
 				}else{
-					if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > subtask_completed': Value is not a Boolean, defaulting to 'false'!");
+					if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > subtask_completed': Value is not a Boolean, defaulting to 'false'!");
 					setCompleted(false);
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > subtask_completed': Value is not a JsonPrimitive, please use a boolean, defaulting to 'false'!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > subtask_completed': Value is not a JsonPrimitive, please use a boolean, defaulting to 'false'!");
 				setCompleted(false);
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > subtask_completed': Not detected, defaulting to 'false'!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > subtask_completed': Not detected, defaulting to 'false'!");
 			setCompleted(false);
 		}
 		
@@ -49,15 +49,15 @@ public class SingleSubtaskPartyProgress implements IJsonObjectProcessor, IJsonOb
 					int jsonPrimitiveIntValue = jsonPrimitive.getAsInt();
 					setValue(jsonPrimitiveIntValue);
 				}else{
-					if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > value': Value is not a Number, please use an Integer which is 0 or higher, defaulting to '0'!");
+					if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > value': Value is not a Number, please use an Integer which is 0 or higher, defaulting to '0'!");
 					setValue(0);
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > value': Value is not a Primitive, defaulting to '0'!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > value': Value is not a Primitive, defaulting to '0'!");
 				setValue(0);
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > value': Not detected, defaulting to '0'!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'Party > " + partyId + " > collective_progress > " + questId + " > task_progress > " + taskId + " > subtask_progress > " + subtaskId + " > value': Not detected, defaulting to '0'!");
 			setValue(0);
 		}
 	}

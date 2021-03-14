@@ -1,7 +1,7 @@
 package com.vincentmet.customquests.hierarchy.progress;
 
 import com.google.gson.*;
-import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.*;
 import com.vincentmet.customquests.api.*;
 import java.util.UUID;
 
@@ -29,15 +29,15 @@ public class QuestingPlayer implements IJsonObjectProvider, IJsonObjectProcessor
 						setParty(-1);
 					}
 				}else{
-					if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > party': Value is not an Integer, defaulting to '-1'!");
+					if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > party': Value is not an Integer, defaulting to '-1'!");
 					setParty(-1);
 				}
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > party': Value is not a JsonPrimitive, please use an Integer, defaulting to '-1'!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > party': Value is not a JsonPrimitive, please use an Integer, defaulting to '-1'!");
 				setParty(-1);
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > party': Not detected, defaulting to '-1'!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > party': Not detected, defaulting to '-1'!");
 			setParty(-1);
 		}
 		
@@ -47,11 +47,11 @@ public class QuestingPlayer implements IJsonObjectProvider, IJsonObjectProcessor
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 				individualProgress.processJson(jsonObject);
 			}else{
-				if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress': Value is not a JsonObject, generating a new one!");
+				if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress': Value is not a JsonObject, generating a new one!");
 				individualProgress.processJson(new JsonObject());
 			}
 		}else{
-			if(Ref.DEV_MODE)Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress': Not detected, generating a new JsonObject!");
+			if(Config.SidedConfig.isDebugModeOn())Ref.CustomQuests.LOGGER.warn("'User > " + uuid.toString() + " > individual_progress': Not detected, generating a new JsonObject!");
 			individualProgress.processJson(new JsonObject());
 		}
 	}

@@ -4,9 +4,9 @@ import com.google.gson.*;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.IntCounter;
-import java.util.ArrayList;
+import java.util.HashSet;
 
-public class QuestList extends ArrayList<Integer> implements IJsonArrayProcessor, IJsonArrayProvider{
+public class QuestList extends HashSet<Integer> implements IJsonArrayProcessor, IJsonArrayProvider{
 	private final int parentChapterId;
 	
 	public QuestList(int parentChapterId){
@@ -14,7 +14,7 @@ public class QuestList extends ArrayList<Integer> implements IJsonArrayProcessor
 	}
 	
 	public QuestList add(int id){
-		if(id >= 0 && stream().noneMatch(integer -> integer == id)){
+		if(id >= 0){
 			super.add(id);
 		}
 		return this;

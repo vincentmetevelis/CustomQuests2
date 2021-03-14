@@ -1,8 +1,8 @@
 package com.vincentmet.customquests.gui.elements;
 
 import com.vincentmet.customquests.api.ApiUtils;
+import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.*;
-import com.vincentmet.customquests.hierarchy.quest.*;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -12,19 +12,16 @@ import net.minecraft.util.text.ITextComponent;
 import org.lwjgl.opengl.GL11;
 
 public class QuestButton implements MovableScalableCanvasEntry{
-	private int parentX;
-	private int parentY;
-	
 	private State buttonState;
-	private IButtonShape shape;
-	private List<ITextComponent> tooltipLines;
-	private Consumer<MouseButton> onClickCallback;
-	private int x, y;
+	private final IButtonShape shape;
+	private final List<String> tooltipLines;
+	private final Consumer<MouseButton> onClickCallback;
+	private final int parentX, parentY, x, y;
 	private final IQuestingTexture icon;
 	private final int questId;
-	private final double buttonScale;
+	private final float buttonScale;
 	
-	public QuestButton(int parentX, int parentY, int x, int y, int questId, IQuestingTexture icon, IButtonShape shape, State buttonState, double scale, Consumer<MouseButton> onClickCallback, List<ITextComponent> tooltipLines){
+	public QuestButton(int parentX, int parentY, int x, int y, int questId, IQuestingTexture icon, IButtonShape shape, State buttonState, float scale, Consumer<MouseButton> onClickCallback, List<ITextComponent> tooltipLines){
 		this.parentX = parentX;
 		this.parentY = parentY;
 		
@@ -36,14 +33,14 @@ public class QuestButton implements MovableScalableCanvasEntry{
 		this.shape = shape;
 		this.buttonScale = scale;
 		this.onClickCallback = onClickCallback;
-		this.tooltipLines = tooltipLines;
+		this.tooltipLines = tooltipLines.stream().map(ITextComponent::getFormattedText).collect(Collectors.toList());
 	}
 	
 	@Override
 	public void render(int mouseX, int mouseY, float partialTicks){
 		GL11.glPushMatrix();
 		GL11.glTranslated(parentX + x, parentY + y, 0);
-		GL11.glScaled(buttonScale, buttonScale, 1);
+		GL11.glScalef(buttonScale, buttonScale, 1);
 		GL11.glTranslated(-(parentX + x), -(parentY + y), 0);
 		Minecraft.getInstance().getTextureManager().bindTexture(shape.getTexture());
 		if((buttonState.equals(State.NORMAL) || buttonState.equals(State.HOVER)) && ApiUtils.isMouseInBounds(mouseX, mouseY, parentX + x, parentY + y, x + parentX + (int)(buttonState.WIDTH * buttonScale), y + parentY + (int)(buttonState.HEIGHT * buttonScale))){
@@ -53,7 +50,7 @@ public class QuestButton implements MovableScalableCanvasEntry{
 		}
 		AbstractGui.blit(parentX + x, parentY + y, buttonState.u, buttonState.v, buttonState.WIDTH, buttonState.HEIGHT, 72, 72);
 		
-		icon.render(parentX + x + 4, parentY + y + 4, mouseX, mouseY);
+		icon.render(1, parentX + x + 4, parentY + y + 4, mouseX, mouseY);
 		GL11.glPopMatrix();
 	}
 	
@@ -61,7 +58,7 @@ public class QuestButton implements MovableScalableCanvasEntry{
 	public void renderHover(int mouseX, int mouseY, float partialTicks){
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, parentX + x, parentY + y, parentX + x + (int)(buttonState.WIDTH * buttonScale), parentY + y + (int)(buttonState.HEIGHT * buttonScale))){
 			TooltipBuffer.tooltipBuffer.add(()->{
-				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.renderTooltip(tooltipLines.stream().map(ITextComponent::getFormattedText).collect(Collectors.toList()), mouseX, mouseY);
+				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.renderTooltip(tooltipLines, mouseX, mouseY);
 			});
 		}
 	}
@@ -81,36 +78,6 @@ public class QuestButton implements MovableScalableCanvasEntry{
 	
 	public int getQuestId(){
 		return questId;
-	}
-	
-	@Override
-	public int getParentX(){
-		return parentX;
-	}
-	
-	@Override
-	public int getParentY(){
-		return parentY;
-	}
-	
-	@Override
-	public int getX(){
-		return x;
-	}
-	
-	@Override
-	public int getY(){
-		return y;
-	}
-	
-	@Override
-	public int getWidth(){
-		return buttonState.WIDTH;
-	}
-	
-	@Override
-	public int getHeight(){
-		return buttonState.HEIGHT;
 	}
 	
 	public enum State{

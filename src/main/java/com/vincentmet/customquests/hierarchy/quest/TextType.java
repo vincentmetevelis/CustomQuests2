@@ -9,12 +9,14 @@ import java.util.function.Supplier;
 import net.minecraft.util.ResourceLocation;
 
 public class TextType implements IJsonObjectProcessor, IJsonObjectProvider{
-    private final int parentQuestId;
+    private final int parentId;
     private final String textTypeName;
+    private final String questOrChapter;
     private ITextType type;
     
-    public TextType(int parentQuestId, String textTypeName){
-        this.parentQuestId = parentQuestId;
+    public TextType(int parentId, String questOrChapter, String textTypeName){
+        this.parentId = parentId;
+        this.questOrChapter = questOrChapter;
         this.textTypeName = textTypeName;
     }
     
@@ -33,19 +35,19 @@ public class TextType implements IJsonObjectProcessor, IJsonObjectProvider{
                         }
                     }
                     if(type == null){
-                        Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > " + textTypeName + " > type': Value does not match a registered ButtonShape, please download the addon mod it belongs to, or change it to something valid. Defaulting to 'customquests:plaintext'");
+                        Ref.CustomQuests.LOGGER.warn("'" + questOrChapter + " > " + parentId + " > " + textTypeName + " > type': Value does not match a registered ButtonShape, please download the addon mod it belongs to, or change it to something valid. Defaulting to 'customquests:plaintext'");
                         setType(new PlainTextTextType());
                     }
                 }else{
-                    Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > " + textTypeName + " > type': Value is not a String, defaulting to 'customquests:plaintext'!");
+                    Ref.CustomQuests.LOGGER.warn("'" + questOrChapter + " > " + parentId + " > " + textTypeName + " > type': Value is not a String, defaulting to 'customquests:plaintext'!");
                     setType(new PlainTextTextType());
                 }
             }else{
-                Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > " + textTypeName + " > type': Value is not a JsonPrimitive, please use a String, defaulting to 'customquests:plaintext'!");
+                Ref.CustomQuests.LOGGER.warn("'" + questOrChapter + " > " + parentId + " > " + textTypeName + " > type': Value is not a JsonPrimitive, please use a String, defaulting to 'customquests:plaintext'!");
                 setType(new PlainTextTextType());
             }
         }else{
-            Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > " + textTypeName + " > type': Not detected, defaulting to 'customquests:plaintext'!");
+            Ref.CustomQuests.LOGGER.warn("'" + questOrChapter + " > " + parentId + " > " + textTypeName + " > type': Not detected, defaulting to 'customquests:plaintext'!");
             setType(new PlainTextTextType());
         }
         
@@ -56,13 +58,13 @@ public class TextType implements IJsonObjectProcessor, IJsonObjectProvider{
                 if(jsonPrimitive.isString()){
                     type.setOgText(jsonPrimitive.getAsString());
                 }else{
-                    Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > " + textTypeName + " > text': Value is not a String, defaulting to an empty String!");
+                    Ref.CustomQuests.LOGGER.warn("'" + questOrChapter + " > " + parentId + " > " + textTypeName + " > text': Value is not a String, defaulting to an empty String!");
                 }
             }else{
-                Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > " + textTypeName + " > text': Value is not a JsonPrimitive, please use a String, defaulting to an empty String!");
+                Ref.CustomQuests.LOGGER.warn("'" + questOrChapter + " > " + parentId + " > " + textTypeName + " > text': Value is not a JsonPrimitive, please use a String, defaulting to an empty String!");
             }
         }else{
-            Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > " + textTypeName + " > text': Not detected, defaulting to an empty String!");
+            Ref.CustomQuests.LOGGER.warn("'" + questOrChapter + " > " + parentId + " > " + textTypeName + " > text': Not detected, defaulting to an empty String!");
         }
     }
     

@@ -8,15 +8,15 @@ import java.util.*;
 import net.minecraft.util.ResourceLocation;
 
 public class SubTasks extends HashMap<Integer, SubTask> implements IJsonObjectProvider, IJsonObjectProcessor{
-	private final int parentQuestId;
-	private final int parentTaskId;
+	private final int questId;
+	private final int taskId;
 	
 	private LogicType logicType = LogicType.AND;
 	private final ResourceLocation type;
 	
-	public SubTasks(int parentQuestId, int parentTaskId, ResourceLocation type){
-		this.parentQuestId = parentQuestId;
-		this.parentTaskId = parentTaskId;
+	public SubTasks(int questId, int taskId, ResourceLocation type){
+		this.questId = questId;
+		this.taskId = taskId;
 		this.type = type;
 	}
 	
@@ -40,19 +40,19 @@ public class SubTasks extends HashMap<Integer, SubTask> implements IJsonObjectPr
 					if(operator.toUpperCase().equals("AND") || operator.toUpperCase().equals("OR")){
 						setLogicType(LogicType.valueOf(operator.toUpperCase()));
 					}else{
-						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > logic': Value is not a valid operator, please use 'AND' or 'OR', defaulting to 'AND'!");
+						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > logic': Value is not a valid operator, please use 'AND' or 'OR', defaulting to 'AND'!");
 						setLogicType(LogicType.AND);
 					}
 				}else{
-					Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > logic': Value is not a String, defaulting to 'AND'!");
+					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > logic': Value is not a String, defaulting to 'AND'!");
 					setLogicType(LogicType.AND);
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > logic': Value is not a JsonPrimitive, please use a String, defaulting to 'AND'!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > logic': Value is not a JsonPrimitive, please use a String, defaulting to 'AND'!");
 				setLogicType(LogicType.AND);
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + parentTaskId + " > logic': Not detected, defaulting to 'AND'!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > logic': Not detected, defaulting to 'AND'!");
 			setLogicType(LogicType.AND);
 		}
 		
@@ -67,19 +67,19 @@ public class SubTasks extends HashMap<Integer, SubTask> implements IJsonObjectPr
 					JsonElement value = jsonEntryElement.getValue();
 					if(value.isJsonObject()){
 						JsonObject jsonObjectValue = value.getAsJsonObject();
-						SubTask subTask = new SubTask(parentQuestId, parentTaskId, keyInt, type);
+						SubTask subTask = new SubTask(questId, taskId, keyInt, type);
 						subTask.processJson(jsonObjectValue);
 						put(keyInt, subTask);
 					}else{
-						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries > " + counter.getValue() + "': Value is not a JsonObject, discarding it for now!");
+						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + counter.getValue() + "': Value is not a JsonObject, discarding it for now!");
 					}
 					counter.count();
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries': Value is not a JsonObject, generating a new one!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries': Value is not a JsonObject, generating a new one!");
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > tasks > entries': Not detected, generating a new JsonObject!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries': Not detected, generating a new JsonObject!");
 		}
 	}
 	
@@ -102,5 +102,13 @@ public class SubTasks extends HashMap<Integer, SubTask> implements IJsonObjectPr
 	
 	public LogicType getLogicType(){
 		return logicType;
+	}
+	
+	public int getQuestId(){
+		return questId;
+	}
+	
+	public int getTaskId(){
+		return taskId;
 	}
 }

@@ -7,24 +7,20 @@ import com.vincentmet.customquests.helpers.IntCounter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DependencyList extends ArrayList<Integer> implements IJsonObjectProcessor, IJsonObjectProvider{
+public class DependencyList extends HashSet<Integer> implements IJsonObjectProcessor, IJsonObjectProvider{
 	private LogicType logicType = LogicType.AND;
-	private int parentQuestId;
-	
-	public DependencyList(){
-	
-	}
+	private final int parentQuestId;
 	
 	public DependencyList(int parentQuestId){
 		this.parentQuestId = parentQuestId;
 	}
 	
 	public List<Quest> asQuestList(){
-		return stream().map(QuestHelper::getQuestFromId).collect(Collectors.toList());
+		return stream().map(QuestHelper::getQuestFromId).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 	
 	public boolean add(Integer id){
-		if(id >= 0 && stream().noneMatch(integer -> integer.equals(id))){
+		if(id >= 0){
 			return super.add(id);
 		}
 		return false;
@@ -40,7 +36,7 @@ public class DependencyList extends ArrayList<Integer> implements IJsonObjectPro
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String operator = jsonPrimitive.getAsString();
-					if(operator.toUpperCase().equals("AND") || operator.toUpperCase().equals("OR")){
+					if(operator.equalsIgnoreCase("AND") || operator.equalsIgnoreCase("OR")){
 						setLogicType(LogicType.valueOf(operator.toUpperCase()));
 					}else{
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > dependencies > logic': Value is not a valid operator, please use 'AND' or 'OR', defaulting to 'AND'!");

@@ -1,7 +1,7 @@
 package com.vincentmet.customquests.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.builder.*;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.vincentmet.customquests.Objects;
@@ -28,7 +28,7 @@ public class CQCommand{
                 .then(registerProgressCommand())
                 .then(registerGiveCommand())
                 //.then(registerEditorCommand())
-                //.then(registerSettingsCommand())
+                .then(registerSettingsCommand())
                 .then(registerInfoCommand())
                 .then(registerReloadCommand())
                 //.then(registerQuestsCommand())
@@ -44,27 +44,37 @@ public class CQCommand{
     
     public static ArgumentBuilder<CommandSource, ?> registerPartyCommand(){
         return Commands.literal("party")
+                .then(Commands.literal("list")
+                    .executes(context -> {
+                        if(QuestingStorage.getSidedPartiesMap().size()>=1){
+                            QuestingStorage.getSidedPartiesMap().values().forEach(party->context.getSource().sendFeedback(new StringTextComponent("ID: " + party.getId() + ", " + new TranslationTextComponent(Ref.MODID + ".general.name").getString() + ": " + party.getName()), false));
+                        }else{
+                            context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.list.no_parties"), false);
+                        }
+                        return 0;
+                    })
+                )
                 .then(Commands.literal("create")
                     .then(Commands.argument("party_name", StringArgumentType.string())
                         .executes(context -> {
                             String name = context.getArgument("party_name", String.class);
                             if(Pattern.matches("[A-Za-z0-9]+?", name)){
                                 int partyId = PartyHelper.createParty(context.getSource().asPlayer().getUniqueID(), name);
-                                if(partyId == -1){
-                                    context.getSource().sendFeedback(new StringTextComponent("You're already in a party, leave it first before creating a new one!"), false);
+                                if(partyId == Ref.NO_PARTY){
+                                    context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.create.error"), false);
                                 }else{
-                                    String devModeMessage = Ref.DEV_MODE ? " (ID: "+partyId+", name:'" + name + "')" : "";
-                                    context.getSource().sendFeedback(new StringTextComponent("Successfully created a party!" + devModeMessage), false);
+                                    String devModeMessage = Config.SidedConfig.isDebugModeOn() ? " (ID: "+partyId+", name:'" + name + "')" : "";
+                                    context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.create.success", devModeMessage), false);
                                     context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils::sendProgressAndParties);
                                 }
                             }else{
-                                context.getSource().sendErrorMessage(new StringTextComponent("Invalid party name, please only use [A-Za-z0-9]!"));
+                                context.getSource().sendErrorMessage(new TranslationTextComponent(Ref.MODID + ".command.party.create.invalid_name"));
                             }
                             return 0;
                         })
                     )
                     .executes(context -> {
-                        context.getSource().sendFeedback(new StringTextComponent("Please specify a party name!"), false);
+                        context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.create.no_name"), false);
                         return 0;
                     })
                 )
@@ -74,21 +84,21 @@ public class CQCommand{
                         int playerParty = ProgressHelper.getPlayerParty(uuid);
                         List<UUID> uuidsInParty = PartyHelper.getAllUUIDsInParty(playerParty);
                         if(playerParty == Ref.NO_PARTY){
-                            context.getSource().sendFeedback(new StringTextComponent("You aren't in a party, so can't leave one!"), false);
+                            context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.leave.not_in_party"), false);
                             return 0;
                         }
                         if(PartyHelper.isPlayerPartyOwner(uuid, playerParty) && uuidsInParty.size() > 1){
-                            context.getSource().sendFeedback(new StringTextComponent("You are the party owner, please assign someone else before leaving! (/customquests party setowner <player>)"), false);
+                            context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.leave.party_owner"), false);
                             return 0;
                         }
                         if(uuidsInParty.size() == 1){ //If player is last one in party
                             ProgressHelper.setPlayerParty(uuid, Ref.NO_PARTY);
                             PartyHelper.deleteParty(playerParty);
-                            context.getSource().sendFeedback(new StringTextComponent("Party deleted!"), false);
+                            context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.delete.success"), false);
                             return 0;
                         }
                         ProgressHelper.setPlayerParty(uuid, Ref.NO_PARTY);
-                        context.getSource().sendFeedback(new StringTextComponent("Leaving party..."), false);
+                        context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.leave.success"), false);
                         return 0;
                     })
                 )
@@ -99,22 +109,22 @@ public class CQCommand{
                             int playerParty = ProgressHelper.getPlayerParty(uuid);
                             PlayerEntity newOwner = EntityArgument.getPlayer(context, "new_owner");
                             if(!ProgressHelper.isPlayerInParty(uuid)){
-                                context.getSource().sendFeedback(new StringTextComponent("You're not in a party..."), false);
+                                context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.set_owner.not_in_party"), false);
                             }else if(newOwner.getUniqueID().equals(uuid)){
-                                context.getSource().sendFeedback(new StringTextComponent("You're already the owner of the party..."), false);
+                                context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.set_owner.already_owner"), false);
                             }else if(PartyHelper.isPlayerPartyOwner(uuid, playerParty) && ProgressHelper.getPlayerParty(newOwner.getUniqueID()) == playerParty){
                                 PartyHelper.setPartyOwner(newOwner.getUniqueID(), playerParty);
-                                context.getSource().sendFeedback(new StringTextComponent("Successfully made '" + newOwner.getDisplayName().getString() + "' the new party owner!"), false);
+                                context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.set_owner.success", newOwner.getDisplayName().getString()), false);
                             }else if(ProgressHelper.getPlayerParty(newOwner.getUniqueID()) == playerParty){
-                                context.getSource().sendFeedback(new StringTextComponent("You are not the owner of the party!"), false);
+                                context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.set_owner.not_owner"), false);
                             }else{
-                                context.getSource().sendFeedback(new StringTextComponent("The specified player is not in your party!"), false);
+                                context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.set_owner.new_owner_not_in_party"), false);
                             }
                             return 0;
                         })
                     )
                     .executes(context -> {
-                        context.getSource().sendFeedback(new StringTextComponent("Please specify a new owner!"), false);
+                        context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.set_owner.no_name"), false);
                         return 0;
                     })
                 )
@@ -128,22 +138,22 @@ public class CQCommand{
                              if(ProgressHelper.doesPlayerExist(inviterUUID) && ProgressHelper.isPlayerInParty(inviterUUID)){
                                  int partyId = ProgressHelper.getPlayerParty(inviterUUID);
                                  if(invitedPlayerUUID.equals(inviterUUID)){
-                                     context.getSource().sendFeedback(new StringTextComponent("You're already the party owner, you can't invite yourself..."), false);
+                                     context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.invite.yourself"), false);
                                  }else if(PartyInviteCache.isPlayerInvitedToAnyParty(invitedPlayerUUID)){
-                                     context.getSource().sendFeedback(new StringTextComponent("Given player already has a pending invite, they have to deny it first before you can send them a new one!"), false);
+                                     context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.invite.player_already_pending"), false);
                                  }else if(!PartyHelper.isPlayerPartyOwner(inviterUUID, partyId)){
-                                     context.getSource().sendFeedback(new StringTextComponent("Only the party owner can invite new people to the party!"), false);
+                                     context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.invite.not_owner"), false);
                                  }else{
                                      PartyInviteCache.addInvite(invitedPlayerUUID, partyId);
-                                     context.getSource().sendFeedback(new StringTextComponent("You invited '" + invitedPlayer.getDisplayName().getString() + "' to your party!"), false);
-                                     invitedPlayer.sendMessage(new StringTextComponent(inviter.getDisplayName().getString() + " invited you to their party. Use '/customquests party accept' to accept or '/customquests party deny' to deny the invite!"));
+                                     context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.invite.success.feedback", invitedPlayer.getDisplayName().getString()), false);
+                                     invitedPlayer.sendMessage(new TranslationTextComponent(Ref.MODID + ".command.party.invite.success.invited_player_message", inviter.getDisplayName().getString()));
                                  }
                              }
                              return 0;
                          })
                      )
                      .executes(context -> {
-                         context.getSource().sendFeedback(new StringTextComponent("Please specify the online player you want to invite!"), false);
+                         context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.invite.no_name"), false);
                          return 0;
                      })
                 )
@@ -151,13 +161,13 @@ public class CQCommand{
                     .executes(context -> {
                         UUID accepter = context.getSource().asPlayer().getUniqueID();
                         if(ProgressHelper.isPlayerInParty(accepter)){
-                            context.getSource().sendFeedback(new StringTextComponent("Leave current party first before accepting a new invite!"), false);
+                            context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.accept.in_party"), false);
                         }else if(!PartyInviteCache.isPlayerInvitedToAnyParty(accepter)){
-                            context.getSource().sendFeedback(new StringTextComponent("You're not invited to any party! :("), false);
+                            context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.accept.not_invited"), false);
                         }else{
                             int newPartyId = PartyInviteCache.getPartyForInvite(accepter);
                             ProgressHelper.setPlayerParty(accepter, newPartyId);
-                            context.getSource().sendFeedback(new StringTextComponent("You successfully joined a party!"), false);
+                            context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.accept.success"), false);
                         }
                         return 0;
                     })
@@ -166,18 +176,18 @@ public class CQCommand{
                     .executes(context -> {
                         UUID denier = context.getSource().asPlayer().getUniqueID();
                         if(ProgressHelper.isPlayerInParty(denier)){
-                            context.getSource().sendFeedback(new StringTextComponent("Cant deny an invite because you're already in a party!"), false);
+                            context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.deny.in_party"), false);
                         }else if(PartyInviteCache.isPlayerInvitedToAnyParty(denier)){
-                            context.getSource().sendFeedback(new StringTextComponent("You're not invited to any party! :("), false);
+                            context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.deny.not_invited"), false);
                         }else{
                             PartyInviteCache.removePlayerInvite(denier);
-                            context.getSource().sendFeedback(new StringTextComponent("You successfully denied the party invite! #SocialDistancing"), false);
+                            context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.party.deny.success"), false);
                         }
                         return 0;
                     })
                 )
                 .executes(context->{
-                    context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.wip"), false);
+                    context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.use_subcommand"), false);
                     return 0;
                 })
         ;
@@ -195,14 +205,10 @@ public class CQCommand{
                         .then(Commands.literal("all")
                                 .executes(context -> {
                                     QuestingStorage.getSidedPlayersMap().forEach((uuid, questingPlayer) -> ProgressHelper.deleteProgress(UUID.fromString(uuid)));
-                                    QuestingStorage.getSidedPartiesMap().forEach((partyId, party) -> {
-                                        party.getCollectivelyCompletedQuestList().clear();
-                                        party.getCollectiveProgress().clear();
-                                        CQHelper.generateMissingPartyProgress();
-                                    });
+                                    QuestingStorage.getSidedPartiesMap().forEach((partyId, party) -> PartyHelper.deleteProgress(partyId));
                                     context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils::sendProgressToClient);
                                     context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils::sendPartiesToClient);
-                                    context.getSource().sendFeedback(new StringTextComponent("Successfully deleted all player and party progress!"), false);
+                                    context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.progress.delete.all.success"), false);
                                     return 0;
                                 })
                         )
@@ -211,7 +217,9 @@ public class CQCommand{
                                 .executes(context -> {
                                     Collection<ServerPlayerEntity> serverPlayerEntities = EntityArgument.getPlayers(context, "player_name");
                                     serverPlayerEntities.forEach(playerEntity -> {
-                                    
+                                        ProgressHelper.deleteProgress(playerEntity.getUniqueID());
+                                        context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils::sendProgressToClient);
+                                        context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.progress.delete.player.success", playerEntity.getDisplayName()), false);
                                     });
                                     return 0;
                                 })
@@ -259,8 +267,78 @@ public class CQCommand{
                     }
                     return cs.hasPermissionLevel(2);
                 })
+                .then(Commands.literal("can_reward_only_be_claimed_once")
+                     .then(Commands.argument("value", BoolArgumentType.bool())
+                           .executes(context -> {
+                               Config.ServerConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE = BoolArgumentType.getBool(context, "value");
+                               context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.settings.set", "can_reward_only_be_claimed_once", TextFormatting.GOLD + String.valueOf(Config.SidedConfig.canRewardOnlyBeClaimedOnce())), false);
+                               ServerUtils.sendServerConfigToAllPlayers();
+                               return 0;
+                           })
+                     )
+                     .executes(context -> {
+                         context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.settings.get", "can_reward_only_be_claimed_once", TextFormatting.GOLD + String.valueOf(Config.SidedConfig.canRewardOnlyBeClaimedOnce())), false);
+                         return 0;
+                     })
+                )
+                .then(Commands.literal("edit_mode")
+                     .then(Commands.argument("value", BoolArgumentType.bool())
+                           .executes(context -> {
+                               Config.ServerConfig.EDIT_MODE = BoolArgumentType.getBool(context, "value");
+                               context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.settings.set", "edit_mode", TextFormatting.GOLD + String.valueOf(Config.SidedConfig.isEditModeOnByDefault())), false);
+                               ServerUtils.sendServerConfigToAllPlayers();
+                               return 0;
+                           })
+                     )
+                     .executes(context -> {
+                         context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.settings.get", "edit_mode", TextFormatting.GOLD + String.valueOf(Config.SidedConfig.isEditModeOnByDefault())), false);
+                         return 0;
+                     })
+                )
+                .then(Commands.literal("give_device_on_first_login")
+                     .then(Commands.argument("value", BoolArgumentType.bool())
+                           .executes(context -> {
+                               Config.ServerConfig.GIVE_DEVICE_ON_FIRST_LOGIN = BoolArgumentType.getBool(context, "value");
+                               context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.settings.set", "give_device_on_first_login", TextFormatting.GOLD + String.valueOf(Config.SidedConfig.giveDeviceOnFirstLogin())), false);
+                               ServerUtils.sendServerConfigToAllPlayers();
+                               return 0;
+                           })
+                     )
+                     .executes(context -> {
+                         context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.settings.get", "give_device_on_first_login", TextFormatting.GOLD + String.valueOf(Config.SidedConfig.giveDeviceOnFirstLogin())), false);
+                         return 0;
+                     })
+                )
+                .then(Commands.literal("debug_mode")
+                     .then(Commands.argument("value", BoolArgumentType.bool())
+                           .executes(context -> {
+                               Config.ServerConfig.DEBUG_MODE = BoolArgumentType.getBool(context, "value");
+                               context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.settings.set", "debug_mode", TextFormatting.GOLD + String.valueOf(Config.SidedConfig.isDebugModeOn())), false);
+                               ServerUtils.sendServerConfigToAllPlayers();
+                               return 0;
+                           })
+                     )
+                     .executes(context -> {
+                         context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.settings.get", "debug_mode", TextFormatting.GOLD + String.valueOf(Config.SidedConfig.isDebugModeOn())), false);
+                         return 0;
+                     })
+                )
+                .then(Commands.literal("backups")
+                     .then(Commands.argument("value", BoolArgumentType.bool())
+                           .executes(context -> {
+                               Config.ServerConfig.GIVE_DEVICE_ON_FIRST_LOGIN = BoolArgumentType.getBool(context, "value");
+                               context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.settings.set", "backups", TextFormatting.GOLD + String.valueOf(Config.SidedConfig.areBackupsEnabled())), false);
+                               ServerUtils.sendServerConfigToAllPlayers();
+                               return 0;
+                           })
+                     )
+                     .executes(context -> {
+                         context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.settings.get", "backups", TextFormatting.GOLD + String.valueOf(Config.SidedConfig.areBackupsEnabled())), false);
+                         return 0;
+                     })
+                )
                 .executes(context->{
-                    context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.wip"), false);//todo add config settings here
+                    context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.use_subcommand"), false);
                     return 0;
                 })
         ;
@@ -269,9 +347,9 @@ public class CQCommand{
     public static ArgumentBuilder<CommandSource, ?> registerInfoCommand(){
         return Commands.literal("info")
                 .executes(context->{
-                    context.getSource().sendFeedback(new StringTextComponent("Modid: " + Ref.MODID), false);
-                    context.getSource().sendFeedback(new StringTextComponent("Mod Version: " + Ref.VERSION_MOD), false);
-                    context.getSource().sendFeedback(new StringTextComponent("MC Version: " + Ref.VERSION_MC), false);
+                    context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.info.modid", Ref.MODID), false);
+                    context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.info.mod_version", Ref.VERSION_MOD), false);
+                    context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.info.mc_version", Ref.VERSION_MC), false);
                     return 0;
                 })
         ;
@@ -280,10 +358,8 @@ public class CQCommand{
     public static ArgumentBuilder<CommandSource, ?> registerReloadCommand(){
         return Commands.literal("reload")
                 .requires(cs->{
-                    try{
-                        return cs.hasPermissionLevel(2) || cs.asPlayer().getDisplayName().getString().equals("vincentmet");//For troubleshooting
-                    }catch(CommandSyntaxException e){
-                        e.printStackTrace();
+                    if(cs.getEntity() instanceof ServerPlayerEntity){
+                        return cs.hasPermissionLevel(2) || (cs.getEntity()).getDisplayName().getString().equals("vincentmet");//For troubleshooting
                     }
                     return cs.hasPermissionLevel(2);
                 })
@@ -315,7 +391,7 @@ public class CQCommand{
     public static ArgumentBuilder<CommandSource, ?> registerUuidCommand(){
         return Commands.literal("uuid")
                 .executes(context->{
-                    context.getSource().sendFeedback(new StringTextComponent("Your UUID is: " + context.getSource().asPlayer().getUniqueID().toString()), false);
+                    context.getSource().sendFeedback(new TranslationTextComponent(Ref.MODID + ".command.uuid", context.getSource().asPlayer().getUniqueID().toString()), false);
                     return 0;
                 })
         ;
