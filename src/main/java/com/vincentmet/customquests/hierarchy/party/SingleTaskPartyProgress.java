@@ -6,6 +6,8 @@ import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.*;
 import java.util.*;
 
+import java.util.Map.Entry;
+
 public class SingleTaskPartyProgress extends HashMap<Integer, SingleSubtaskPartyProgress> implements IJsonObjectProcessor, IJsonObjectProvider{
 	private boolean allSubtasksCompleted = false;
 	private final int partyId;

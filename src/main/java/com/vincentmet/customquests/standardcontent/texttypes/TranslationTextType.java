@@ -2,17 +2,17 @@ package com.vincentmet.customquests.standardcontent.texttypes;
 
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class TranslationTextType implements ITextType{
     private static final ResourceLocation ID = new ResourceLocation(Ref.MODID, "translation_key");
-    private TranslationTextComponent translationKey;
+    private TranslatableComponent translationKey;
     
     public TranslationTextType(){}
     
     public TranslationTextType(String translationKey){
-        this.translationKey = new TranslationTextComponent(translationKey);
+        this.translationKey = new TranslatableComponent(translationKey);
     }
     
     @Override
@@ -27,7 +27,7 @@ public class TranslationTextType implements ITextType{
     
     @Override
     public void setOgText(String newKey){
-        translationKey = new TranslationTextComponent(newKey);
+        translationKey = new TranslatableComponent(newKey);
     }
     
     @Override
@@ -38,11 +38,11 @@ public class TranslationTextType implements ITextType{
         return "";
     }
     
-    public void setTranslationKey(TranslationTextComponent translationKey){
+    public void setTranslationKey(TranslatableComponent translationKey){
         this.translationKey = translationKey;
     }
     
-    public TranslationTextComponent getTranslationKey(){
+    public TranslatableComponent getTranslationKey(){
         return translationKey;
     }
 }

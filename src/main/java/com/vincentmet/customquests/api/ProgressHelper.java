@@ -4,9 +4,11 @@ import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.hierarchy.progress.*;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
 import java.util.*;
-import net.minecraft.entity.player.*;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 import static com.vincentmet.customquests.Ref.CustomQuests.LOGGER;
+
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 public class ProgressHelper{
 	public static int getPlayerParty(UUID uuid){
@@ -37,10 +39,10 @@ public class ProgressHelper{
 		return false;
 	}
 	
-	public static void executeTaskCallback(PlayerEntity player, int questId, int taskId){
+	public static void executeTaskCallback(Player player, int questId, int taskId){
 		if(EffectiveSide.get().isServer()){
-			QuestingStorage.getSidedPlayersMap().get(player.getUniqueID().toString()).getIndividualProgress().get(questId).get(taskId).executeTaskButton(player);
-			ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
+			QuestingStorage.getSidedPlayersMap().get(player.getUUID().toString()).getIndividualProgress().get(questId).get(taskId).executeTaskButton(player);
+			ServerUtils.sendProgressAndParties((ServerPlayer)player);
 		}else{
 			LOGGER.warn("Tried executing task callback on client, this method should only be called on the server!");
 		}

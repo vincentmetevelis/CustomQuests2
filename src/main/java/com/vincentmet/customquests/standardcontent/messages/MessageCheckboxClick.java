@@ -2,8 +2,8 @@ package com.vincentmet.customquests.standardcontent.messages;
 
 import com.vincentmet.customquests.api.CombinedProgressHelper;
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
 public class MessageCheckboxClick{
 	public int questId;
@@ -16,13 +16,13 @@ public class MessageCheckboxClick{
 		this.subtaskId = subtaskId;
 	}
 	
-	public static void encode(MessageCheckboxClick packet, PacketBuffer buffer){
+	public static void encode(MessageCheckboxClick packet, FriendlyByteBuf buffer){
 		buffer.writeInt(packet.questId);
 		buffer.writeInt(packet.taskId);
 		buffer.writeInt(packet.subtaskId);
 	}
 	
-	public static MessageCheckboxClick decode(PacketBuffer buffer) {
+	public static MessageCheckboxClick decode(FriendlyByteBuf buffer) {
 		if(buffer.readableBytes() >= 12){
 			int questId = buffer.readInt();
 			int taskId = buffer.readInt();
@@ -35,8 +35,8 @@ public class MessageCheckboxClick{
 	public static void handle(final MessageCheckboxClick message, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			if(message!=null){
-				CombinedProgressHelper.setValue(ctx.get().getSender().getUniqueID(), message.questId, message.taskId, message.subtaskId, 1);
-				CombinedProgressHelper.completeSubtask(ctx.get().getSender().getUniqueID(), message.questId, message.taskId, message.subtaskId);
+				CombinedProgressHelper.setValue(ctx.get().getSender().getUUID(), message.questId, message.taskId, message.subtaskId, 1);
+				CombinedProgressHelper.completeSubtask(ctx.get().getSender().getUUID(), message.questId, message.taskId, message.subtaskId);
 			}
 		});
 		ctx.get().setPacketHandled(true);

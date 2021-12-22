@@ -6,7 +6,7 @@ import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.standardcontent.texttypes.PlainTextTextType;
 import java.util.Map;
 import java.util.function.Supplier;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class TextType implements IJsonObjectProcessor, IJsonObjectProvider{
     private final int parentId;

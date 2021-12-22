@@ -1,11 +1,11 @@
 package com.vincentmet.customquests.hierarchy.quest;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.api.IQuestingTexture;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.*;
 
 public class PredicateTexture implements IQuestingTexture{
@@ -30,13 +30,13 @@ public class PredicateTexture implements IQuestingTexture{
     }
     
     @OnlyIn(Dist.CLIENT)
-	public void render(MatrixStack matrixStack, float scale, int x, int y, int mouseX, int mouseY){
+	public void render(PoseStack matrixStack, float scale, int x, int y, int mouseX, int mouseY){
 		if(showing.get()){
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.scale(scale, scale, 1);
-			Minecraft.getInstance().textureManager.bindTexture(texture);
-			AbstractGui.blit(matrixStack, x, y, texU, texV, texWidth, texHeight, texSizeX, texSizeY);
-			matrixStack.pop();
+			Minecraft.getInstance().textureManager.bindForSetup(texture);
+			GuiComponent.blit(matrixStack, x, y, texU, texV, texWidth, texHeight, texSizeX, texSizeY);
+			matrixStack.popPose();
 		}
 	}
 	

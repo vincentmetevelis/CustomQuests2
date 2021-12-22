@@ -3,12 +3,12 @@ package com.vincentmet.customquests.api;
 import com.mojang.datafixers.util.Pair;
 import java.util.*;
 import java.util.function.Supplier;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
 
 public class CQRegistry{
 	//------------------Type Registering------------------
-	private static final Map<ResourceLocation, Pair<ITextComponent, Supplier<ITaskType>>> taskTypes = new HashMap<>();
+	private static final Map<ResourceLocation, Pair<Component, Supplier<ITaskType>>> taskTypes = new HashMap<>();
 	private static final Map<ResourceLocation, Supplier<IRewardType>> rewardTypes = new HashMap<>();
 	private static final Map<ResourceLocation, Supplier<IButtonShape>> buttonShapes = new HashMap<>();
 	private static final Map<ResourceLocation, Supplier<ITextType>> textTypes = new HashMap<>();
@@ -26,7 +26,7 @@ public class CQRegistry{
 		textTypes.put(textType.get().getId(), textType);
 	}
 	
-	public static Map<ResourceLocation, Pair<ITextComponent, Supplier<ITaskType>>> getTaskTypes(){
+	public static Map<ResourceLocation, Pair<Component, Supplier<ITaskType>>> getTaskTypes(){
 		return taskTypes;
 	}
 	public static Map<ResourceLocation, Supplier<IRewardType>> getRewardTypes(){

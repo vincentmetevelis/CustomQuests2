@@ -1,20 +1,22 @@
 package com.vincentmet.customquests.standardcontent.rewardtypes;
 
 import com.google.gson.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.MouseButton;
 import com.vincentmet.customquests.integrations.jei.JEIHelper;
 import java.util.*;
 import java.util.function.Consumer;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
+
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	private static ResourceLocation ID = new ResourceLocation(Ref.MODID, "items");
@@ -33,7 +35,7 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	}
 	
 	@Override
-	public void executeReward(PlayerEntity player){
+	public void executeReward(Player player){
 		ItemHandlerHelper.giveItemToPlayer(player, stack);
 	}
 	
@@ -43,13 +45,13 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	}
 	
 	@Override
-	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		return ()->Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, stack, mouseX, mouseY);
+	public Runnable onSlotHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		return ()->Minecraft.getInstance().screen.renderTooltip(matrixStack, stack, mouseX, mouseY);
 	}
 	
 	@Override
 	public String getText(){
-		return stack.getCount() + "x " + stack.getItem().getName().getString();
+		return stack.getCount() + "x " + stack.getItem().getDescription().getString();
 	}
 	
 	@Override
@@ -65,7 +67,7 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	
 	@Override
 	public String toString(){
-		return stack.getCount() + "x " + stack.getItem().getName().getString();
+		return stack.getCount() + "x " + stack.getItem().getDescription().getString();
 	}
 	
 	@Override
@@ -95,7 +97,7 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ogRL = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(ogRL == null){
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > item': Value is not a valid item, please use a valid item id, defaulting to 'minecraft:grass_block'!");
 						ogRL = Blocks.GRASS_BLOCK.getRegistryName();

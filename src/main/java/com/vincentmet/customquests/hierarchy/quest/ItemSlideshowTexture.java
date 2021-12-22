@@ -1,12 +1,12 @@
 package com.vincentmet.customquests.hierarchy.quest;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.api.*;
 import java.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import com.mojang.blaze3d.platform.Lighting;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.*;
 
 public class ItemSlideshowTexture implements IQuestingTexture, ICurrentItemStackProvider{
@@ -30,12 +30,12 @@ public class ItemSlideshowTexture implements IQuestingTexture, ICurrentItemStack
     }
     
     @OnlyIn(Dist.CLIENT)
-	public void render(MatrixStack stack, float scale, int x, int y, int mouseX, int mouseY){
+	public void render(PoseStack stack, float scale, int x, int y, int mouseX, int mouseY){
 		if(!items.isEmpty()){
 			int arrSize = items.size();
 			int currentIndex = (int)(System.currentTimeMillis()/50/delay%arrSize);
-			RenderHelper.setupGui3DDiffuseLighting();
-			Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(items.get(currentIndex), x, y);
+			Lighting.setupFor3DItems();
+			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(items.get(currentIndex), x, y);
 		}
 	}
 	@Override

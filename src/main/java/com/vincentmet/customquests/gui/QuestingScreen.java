@@ -1,6 +1,6 @@
 package com.vincentmet.customquests.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.gui.elements.*;
@@ -11,12 +11,16 @@ import com.vincentmet.customquests.helpers.rendering.VariableButton;
 import java.util.*;
 import java.util.function.IntSupplier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.*;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.*;
 import org.lwjgl.glfw.GLFW;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 @OnlyIn(Dist.CLIENT)
 public class QuestingScreen extends Screen{
@@ -26,7 +30,7 @@ public class QuestingScreen extends Screen{
 	private ScrollableList chapterList;
 	private QuestingCanvas questingCanvas;
 	public QuestDetails questDetails;
-	private final PlayerEntity localPlayer = Minecraft.getInstance().player;
+	private final Player localPlayer = Minecraft.getInstance().player;
 	private BooleanContainer queueReInit = new BooleanContainer(true);
 	
 	private final IntSupplier questingCanvasX = ()->(width>>2) + 10;
@@ -49,13 +53,13 @@ public class QuestingScreen extends Screen{
 	private final IntSupplier questDetailsWidth = ()->width-40;
 	private final IntSupplier questDetailsHeight = ()->height-40;
 	
-	private static final ITextComponent localization_noQuests = new TranslationTextComponent(Ref.MODID + ".screens.no_quests");
-	private static final ITextComponent localization_backToChapters = new TranslationTextComponent(Ref.MODID + ".screens.back_to_chapters");
+	private static final Component localization_noQuests = new TranslatableComponent(Ref.MODID + ".screens.no_quests");
+	private static final Component localization_backToChapters = new TranslatableComponent(Ref.MODID + ".screens.back_to_chapters");
 	
-	private final List<ITextComponent> tooltip_backToChapters = new ArrayList<>();
+	private final List<Component> tooltip_backToChapters = new ArrayList<>();
 	
 	public QuestingScreen(OptionalInt questId){
-		super(new TranslationTextComponent("item." + Ref.MODID + ".questing_device"));
+		super(new TranslatableComponent("item." + Ref.MODID + ".questing_device"));
 		if(questId.isPresent()){
 			screenManager.setCurrentlySelectedQuestId(questId.getAsInt());
 		}
@@ -85,12 +89,12 @@ public class QuestingScreen extends Screen{
 		IntCounter cumulativeHeight = new IntCounter(chapterListY.getAsInt(), BUTTON_HEIGHT);
 		chapterList.clear();
 		QuestingStorage.getSidedChaptersMap().forEach((chapterID, chapter) -> {
-			List<ITextComponent> chapterInfoList = new ArrayList<>();
-			chapterInfoList.add(new StringTextComponent(ClientUtils.colorify(chapter.getTitle().getText()) + TextFormatting.RESET + " #" + chapterID));
-			chapterInfoList.add(new StringTextComponent(ClientUtils.colorify(chapter.getText().getText())));
+			List<Component> chapterInfoList = new ArrayList<>();
+			chapterInfoList.add(new TextComponent(ClientUtils.colorify(chapter.getTitle().getText()) + ChatFormatting.RESET + " #" + chapterID));
+			chapterInfoList.add(new TextComponent(ClientUtils.colorify(chapter.getText().getText())));
 			
 			ButtonState buttonState = ButtonState.DISABLED;
-			if(ChapterHelper.isChapterUnlocked(localPlayer.getUniqueID(), chapter)){
+			if(ChapterHelper.isChapterUnlocked(localPlayer.getUUID(), chapter)){
 				buttonState = ButtonState.NORMAL;
 			}
 			
@@ -105,7 +109,7 @@ public class QuestingScreen extends Screen{
 	}
 	
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		TooltipBuffer.tooltipBuffer.clear();
 		renderBackgrounds(matrixStack);
 		
@@ -147,17 +151,17 @@ public class QuestingScreen extends Screen{
 			
 			//Show message if there are no quests loaded
 			if(QuestingStorage.getSidedQuestsMap().isEmpty()){
-				Minecraft.getInstance().fontRenderer.drawStringWithShadow(matrixStack, localization_noQuests.getString(), questingCanvas.getX() + 5, questingCanvas.getY() + 5, 0xFFFFFF);
+				Minecraft.getInstance().font.drawShadow(matrixStack, localization_noQuests.getString(), questingCanvas.getX() + 5, questingCanvas.getY() + 5, 0xFFFFFF);
 			}
 		}
 		TooltipBuffer.tooltipBuffer.forEach(Runnable::run);
 	}
 	
-	private void renderBackgrounds(MatrixStack matrixStack){
-		AbstractGui.fill(matrixStack, 0, 0, width, height, 0x88000000);
+	private void renderBackgrounds(PoseStack matrixStack){
+		GuiComponent.fill(matrixStack, 0, 0, width, height, 0x88000000);
 		if(!screenManager.shouldShowQuestDetails()){
-			AbstractGui.fill(matrixStack, chapterListX.getAsInt(), chapterListY.getAsInt(), chapterListX.getAsInt() + chapterListWidth.getAsInt(), chapterListY.getAsInt() + chapterListHeight.getAsInt(), 0x88000000);
-			AbstractGui.fill(matrixStack, questingCanvasX.getAsInt(), questingCanvasY.getAsInt(), questingCanvasX.getAsInt() + questingCanvasWidth.getAsInt(), questingCanvasY.getAsInt() + questingCanvasHeight.getAsInt(), 0x88000000);
+			GuiComponent.fill(matrixStack, chapterListX.getAsInt(), chapterListY.getAsInt(), chapterListX.getAsInt() + chapterListWidth.getAsInt(), chapterListY.getAsInt() + chapterListHeight.getAsInt(), 0x88000000);
+			GuiComponent.fill(matrixStack, questingCanvasX.getAsInt(), questingCanvasY.getAsInt(), questingCanvasX.getAsInt() + questingCanvasWidth.getAsInt(), questingCanvasY.getAsInt() + questingCanvasHeight.getAsInt(), 0x88000000);
 		}
 	}
 	
@@ -203,8 +207,8 @@ public class QuestingScreen extends Screen{
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int mods){
 		if(keyCode == GLFW.GLFW_KEY_ESCAPE){
-			if(Minecraft.getInstance().currentScreen != null){
-				Minecraft.getInstance().currentScreen.closeScreen();
+			if(Minecraft.getInstance().screen != null){
+				Minecraft.getInstance().screen.onClose();
 			}
 			return true;
 		}

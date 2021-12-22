@@ -5,7 +5,7 @@ import com.vincentmet.customquests.api.ApiUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 
 public class Config {
     

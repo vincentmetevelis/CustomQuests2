@@ -1,7 +1,7 @@
 package com.vincentmet.customquests.standardcontent.tasktypes;
 
 import com.google.gson.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.*;
@@ -9,20 +9,23 @@ import com.vincentmet.customquests.hierarchy.quest.ItemSlideshowTexture;
 import com.vincentmet.customquests.integrations.jei.JEIHelper;
 import java.util.*;
 import java.util.function.Consumer;
-import net.minecraft.block.Blocks;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.player.*;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.*;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.StringUtils;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+
 public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 	private static final ResourceLocation ID = new ResourceLocation(Ref.MODID, "block_mined");
-	private static final ITextComponent TRANSLATION = new TranslationTextComponent(Ref.MODID + ".standardcontent.tasks.block_mined");
+	private static final Component TRANSLATION = new TranslatableComponent(Ref.MODID + ".standardcontent.tasks.block_mined");
 	public static final List<PlayerBoundSubtaskReference> TRACKING_LIST = new ArrayList<>();
 	private int questId;
 	private int taskId;
@@ -40,7 +43,7 @@ public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 	}
     
     @Override
-    public ITextComponent getTranslation(){
+    public Component getTranslation(){
         return TRANSLATION;
     }
 	
@@ -55,47 +58,47 @@ public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 	}
 	
 	@Override
-	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
+	public void executeSubtaskCheck(Player player, Object object){
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
 			BlockEvent.BreakEvent event = (BlockEvent.BreakEvent)object;
 			items.stream()
 				 .filter(itemStack->event.getState().getBlock().asItem().getRegistryName().equals(itemStack.getItem().getRegistryName()))
 				 .forEach(itemStack -> {
-					 CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, 1);
-					 ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
+					 CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, 1);
+					 ServerUtils.sendProgressAndParties((ServerPlayer)player);
 				 })
 			;
 			processValue(player);
 		}
 	}
 	
-	public void processValue(PlayerEntity player){
-		if(CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId) >= count){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+	public void processValue(Player player){
+		if(CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId) >= count){
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
 	@Override
-	public void executeSubtaskButton(PlayerEntity player){
+	public void executeSubtaskButton(Player player){
 		/*NOOP*/
 	}
 	
 	@Override
-	public IQuestingTexture getIcon(ClientPlayerEntity player){
+	public IQuestingTexture getIcon(LocalPlayer player){
 		return icon;
 	}
 	
 	@Override
-	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks, ClientPlayerEntity player){
-		return ()->Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, icon.getCurrentItemStack(), mouseX, mouseY);
+	public Runnable onSlotHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks, LocalPlayer player){
+		return ()->Minecraft.getInstance().screen.renderTooltip(matrixStack, icon.getCurrentItemStack(), mouseX, mouseY);
 	}
 	
 	@Override
-	public String getText(ClientPlayerEntity player){
+	public String getText(LocalPlayer player){
 		if(items.size()==1){
-			return count + "x " + items.get(0).getItem().getName().getString();
+			return count + "x " + items.get(0).getItem().getDescription().getString();
 		}else{
-			return count + "x " + new TranslationTextComponent(Ref.MODID + ".general.tag").getString() + ": " + Arrays.stream(ogRL.getPath().split("/")).map(StringUtils::capitalize).reduce((s, s2) ->s + "/" + s2).orElse(new TranslationTextComponent(Ref.MODID + ".general.tag.empty").getString());
+			return count + "x " + new TranslatableComponent(Ref.MODID + ".general.tag").getString() + ": " + Arrays.stream(ogRL.getPath().split("/")).map(StringUtils::capitalize).reduce((s, s2) ->s + "/" + s2).orElse(new TranslatableComponent(Ref.MODID + ".general.tag.empty").getString());
 		}
 	}
 	
@@ -105,7 +108,7 @@ public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 	}
     
     @Override
-    public Consumer<MouseButton> onSlotClick(ClientPlayerEntity player){
+    public Consumer<MouseButton> onSlotClick(LocalPlayer player){
 		return (mouseButton)->{
 			if(!icon.getResourceLocation().equals(new ResourceLocation("air"))){
 				if(mouseButton == MouseButton.LEFT){
@@ -153,7 +156,7 @@ public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ogRL = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(ogRL == null){
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > block': Value is not a valid block, please use a valid item id, defaulting to 'minecraft:grass_block'!");
 						ogRL = Blocks.GRASS_BLOCK.getRegistryName();

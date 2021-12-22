@@ -1,8 +1,8 @@
 package com.vincentmet.customquests;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -27,7 +27,7 @@ public class ModEventHandler{
     }
     
     @SubscribeEvent
-    public static void registerTileEntityTypes(RegistryEvent.Register<TileEntityType<?>> event){
+    public static void registerTileEntityTypes(RegistryEvent.Register<BlockEntityType<?>> event){
         //Standard Content
         //event.getRegistry().registerAll(Objects.TileEntities.DELIVERY_BLOCK);
     }

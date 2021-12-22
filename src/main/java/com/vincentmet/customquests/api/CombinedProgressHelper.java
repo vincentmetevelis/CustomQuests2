@@ -13,7 +13,7 @@ public class CombinedProgressHelper{
                 int partyId = ProgressHelper.getPlayerParty(player);
                 PartyHelper.completeQuest(partyId, questId);
             }
-            MinecraftForge.EVENT_BUS.post(new QuestEvent.Completed(Ref.currentServerInstance.getPlayerList().getPlayerByUUID(player), questId));
+            MinecraftForge.EVENT_BUS.post(new QuestEvent.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId));
         }
     }
     
@@ -24,7 +24,7 @@ public class CombinedProgressHelper{
                 int partyId = ProgressHelper.getPlayerParty(player);
                 PartyHelper.completeTask(partyId, questId, taskId);
             }
-            MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Completed(Ref.currentServerInstance.getPlayerList().getPlayerByUUID(player), questId, taskId));
+            MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId, taskId));
         }
     }
     
@@ -35,7 +35,7 @@ public class CombinedProgressHelper{
                 int partyId = ProgressHelper.getPlayerParty(player);
                 PartyHelper.completeSubtask(partyId, questId, taskId, subtaskId);
             }
-            MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Subtask.Completed(Ref.currentServerInstance.getPlayerList().getPlayerByUUID(player), questId, taskId, subtaskId));
+            MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Subtask.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId, taskId, subtaskId));
         }
     }
     
@@ -133,7 +133,7 @@ public class CombinedProgressHelper{
                 }
             }
         }
-        ServerUtils.sendProgressAndParties(Ref.currentServerInstance.getPlayerList().getPlayerByUUID(claimer));
+        ServerUtils.sendProgressAndParties(Ref.currentServerInstance.getPlayerList().getPlayer(claimer));
     }
     
     public static boolean canClaimReward(UUID claimer, int questId){

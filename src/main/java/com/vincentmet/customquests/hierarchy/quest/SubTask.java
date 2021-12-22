@@ -3,7 +3,7 @@ package com.vincentmet.customquests.hierarchy.quest;
 import com.google.gson.JsonObject;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.JsonContainer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class SubTask implements IJsonObjectProvider, IJsonObjectProcessor{
 	private final ResourceLocation type;

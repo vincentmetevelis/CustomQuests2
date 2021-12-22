@@ -6,9 +6,9 @@ import com.vincentmet.customquests.gui.QuestingScreen;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 import static com.vincentmet.customquests.Ref.CustomQuests.LOGGER;
 
 public class MessageUpdateSingleQuest{
@@ -24,14 +24,14 @@ public class MessageUpdateSingleQuest{
 		this.json = json;
 	}
 	
-	public static void encode(MessageUpdateSingleQuest packet, PacketBuffer buffer){
+	public static void encode(MessageUpdateSingleQuest packet, FriendlyByteBuf buffer){
 		buffer.writeInt(packet.questId);
-		buffer.writeString(QuestingStorage.getSidedQuestsMap().get(packet.questId).getJson().toString());
+		buffer.writeUtf(QuestingStorage.getSidedQuestsMap().get(packet.questId).getJson().toString());
 	}
 	
-	public static MessageUpdateSingleQuest decode(PacketBuffer buffer) {
+	public static MessageUpdateSingleQuest decode(FriendlyByteBuf buffer) {
 		int questId = buffer.readInt();
-		String stringJson = buffer.readString();
+		String stringJson = buffer.readUtf();
 		JsonObject json = new JsonParser().parse(stringJson).getAsJsonObject();
 		return new MessageUpdateSingleQuest(questId, json);
 	}
@@ -49,7 +49,7 @@ public class MessageUpdateSingleQuest{
 				LOGGER.error("Quest " + message.questId + " should be a numeric id");
 				exception.printStackTrace();
 			}
-			Screen currentScreen = Minecraft.getInstance().currentScreen;
+			Screen currentScreen = Minecraft.getInstance().screen;
 			if(currentScreen instanceof QuestingScreen){
 				((QuestingScreen)currentScreen).requestPosRecalc();
 			}

@@ -3,7 +3,7 @@ package com.vincentmet.customquests.hierarchy.quest;
 import com.google.gson.*;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class Task implements IJsonObjectProcessor, IJsonObjectProvider{
 	private final int questId;

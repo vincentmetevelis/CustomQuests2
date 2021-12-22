@@ -1,6 +1,6 @@
 package com.vincentmet.customquests.api;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public interface IButtonShape{
     int WIDTH = 24;

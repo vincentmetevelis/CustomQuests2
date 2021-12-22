@@ -6,6 +6,8 @@ import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.IntCounter;
 import java.util.*;
 
+import java.util.Map.Entry;
+
 public class UserProgress extends HashMap<Integer, SingleQuestUserProgress> implements IJsonObjectProcessor, IJsonObjectProvider {
 	private final UUID uuid;
 	private final IndividuallyCompletedQuestList individuallyCompletedQuests;

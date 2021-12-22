@@ -1,10 +1,13 @@
 package com.vincentmet.customquests.item;
 
 import com.vincentmet.customquests.api.ClientUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.util.*;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class QuestingDevice extends Item{
 	public QuestingDevice(Properties properties){
@@ -12,10 +15,10 @@ public class QuestingDevice extends Item{
 	}
 	
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand){
-		if(world.isRemote){
+	public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand){
+		if(world.isClientSide){
 			ClientUtils.openQuestingScreen();
 		}
-		return super.onItemRightClick(world, player, hand);
+		return super.use(world, player, hand);
 	}
 }

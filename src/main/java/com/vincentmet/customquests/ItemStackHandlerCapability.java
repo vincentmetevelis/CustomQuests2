@@ -5,17 +5,17 @@ import com.vincentmet.customquests.helpers.Triple;
 import com.vincentmet.customquests.hierarchy.quest.*;
 import com.vincentmet.customquests.standardcontent.tasktypes.ItemSubmitTaskType;
 import javax.annotation.Nonnull;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.items.ItemStackHandler;
 
 public class ItemStackHandlerCapability extends ItemStackHandler{
 	private final Triple<Integer, Integer, Integer> activeSubtask = new Triple<>(-1, -1, -1);
-	private PlayerEntity player;
-	private TileEntity te;
+	private Player player;
+	private BlockEntity te;
 	
-	public ItemStackHandlerCapability(PlayerEntity player, TileEntity te){
+	public ItemStackHandlerCapability(Player player, BlockEntity te){
 		super(1);
 		this.te = te;
 		this.player = player;
@@ -27,11 +27,11 @@ public class ItemStackHandlerCapability extends ItemStackHandler{
 		activeSubtask.setR(subtask);
 	}
 	
-	public void setPlayer(PlayerEntity player){
+	public void setPlayer(Player player){
 		this.player = player;
 	}
 	
-	public PlayerEntity getPlayer(){
+	public Player getPlayer(){
 		return player;
 	}
 	
@@ -43,11 +43,11 @@ public class ItemStackHandlerCapability extends ItemStackHandler{
 	public void onContentsChanged(int slot){
 		if(player!=null&&activeSubtask.getLeft() >= 0 && activeSubtask.getMiddle() >= 0 && activeSubtask.getRight() >= 0){//todo DELIVERYBLOCK add some more uuid checks here
 			if(getStackInSlot(slot).getCount()>0){
-				CombinedProgressHelper.addValue(player.getUniqueID(), activeSubtask.getLeft(), activeSubtask.getMiddle(), activeSubtask.getRight(), 1);
+				CombinedProgressHelper.addValue(player.getUUID(), activeSubtask.getLeft(), activeSubtask.getMiddle(), activeSubtask.getRight(), 1);
 				setStackInSlot(slot, new ItemStack(getStackInSlot(slot).getItem(), getStackInSlot(slot).getCount()-1));
 			}
 		}
-		te.markDirty();
+		te.setChanged();
 	}
 	
 	@Override
@@ -55,7 +55,7 @@ public class ItemStackHandlerCapability extends ItemStackHandler{
 		Task task = QuestHelper.getTaskFromId(activeSubtask.getLeft(), activeSubtask.getMiddle());
 		SubTask subtask = QuestHelper.getSubtaskFromId(activeSubtask.getLeft(), activeSubtask.getMiddle(), activeSubtask.getRight());
 		if(task!=null &&subtask!=null && subtask.getSubtask() instanceof ItemSubmitTaskType){
-			return ((ItemSubmitTaskType)subtask.getSubtask()).getItemStacks().stream().anyMatch(itemStack -> ItemStack.areItemsEqual(itemStack, stack));
+			return ((ItemSubmitTaskType)subtask.getSubtask()).getItemStacks().stream().anyMatch(itemStack -> ItemStack.isSame(itemStack, stack));
 		}else{
 			return false;
 		}

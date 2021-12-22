@@ -5,7 +5,7 @@ import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.IntCounter;
 import java.util.*;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class Tasks extends HashMap<Integer, Task> implements IJsonObjectProvider, IJsonObjectProcessor{
 	private LogicType logicType = LogicType.AND;

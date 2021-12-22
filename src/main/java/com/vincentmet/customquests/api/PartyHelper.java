@@ -8,7 +8,7 @@ import com.vincentmet.customquests.hierarchy.quest.Quest;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
 public class PartyHelper {
 	private static final List<Integer> partiesToDelete = new ArrayList<>();
@@ -158,8 +158,8 @@ public class PartyHelper {
 		}
 	}
 	
-	public static void forEachPlayerInPartyCurrentlyOnline(int partyId, Consumer<ServerPlayerEntity> consumer){
-		getAllUUIDsInParty(partyId).stream().map(Ref.currentServerInstance.getPlayerList()::getPlayerByUUID).filter(Objects::nonNull).forEach(consumer);
+	public static void forEachPlayerInPartyCurrentlyOnline(int partyId, Consumer<ServerPlayer> consumer){
+		getAllUUIDsInParty(partyId).stream().map(Ref.currentServerInstance.getPlayerList()::getPlayer).filter(Objects::nonNull).forEach(consumer);
 	}
 	
 	public static void syncAllPartyDataWithinParty(){

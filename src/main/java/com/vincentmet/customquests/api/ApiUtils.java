@@ -11,13 +11,13 @@ import net.minecraft.nbt.*;
 
 public class ApiUtils{
 	//Just to not worry about the errors, it'll fall back to the default item NBT if it fails
-	public static CompoundNBT getNbtFromJson(String jsonString){
+	public static CompoundTag getNbtFromJson(String jsonString){
 		try {
-			return JsonToNBT.getTagFromJson(jsonString);
+			return TagParser.parseTag(jsonString);
 		}catch (CommandSyntaxException e){
 			//NOOP
 		}
-		return new CompoundNBT();
+		return new CompoundTag();
 	}
 	
 	public static void writeTo(Path location, String filename, Object text){

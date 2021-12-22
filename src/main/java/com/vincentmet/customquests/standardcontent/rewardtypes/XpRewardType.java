@@ -1,14 +1,16 @@
 package com.vincentmet.customquests.standardcontent.rewardtypes;
 
 import com.google.gson.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.IRewardType;
 import com.vincentmet.customquests.helpers.MouseButton;
 import java.util.function.Consumer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
+
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 public class XpRewardType implements IRewardType{
 	private static ResourceLocation ID = new ResourceLocation(Ref.MODID, "xp");
@@ -24,9 +26,9 @@ public class XpRewardType implements IRewardType{
     }
     
     @Override
-	public void executeReward(PlayerEntity player){
+	public void executeReward(Player player){
 		if(inLevels){
-			player.addExperienceLevel(amount);
+			player.giveExperienceLevels(amount);
 		}else{
 			player.giveExperiencePoints(amount);
 		}
@@ -38,7 +40,7 @@ public class XpRewardType implements IRewardType{
 	}
 	
 	@Override
-	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+	public Runnable onSlotHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		return ()->{/*NOOP*/};
 	}
 	

@@ -7,9 +7,9 @@ import com.vincentmet.customquests.hierarchy.progress.QuestingPlayer;
 import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 import static com.vincentmet.customquests.Ref.CustomQuests.LOGGER;
 
 public class MessageUpdateSinglePlayer{
@@ -25,14 +25,14 @@ public class MessageUpdateSinglePlayer{
 		this.json = json;
 	}
 	
-	public static void encode(MessageUpdateSinglePlayer packet, PacketBuffer buffer){
-		buffer.writeString(packet.uuid);
-		buffer.writeString(QuestingStorage.getSidedPlayersMap().get(packet.uuid).getJson().toString());
+	public static void encode(MessageUpdateSinglePlayer packet, FriendlyByteBuf buffer){
+		buffer.writeUtf(packet.uuid);
+		buffer.writeUtf(QuestingStorage.getSidedPlayersMap().get(packet.uuid).getJson().toString());
 	}
 	
-	public static MessageUpdateSinglePlayer decode(PacketBuffer buffer) {
-		String uuid = buffer.readString();
-		String data = buffer.readString();
+	public static MessageUpdateSinglePlayer decode(FriendlyByteBuf buffer) {
+		String uuid = buffer.readUtf();
+		String data = buffer.readUtf();
 		JsonObject json = new JsonParser().parse(data).getAsJsonObject();
 		return new MessageUpdateSinglePlayer(uuid, json);
 	}
@@ -50,7 +50,7 @@ public class MessageUpdateSinglePlayer{
 				LOGGER.error("User " + message.uuid + " should be a uuid");
 				exception.printStackTrace();
 			}
-			Screen currentScreen = Minecraft.getInstance().currentScreen;
+			Screen currentScreen = Minecraft.getInstance().screen;
 			if(currentScreen instanceof QuestingScreen){
 				((QuestingScreen)currentScreen).requestPosRecalc();
 				((QuestingScreen)currentScreen).reInit();

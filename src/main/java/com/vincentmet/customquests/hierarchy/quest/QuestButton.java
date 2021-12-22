@@ -7,9 +7,9 @@ import com.vincentmet.customquests.helpers.TagHelper;
 import com.vincentmet.customquests.standardcontent.buttonshapes.Shape;
 import java.util.*;
 import java.util.function.Supplier;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class QuestButton implements IJsonObjectProvider, IJsonObjectProcessor{

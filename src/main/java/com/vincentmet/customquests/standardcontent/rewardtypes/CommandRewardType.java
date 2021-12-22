@@ -1,20 +1,22 @@
 package com.vincentmet.customquests.standardcontent.rewardtypes;
 
 import com.google.gson.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.IRewardType;
 import com.vincentmet.customquests.helpers.MouseButton;
 import java.util.function.Consumer;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.registries.ForgeRegistries;
+
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 public class CommandRewardType implements IRewardType{
 	private static ResourceLocation ID = new ResourceLocation(Ref.MODID, "command");
@@ -31,12 +33,12 @@ public class CommandRewardType implements IRewardType{
     }
     
     @Override
-	public void executeReward(PlayerEntity player){
+	public void executeReward(Player player){
 		MinecraftServer ms = player.getServer();
 		if(ms!=null){
-			final CommandDispatcher<CommandSource> dispatcher = ms.getCommandManager().getDispatcher();
+			final CommandDispatcher<CommandSourceStack> dispatcher = ms.getCommands().getDispatcher();
 			try {
-				dispatcher.execute("execute at " + player.getDisplayName().getString() + " run " + command, player.getServer().getCommandSource().withFeedbackDisabled());
+				dispatcher.execute("execute at " + player.getDisplayName().getString() + " run " + command, player.getServer().createCommandSourceStack().withSuppressedOutput());
 			} catch (CommandSyntaxException e) {
 				e.printStackTrace();
 			}
@@ -49,7 +51,7 @@ public class CommandRewardType implements IRewardType{
 	}
 	
 	@Override
-	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+	public Runnable onSlotHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		return ()->{/*NOOP*/};
 	}
 	
@@ -95,7 +97,7 @@ public class CommandRewardType implements IRewardType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation rl = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ResourceLocation rl = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(rl != null){
 						icon = ForgeRegistries.ITEMS.getValue(rl);
 					}else{
@@ -119,15 +121,15 @@ public class CommandRewardType implements IRewardType{
 					displayText =  jsonPrimitive.getAsString();
 				}else{
 					Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > text': Value is not a String, defaulting to 'Hidden'!");
-					displayText = new TranslationTextComponent(Ref.MODID + ".general.hidden").getString();
+					displayText = new TranslatableComponent(Ref.MODID + ".general.hidden").getString();
 				}
 			}else{
 				Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > text': Value is not a JsonPrimitive, please use a String, defaulting to 'Hidden'!");
-				displayText = new TranslationTextComponent(Ref.MODID + ".general.hidden").getString();
+				displayText = new TranslatableComponent(Ref.MODID + ".general.hidden").getString();
 			}
 		}else{
 			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > text': Not detected, defaulting to 'Hidden'!");
-			displayText = new TranslationTextComponent(Ref.MODID + ".general.hidden").getString();
+			displayText = new TranslatableComponent(Ref.MODID + ".general.hidden").getString();
 		}
 		
 		if(json.has("command")){

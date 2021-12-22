@@ -1,6 +1,6 @@
 package com.vincentmet.customquests.helpers.rendering;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.*;
@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.gui.GuiComponent;
+import com.mojang.blaze3d.platform.Lighting;
 import net.minecraft.util.*;
-import net.minecraft.util.text.Style;
+import net.minecraft.network.chat.Style;
 import net.minecraftforge.api.distmarker.*;
+
+import net.minecraft.resources.ResourceLocation;
 
 @OnlyIn(Dist.CLIENT)
 public class VariableSlot implements IHoverRenderable{
@@ -31,9 +33,9 @@ public class VariableSlot implements IHoverRenderable{
 		this.tooltipLines = tooltipLines;
 	}
 	
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		Color.color(0xFFFFFFFF);
-		RenderHelper.disableStandardItemLighting();
+		Lighting.setupForFlatItems();
 		
 		int texU = this.texture.getU();
 		int texV = this.texture.getV();
@@ -41,13 +43,13 @@ public class VariableSlot implements IHoverRenderable{
 		int texHeight = this.texture.getHeight();
 		int texP = this.texture.getBorderSize(); // P for Padding
 		
-		Minecraft.getInstance().getTextureManager().bindTexture(this.texture.getTexture());
+		Minecraft.getInstance().getTextureManager().bindForSetup(this.texture.getTexture());
 		
 		// blit -> x, y, u, v, width, height, texSizeX, texSizeY
-		AbstractGui.blit(matrixStack, x, y, texU, texV, texP, texP, texWidth, texHeight);// Left Top corner
-		AbstractGui.blit(matrixStack, x, y + height - texP, texU, texHeight - texP, texP, texP, texWidth, texHeight);// Left Bottom corner
-		AbstractGui.blit(matrixStack, x + width - texP, y, texWidth - texP, texV, texP, texP, texWidth, texHeight);// Right Top corner
-		AbstractGui.blit(matrixStack, x + width - texP, y + height - texP, texWidth - texP, texHeight - texP, texP, texP, texWidth, texHeight);// Right Bottom corner
+		GuiComponent.blit(matrixStack, x, y, texU, texV, texP, texP, texWidth, texHeight);// Left Top corner
+		GuiComponent.blit(matrixStack, x, y + height - texP, texU, texHeight - texP, texP, texP, texWidth, texHeight);// Left Bottom corner
+		GuiComponent.blit(matrixStack, x + width - texP, y, texWidth - texP, texV, texP, texP, texWidth, texHeight);// Right Top corner
+		GuiComponent.blit(matrixStack, x + width - texP, y + height - texP, texWidth - texP, texHeight - texP, texP, texP, texWidth, texHeight);// Right Bottom corner
 		
 		int innerWidth = texWidth - 2 * texP;
 		int innerHeight = texHeight - 2 * texP;
@@ -55,25 +57,25 @@ public class VariableSlot implements IHoverRenderable{
 		int bottom = y + height - texP;
 		
 		for (int left = x + texP; left < right; left += innerWidth) {// Top and Bottom Edges
-			AbstractGui.blit(matrixStack, left, y, texP, 0, Math.min(innerWidth, right - left), texP, texWidth, texHeight);// Top
-			AbstractGui.blit(matrixStack, left, y + height - texP, texP, texHeight - texP, Math.min(innerWidth, right - left), texP, texWidth, texHeight);// Bottom
+			GuiComponent.blit(matrixStack, left, y, texP, 0, Math.min(innerWidth, right - left), texP, texWidth, texHeight);// Top
+			GuiComponent.blit(matrixStack, left, y + height - texP, texP, texHeight - texP, Math.min(innerWidth, right - left), texP, texWidth, texHeight);// Bottom
 		}
 		for (int top = y + texP; top < bottom; top += innerHeight) {// Left and Right Edges
-			AbstractGui.blit(matrixStack, x, top, 0, texP, texP, Math.min(innerHeight, bottom - top), texWidth, texHeight);// Left
-			AbstractGui.blit(matrixStack, x + width - texP, top, texWidth - texP, texP, texP, Math.min(innerHeight, bottom - top), texWidth, texHeight);// Right
+			GuiComponent.blit(matrixStack, x, top, 0, texP, texP, Math.min(innerHeight, bottom - top), texWidth, texHeight);// Left
+			GuiComponent.blit(matrixStack, x + width - texP, top, texWidth - texP, texP, texP, Math.min(innerHeight, bottom - top), texWidth, texHeight);// Right
 		}
 		for (int left = x + texP; left < right; left += innerWidth) {// Fill the Middle
 			for (int top = y + texP; top < bottom; top += innerHeight) {
-				AbstractGui.blit(matrixStack, left, top, texP, texP, Math.min(innerWidth, right - left), Math.min(innerHeight, bottom - top), texWidth, texHeight);
+				GuiComponent.blit(matrixStack, left, top, texP, texP, Math.min(innerWidth, right - left), Math.min(innerHeight, bottom - top), texWidth, texHeight);
 			}
 		}
 	}
 	
 	@Override
-	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+	public void renderHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, x, y, x+width, y+height)){
 			TooltipBuffer.tooltipBuffer.add(()->{
-				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, tooltipLines.stream().map(line ->IReorderingProcessor.fromString(line, Style.EMPTY)).collect(Collectors.toList()), mouseX, mouseY);
+				if(Minecraft.getInstance().screen != null) Minecraft.getInstance().screen.renderTooltip(matrixStack, tooltipLines.stream().map(line ->FormattedCharSequence.forward(line, Style.EMPTY)).collect(Collectors.toList()), mouseX, mouseY);
 			});
 		}
 	}

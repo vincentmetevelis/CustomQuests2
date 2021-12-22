@@ -1,18 +1,18 @@
 package com.vincentmet.customquests.helpers;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.resources.ResourceLocation;
 
 public class WorldHelper{
-    public static boolean isPlayerInDimension(PlayerEntity player, ResourceLocation dimension){
-        return player.getEntityWorld().getDimensionKey().getLocation().equals(dimension);
+    public static boolean isPlayerInDimension(Player player, ResourceLocation dimension){
+        return player.getCommandSenderWorld().dimension().location().equals(dimension);
     }
     
-    public static boolean isPlayerInBiome(PlayerEntity player, ResourceLocation biome){
-        return player.getEntityWorld().getBiome(player.getPosition()).getRegistryName().equals(biome);
+    public static boolean isPlayerInBiome(Player player, ResourceLocation biome){
+        return player.getCommandSenderWorld().getBiome(player.blockPosition()).getRegistryName().equals(biome);
     }
     
-    public static boolean isPlayerInRange(PlayerEntity player, int x, int y, int z, int range){
-        return (player.getPosX() >= x-range && player.getPosX() <= x+range) && (player.getPosY() >= y-range && player.getPosY() <= y+range) && (player.getPosZ() >= z-range && player.getPosZ() <= z+range);
+    public static boolean isPlayerInRange(Player player, int x, int y, int z, int range){
+        return (player.getX() >= x-range && player.getX() <= x+range) && (player.getY() >= y-range && player.getY() <= y+range) && (player.getZ() >= z-range && player.getZ() <= z+range);
     }
 }

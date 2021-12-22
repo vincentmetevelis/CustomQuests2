@@ -1,19 +1,19 @@
 package com.vincentmet.customquests.gui.elements;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.helpers.MouseButton;
 import com.vincentmet.customquests.helpers.math.Vec2i;
 import com.vincentmet.customquests.helpers.rendering.*;
 import java.util.List;
 import java.util.function.Consumer;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.util.text.ITextComponent;
+import com.mojang.blaze3d.platform.Lighting;
+import net.minecraft.network.chat.Component;
 
 public class TextButton implements ScrollableListEntry{
 	private int x, y, width, height;
 	private final VariableButton button;
 	
-	public TextButton(int x, int y, int width, int height, String text, ButtonState buttonState, Consumer<MouseButton> onClickCallback, List<ITextComponent> tooltipLines){
+	public TextButton(int x, int y, int width, int height, String text, ButtonState buttonState, Consumer<MouseButton> onClickCallback, List<Component> tooltipLines){
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -22,21 +22,21 @@ public class TextButton implements ScrollableListEntry{
 	}
 	
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		matrixStack.push();
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		matrixStack.pushPose();
 		Color.color(0xFFFFFFFF);
 		this.button.render(matrixStack, mouseX, mouseY, partialTicks);
-		RenderHelper.setupGui3DDiffuseLighting();
-		matrixStack.pop();
+		Lighting.setupFor3DItems();
+		matrixStack.popPose();
 	}
 	
 	@Override
-	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		matrixStack.push();
+	public void renderHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		matrixStack.pushPose();
 		Color.color(0xFFFFFFFF);
 		this.button.renderHover(matrixStack, mouseX, mouseY, partialTicks);
-		RenderHelper.setupGui3DDiffuseLighting();
-		matrixStack.pop();
+		Lighting.setupFor3DItems();
+		matrixStack.popPose();
 	}
 	
 	@Override

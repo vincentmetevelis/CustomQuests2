@@ -1,15 +1,15 @@
 package com.vincentmet.customquests.gui.elements;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.IntCounter;
 import com.vincentmet.customquests.helpers.rendering.GLScissorStack;
 import java.util.*;
-import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraftforge.api.distmarker.*;
 
 @OnlyIn(Dist.CLIENT)
-public class ScrollableList implements IGuiEventListener, IHoverRenderable{
+public class ScrollableList implements GuiEventListener, IHoverRenderable{
 	private int x, y, width, height;
 	private int scrollDistance = 0;
 	private final List<ScrollableListEntry> entries = new ArrayList<>();
@@ -21,20 +21,20 @@ public class ScrollableList implements IGuiEventListener, IHoverRenderable{
 		this.height = height;
 	}
 	
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GLScissorStack.push(x, y, width, height);
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		GLScissorStack.push(matrixStack, x, y, width, height);
 		entries.forEach(entry->{
 			entry.render(matrixStack, mouseX, mouseY, partialTicks);
 		});
-		GLScissorStack.pop();
+		GLScissorStack.pop(matrixStack);
 	}
 	
-	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GLScissorStack.push(x, y, width, height);
+	public void renderHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		GLScissorStack.push(matrixStack, x, y, width, height);
 		entries.forEach(entry->{
 			entry.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		});
-		GLScissorStack.pop();
+		GLScissorStack.pop(matrixStack);
 	}
 	
 	@Override

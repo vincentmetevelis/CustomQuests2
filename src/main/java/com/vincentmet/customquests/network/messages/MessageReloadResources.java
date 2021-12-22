@@ -4,23 +4,28 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.*;
 import net.minecraft.util.*;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.network.NetworkEvent;
+
+import net.minecraft.Util;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.resources.ReloadableResourceManager;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 public class MessageReloadResources{
-	public static void encode(MessageReloadResources packet, PacketBuffer buffer){}
+	public static void encode(MessageReloadResources packet, FriendlyByteBuf buffer){}
 	
-	public static MessageReloadResources decode(PacketBuffer buffer) {
+	public static MessageReloadResources decode(FriendlyByteBuf buffer) {
 		return new MessageReloadResources();
 	}
 	
 	public static void handle(final MessageReloadResources message, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
-			IResourceManager rm = Minecraft.getInstance().getResourceManager();
-			if(rm instanceof IReloadableResourceManager){
-				((IReloadableResourceManager)rm).reloadResources(Util.getServerExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE), Minecraft.getInstance().getResourcePackList().getEnabledPacks().stream().map(ResourcePackInfo::getResourcePack).collect(Collectors.toList()));
+			ResourceManager rm = Minecraft.getInstance().getResourceManager();
+			if(rm instanceof ReloadableResourceManager){
+				((ReloadableResourceManager)rm).createReload(Util.backgroundExecutor(), Minecraft.getInstance(), CompletableFuture.completedFuture(Unit.INSTANCE), Minecraft.getInstance().getResourcePackRepository().getSelectedPacks().stream().map(Pack::open).collect(Collectors.toList()));
 			}
 		});
 		ctx.get().setPacketHandled(true);

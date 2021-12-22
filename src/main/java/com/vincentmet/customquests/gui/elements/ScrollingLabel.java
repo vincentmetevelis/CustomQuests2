@@ -1,13 +1,13 @@
 package com.vincentmet.customquests.gui.elements;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.api.IRenderable;
 import com.vincentmet.customquests.helpers.rendering.GLScissorStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.Font;
 
 public class ScrollingLabel implements IRenderable{
-    private static final FontRenderer FONT = Minecraft.getInstance().fontRenderer;
+    private static final Font FONT = Minecraft.getInstance().font;
     
     private int x;
     private int y;
@@ -27,13 +27,13 @@ public class ScrollingLabel implements IRenderable{
         this.beginEndPauseDuration = beginEndPauseDuration;
         this.scrollingSpeed = scrollingSpeed;
     
-        this.textWidth = FONT.getStringWidth(text);
+        this.textWidth = FONT.width(text);
         this.maxOffset = this.textWidth - this.width;
     }
     
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        GLScissorStack.push(x, y, width, FONT.FONT_HEIGHT);
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+        GLScissorStack.push(matrixStack, x, y, width, FONT.lineHeight);
         if(this.maxOffset >= 0){
             int currentOffset = Math.min((int)((System.currentTimeMillis()/50/scrollingSpeed)%(textWidth+beginEndPauseDuration*2)), maxOffset + 2*this.beginEndPauseDuration);
             int localOffsetPause;
@@ -42,11 +42,11 @@ public class ScrollingLabel implements IRenderable{
             }else{
                 localOffsetPause = Math.min(currentOffset - beginEndPauseDuration, maxOffset);
             }
-            FONT.drawStringWithShadow(matrixStack, text, x-localOffsetPause, y, 0xFFFFFF);//stack, text, x, y, color
+            FONT.drawShadow(matrixStack, text, x-localOffsetPause, y, 0xFFFFFF);//stack, text, x, y, color
         }else{
-            FONT.drawStringWithShadow(matrixStack, text, x, y, 0xFFFFFF);//stack, text, x, y, color
+            FONT.drawShadow(matrixStack, text, x, y, 0xFFFFFF);//stack, text, x, y, color
         }
-        GLScissorStack.pop();
+        GLScissorStack.pop(matrixStack);
     }
     
     public int getX(){

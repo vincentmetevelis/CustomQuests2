@@ -1,6 +1,6 @@
 package com.vincentmet.customquests.gui.elements;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.api.IButtonShape;
 import com.vincentmet.customquests.helpers.rendering.Color;
 import com.vincentmet.customquests.hierarchy.quest.Position;
@@ -49,7 +49,7 @@ public class Line implements MovableScalableCanvasEntry {
     }
     
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
         GL11.glPushMatrix();
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
@@ -76,7 +76,7 @@ public class Line implements MovableScalableCanvasEntry {
     }
     
     @Override
-    public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+    public void renderHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
     
     }
 }

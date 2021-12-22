@@ -2,9 +2,9 @@ package com.vincentmet.customquests.network.messages;
 
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.standardcontent.messages.MessageCheckboxClick;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 public class PacketHandler{
 	private static int messageID = 0;
