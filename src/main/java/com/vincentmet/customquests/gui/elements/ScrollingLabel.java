@@ -33,7 +33,7 @@ public class ScrollingLabel implements IRenderable{
     
     @Override
     public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        GLScissorStack.push(matrixStack, x, y, width, FONT.lineHeight);
+        GLScissorStack.push(x, y, width, FONT.lineHeight);
         if(this.maxOffset >= 0){
             int currentOffset = Math.min((int)((System.currentTimeMillis()/50/scrollingSpeed)%(textWidth+beginEndPauseDuration*2)), maxOffset + 2*this.beginEndPauseDuration);
             int localOffsetPause;
@@ -46,7 +46,7 @@ public class ScrollingLabel implements IRenderable{
         }else{
             FONT.drawShadow(matrixStack, text, x, y, 0xFFFFFF);//stack, text, x, y, color
         }
-        GLScissorStack.pop(matrixStack);
+        GLScissorStack.pop();
     }
     
     public int getX(){

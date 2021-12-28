@@ -22,19 +22,19 @@ public class ScrollableList implements GuiEventListener, IHoverRenderable{
 	}
 	
 	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GLScissorStack.push(matrixStack, x, y, width, height);
+		GLScissorStack.push(x, y, width, height);
 		entries.forEach(entry->{
 			entry.render(matrixStack, mouseX, mouseY, partialTicks);
 		});
-		GLScissorStack.pop(matrixStack);
+		GLScissorStack.pop();
 	}
 	
 	public void renderHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GLScissorStack.push(matrixStack, x, y, width, height);
+		GLScissorStack.push(x, y, width, height);
 		entries.forEach(entry->{
 			entry.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		});
-		GLScissorStack.pop(matrixStack);
+		GLScissorStack.pop();
 	}
 	
 	@Override

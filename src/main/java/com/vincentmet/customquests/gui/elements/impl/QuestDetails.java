@@ -285,11 +285,11 @@ public class QuestDetails implements IHoverRenderable, GuiEventListener{
 	}
 	
 	private void renderText(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GLScissorStack.push(matrixStack, textContentX.getAsInt(), textContentY.getAsInt(), textContentWidth.getAsInt(), textContentHeight.getAsInt());
+		GLScissorStack.push(textContentX.getAsInt(), textContentY.getAsInt(), textContentWidth.getAsInt(), textContentHeight.getAsInt());
 		textToRender.forEach(triple->{
 			FONT.drawShadow(matrixStack, triple.getLeft(), triple.getMiddle(), triple.getRight(), 0xFFFFFF);//renderString
 		});
-		GLScissorStack.pop(matrixStack);
+		GLScissorStack.pop();
 	}
 	
 	private void renderHoverBackground(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){/*NOOP*/}
@@ -300,17 +300,17 @@ public class QuestDetails implements IHoverRenderable, GuiEventListener{
 		taskLogicText.render(matrixStack, mouseX, mouseY, partialTicks);
 		
 		//Render stuff in the box
-		GLScissorStack.push(matrixStack, taskContentX.getAsInt(), taskContentY.getAsInt(), taskContentWidth.getAsInt(), taskContentHeight.getAsInt());
+		GLScissorStack.push(taskContentX.getAsInt(), taskContentY.getAsInt(), taskContentWidth.getAsInt(), taskContentHeight.getAsInt());
 		taskTitles.forEach(scrollingLabel -> scrollingLabel.render(matrixStack, mouseX, mouseY, partialTicks));
 		taskButtons.forEach(button->button.render(matrixStack, mouseX, mouseY, partialTicks));
 		subtaskSlotsToRender.forEach(slot->slot.render(matrixStack, mouseX, mouseY, partialTicks));
 		subtaskTextsToRender.forEach(scrollingLabel->scrollingLabel.render(matrixStack, mouseX, mouseY, partialTicks));
 		subtaskIconsToRender.forEach(subtask->subtask.getLeft().getIcon(clientPlayer).render(matrixStack, 1, subtask.getMiddle(), subtask.getRight(), mouseX, mouseY));
-		GLScissorStack.pop(matrixStack);
+		GLScissorStack.pop();
 	}
 	
 	private void renderHoverTasks(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GLScissorStack.push(matrixStack, taskContentX.getAsInt(), taskContentY.getAsInt(), taskContentWidth.getAsInt(), taskContentHeight.getAsInt());
+		GLScissorStack.push(taskContentX.getAsInt(), taskContentY.getAsInt(), taskContentWidth.getAsInt(), taskContentHeight.getAsInt());
 		taskButtons.stream()
 				.filter(button -> ApiUtils.isMouseInBounds(mouseX, mouseY, taskContentX.getAsInt(), taskContentY.getAsInt(), taskContentX.getAsInt() + taskContentWidth.getAsInt(), taskContentY.getAsInt() + taskContentHeight.getAsInt()))
 				.filter(button -> ApiUtils.isMouseInBounds(mouseX, mouseY, button.getX(), button.getY(), button.getX() + button.getWidth(), button.getY() + button.getHeight()))
@@ -318,7 +318,7 @@ public class QuestDetails implements IHoverRenderable, GuiEventListener{
 		subtaskSlotsToRender.stream()
 				.filter(triple -> ApiUtils.isMouseInBounds(mouseX, mouseY, taskContentX.getAsInt(), taskContentY.getAsInt(), taskContentX.getAsInt() + taskContentWidth.getAsInt(), taskContentY.getAsInt() + taskContentHeight.getAsInt()))
 				.forEach(slot->slot.renderHover(matrixStack, mouseX, mouseY, partialTicks));
-		GLScissorStack.pop(matrixStack);
+		GLScissorStack.pop();
 		
 		subtaskIconsToRender.stream()
 							.filter(triple -> triple.getLeft().getIcon(clientPlayer) instanceof ICurrentItemStackProvider)
@@ -328,7 +328,7 @@ public class QuestDetails implements IHoverRenderable, GuiEventListener{
 	}
 	
 	private void renderRewards(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GLScissorStack.push(matrixStack, rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentWidth.getAsInt(), rewardContentHeight.getAsInt());
+		GLScissorStack.push(rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentWidth.getAsInt(), rewardContentHeight.getAsInt());
 		rewardSlotsToRender.forEach(variableSlot -> variableSlot.render(matrixStack, mouseX, mouseY, partialTicks));
 		Lighting.setupFor3DItems();
 		rewardItemsToRender.forEach(quad ->{
@@ -342,18 +342,18 @@ public class QuestDetails implements IHoverRenderable, GuiEventListener{
 		FONT.drawShadow(matrixStack, new TranslatableComponent(Ref.MODID + ".screens.rewards").getString(), rewardContentX.getAsInt(), rewardContentY.getAsInt()-rewardScrollDistance, 0xFFFFFF);
 		rewardSelectionOutlinesToRender.forEach(quadOutline -> quadOutline.render(matrixStack, mouseX, mouseY, partialTicks));
 		claimRewardButton.render(matrixStack, mouseX, mouseY, partialTicks);
-		GLScissorStack.pop(matrixStack);
+		GLScissorStack.pop();
 	}
 	
 	private void renderHoverRewards(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GLScissorStack.push(matrixStack, rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentWidth.getAsInt(), rewardContentHeight.getAsInt());
+		GLScissorStack.push(rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentWidth.getAsInt(), rewardContentHeight.getAsInt());
 		rewardSlotsToRender.stream()
 				.filter(triple -> ApiUtils.isMouseInBounds(mouseX, mouseY, rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentX.getAsInt() + rewardContentWidth.getAsInt(), rewardContentY.getAsInt() + rewardContentHeight.getAsInt()))
 				.forEach(variableSlot -> variableSlot.renderHover(matrixStack, mouseX, mouseY, partialTicks));
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, rewardContentX.getAsInt(), rewardContentY.getAsInt(), rewardContentX.getAsInt() + rewardContentWidth.getAsInt(), rewardContentY.getAsInt() + rewardContentHeight.getAsInt())){
 			claimRewardButton.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		}
-		GLScissorStack.pop(matrixStack);
+		GLScissorStack.pop();
 		
 		rewardItemsToRender.stream()
 						   .filter(triple -> ApiUtils.isMouseInBounds(mouseX, mouseY, triple.getMiddle(), triple.getRight(), triple.getMiddle() + 16, triple.getRight() + 16))
@@ -362,17 +362,17 @@ public class QuestDetails implements IHoverRenderable, GuiEventListener{
 	}
 	
 	private void renderBackground(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GLScissorStack.push(matrixStack, textX.getAsInt(), textY.getAsInt(), textWidth.getAsInt(), textHeight.getAsInt());
+		GLScissorStack.push(textX.getAsInt(), textY.getAsInt(), textWidth.getAsInt(), textHeight.getAsInt());
 		GuiComponent.fill(matrixStack, textX.getAsInt(), textY.getAsInt(), textX.getAsInt() + textWidth.getAsInt(), textY.getAsInt() + textHeight.getAsInt(), 0x88000000);
-		GLScissorStack.pop(matrixStack);
+		GLScissorStack.pop();
 		
-		GLScissorStack.push(matrixStack, tasksX.getAsInt(), tasksY.getAsInt(), tasksWidth.getAsInt(), tasksHeight.getAsInt());
+		GLScissorStack.push(tasksX.getAsInt(), tasksY.getAsInt(), tasksWidth.getAsInt(), tasksHeight.getAsInt());
 		GuiComponent.fill(matrixStack, tasksX.getAsInt(), tasksY.getAsInt(), tasksX.getAsInt() + tasksWidth.getAsInt(), tasksY.getAsInt() + tasksHeight.getAsInt(), 0x88000000);
-		GLScissorStack.pop(matrixStack);
+		GLScissorStack.pop();
 		
-		GLScissorStack.push(matrixStack, rewardsX.getAsInt(), rewardsY.getAsInt(), rewardsWidth.getAsInt(), rewardsHeight.getAsInt());
+		GLScissorStack.push(rewardsX.getAsInt(), rewardsY.getAsInt(), rewardsWidth.getAsInt(), rewardsHeight.getAsInt());
 		GuiComponent.fill(matrixStack, rewardsX.getAsInt(), rewardsY.getAsInt(), rewardsX.getAsInt() + rewardsWidth.getAsInt(), rewardsY.getAsInt() + rewardsHeight.getAsInt(), 0x88000000);
-		GLScissorStack.pop(matrixStack);
+		GLScissorStack.pop();
 	}
 	
 	private void applyScrollLimits(){

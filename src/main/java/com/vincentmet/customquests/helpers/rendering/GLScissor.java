@@ -1,16 +1,14 @@
 package com.vincentmet.customquests.helpers.rendering;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.*;
 import net.minecraftforge.api.distmarker.*;
-import org.lwjgl.opengl.GL11;
 import static org.lwjgl.opengl.GL11.*;
 
 import com.mojang.blaze3d.platform.Window;
 
 @OnlyIn(Dist.CLIENT)
 public class GLScissor{
-	public static void enable(PoseStack matrixStack, int x, int y, int width, int height){
+	public static void enable(int x, int y, int width, int height){
 		Window mw = Minecraft.getInstance().getWindow();
 		double s = mw.getGuiScale();
 		
@@ -18,7 +16,7 @@ public class GLScissor{
 		if(height<0)height=0;
 		if(x<0)x=0;
 		if(y<0)y=0;
-		matrixStack.pushPose();
+		glPushMatrix();
 		glEnable(GL_SCISSOR_TEST);
 		glScissor(
 				(int)(x * s),
@@ -28,9 +26,9 @@ public class GLScissor{
 		);
 	}
 	
-	public static void disable(PoseStack matrixStack){
+	public static void disable(){
 		glDisable(GL_SCISSOR_TEST);
-		matrixStack.popPose();
+		glPopMatrix();
 	}
 	
 	public static boolean isEnabled(){

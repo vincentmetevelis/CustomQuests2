@@ -50,7 +50,7 @@ public class Line implements MovableScalableCanvasEntry {
     
     @Override
     public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        GL11.glPushMatrix();
+        matrixStack.pushPose();
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
         GL11.glEnable(GL11.GL_POLYGON_SMOOTH);
@@ -71,8 +71,8 @@ public class Line implements MovableScalableCanvasEntry {
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         Color.color(0xFFFFFFFF);
-        
-        GL11.glPopMatrix();
+
+        matrixStack.popPose();
     }
     
     @Override
