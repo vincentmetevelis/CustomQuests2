@@ -1,9 +1,14 @@
 package com.vincentmet.customquests.api;
 
-import com.vincentmet.customquests.*;
+import com.vincentmet.customquests.Config;
+import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.event.QuestEvent;
-import java.util.*;
 import net.minecraftforge.common.MinecraftForge;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class CombinedProgressHelper{
     public static void completeQuest(UUID player, int questId){
@@ -13,7 +18,7 @@ public class CombinedProgressHelper{
                 int partyId = ProgressHelper.getPlayerParty(player);
                 PartyHelper.completeQuest(partyId, questId);
             }
-            MinecraftForge.EVENT_BUS.post(new QuestEvent.Completed(Ref.currentServerInstance.getPlayerList().getPlayerByUUID(player), questId));
+            MinecraftForge.EVENT_BUS.post(new QuestEvent.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId));
         }
     }
     
@@ -24,7 +29,7 @@ public class CombinedProgressHelper{
                 int partyId = ProgressHelper.getPlayerParty(player);
                 PartyHelper.completeTask(partyId, questId, taskId);
             }
-            MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Completed(Ref.currentServerInstance.getPlayerList().getPlayerByUUID(player), questId, taskId));
+            MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId, taskId));
         }
     }
     
@@ -35,7 +40,7 @@ public class CombinedProgressHelper{
                 int partyId = ProgressHelper.getPlayerParty(player);
                 PartyHelper.completeSubtask(partyId, questId, taskId, subtaskId);
             }
-            MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Subtask.Completed(Ref.currentServerInstance.getPlayerList().getPlayerByUUID(player), questId, taskId, subtaskId));
+            MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Subtask.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId, taskId, subtaskId));
         }
     }
     
@@ -133,7 +138,7 @@ public class CombinedProgressHelper{
                 }
             }
         }
-        ServerUtils.sendProgressAndParties(Ref.currentServerInstance.getPlayerList().getPlayerByUUID(claimer));
+        ServerUtils.sendProgressAndParties(Ref.currentServerInstance.getPlayerList().getPlayer(claimer));
     }
     
     public static boolean canClaimReward(UUID claimer, int questId){

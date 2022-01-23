@@ -2,7 +2,7 @@ package com.vincentmet.customquests.standardcontent.buttonshapes;
 
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.IButtonShape;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public enum Shape implements IButtonShape{
     ROUND(new ResourceLocation(Ref.MODID, "round"), new ResourceLocation(Ref.MODID, "textures/gui/button_round.png")),

@@ -1,7 +1,8 @@
 package com.vincentmet.customquests.api;
 
+import net.minecraft.world.item.ItemStack;
+
 import java.util.List;
-import net.minecraft.item.ItemStack;
 
 public interface IItemStacksProvider{
 	List<ItemStack> getItemStacks();

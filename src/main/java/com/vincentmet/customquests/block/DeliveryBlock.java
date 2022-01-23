@@ -2,54 +2,55 @@ package com.vincentmet.customquests.block;
 
 import com.vincentmet.customquests.gui.DeliveryScreen;
 import com.vincentmet.customquests.tileentity.DeliveryBlockTileEntity;
-import javax.annotation.Nullable;
-import net.minecraft.block.*;
-import net.minecraft.block.material.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Items;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
-import net.minecraft.util.math.*;
-import net.minecraft.world.*;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.phys.BlockHitResult;
 
-public class DeliveryBlock extends ContainerBlock{
+import javax.annotation.Nullable;
+
+public class DeliveryBlock extends BaseEntityBlock {
 	public DeliveryBlock(){
-		super(Block.Properties.create(new Material.Builder(MaterialColor.BLACK).build()).hardnessAndResistance(2F).doesNotBlockMovement());
+		super(Block.Properties.of(new Material.Builder(MaterialColor.COLOR_BLACK).build()).strength(2F).noCollission());
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Override
-	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit){
-		if(!world.isRemote){
-			TileEntity te = world.getTileEntity(pos);
+	public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit){
+		if(!world.isClientSide()){
+			BlockEntity te = world.getBlockEntity(pos);
 			if(te instanceof DeliveryBlockTileEntity){
-				if(player.getHeldItem(hand).getItem() == Items.CARROT_ON_A_STICK){
+				if(player.getItemInHand(hand).getItem() == Items.CARROT_ON_A_STICK){
 					((DeliveryBlockTileEntity)te).setCurrentSubmitter(player);
 					LOGGER.info("Setting player to: " + player.getDisplayName().getString());
 				}else{
-					Minecraft.getInstance().displayGuiScreen(new DeliveryScreen(pos));
+					Minecraft.getInstance().setScreen(new DeliveryScreen(pos));
 				}
-				return ActionResultType.PASS;
+				return InteractionResult.PASS;
 			}
 		}
-		return ActionResultType.FAIL;
+		return InteractionResult.FAIL;
 	}
-	
-	@SuppressWarnings("deprecation")
+
 	@Override
-	public BlockRenderType getRenderType(BlockState state){
-		return BlockRenderType.MODEL;
+	public RenderShape getRenderShape(BlockState state){
+		return RenderShape.MODEL;
 	}
-	
+
 	@Nullable
 	@Override
-	public TileEntity createNewTileEntity(IBlockReader world){
-		return new DeliveryBlockTileEntity();
-	}
-	
-	@Override
-	public boolean hasTileEntity(BlockState state){
-		return true;
+	public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+		return new DeliveryBlockTileEntity(blockPos, blockState);
 	}
 }

@@ -1,40 +1,45 @@
 package com.vincentmet.customquests.gui.elements;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.vincentmet.customquests.api.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.vincentmet.customquests.api.ApiUtils;
+import com.vincentmet.customquests.api.IHoverRenderable;
 import com.vincentmet.customquests.helpers.IntCounter;
 import com.vincentmet.customquests.helpers.rendering.GLScissorStack;
-import java.util.*;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraftforge.api.distmarker.*;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.IntSupplier;
 
 @OnlyIn(Dist.CLIENT)
-public class ScrollableList implements IGuiEventListener, IHoverRenderable{
-	private int x, y, width, height;
+public class ScrollableList implements GuiEventListener, IHoverRenderable{
+	private IntSupplier x, y, width, height;
 	private int scrollDistance = 0;
 	private final List<ScrollableListEntry> entries = new ArrayList<>();
 	
-	public ScrollableList(int x, int y, int width, int height){
+	public ScrollableList(IntSupplier x, IntSupplier y, IntSupplier width, IntSupplier height){
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 	}
 	
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GLScissorStack.push(x, y, width, height);
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		GLScissorStack.push(matrixStack, x.getAsInt(), y.getAsInt(), width.getAsInt(), height.getAsInt());
 		entries.forEach(entry->{
 			entry.render(matrixStack, mouseX, mouseY, partialTicks);
 		});
-		GLScissorStack.pop();
+		GLScissorStack.pop(matrixStack);
 	}
 	
-	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GLScissorStack.push(x, y, width, height);
+	public void renderHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		GLScissorStack.push(matrixStack, x.getAsInt(), y.getAsInt(), width.getAsInt(), height.getAsInt());
 		entries.forEach(entry->{
 			entry.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		});
-		GLScissorStack.pop();
+		GLScissorStack.pop(matrixStack);
 	}
 	
 	@Override
@@ -46,7 +51,7 @@ public class ScrollableList implements IGuiEventListener, IHoverRenderable{
 	}
 	
 	public boolean mouseScrolled(double mouseX, double mouseY, double dyScroll){
-		if(ApiUtils.isMouseInBounds(mouseX, mouseY, x, y, x + width, y + height)){
+		if(ApiUtils.isMouseInBounds(mouseX, mouseY, x.getAsInt(), y.getAsInt(), x.getAsInt() + width.getAsInt(), y.getAsInt() + height.getAsInt())){
 			scrollDistance -= dyScroll*getScrollAmount();
 		}
 		
@@ -61,16 +66,16 @@ public class ScrollableList implements IGuiEventListener, IHoverRenderable{
 	public int getContentHeight(){
 		IntCounter _height = new IntCounter(0);
 		entries.forEach(entry->{
-			_height.add(entry.getHeight());
+			_height.add(entry.getHeight().getAsInt());
 		});
-		if(_height.getValue() < height){
-			_height.setValue(height);
+		if(_height.getValue() < height.getAsInt()){
+			_height.setValue(height.getAsInt());
 		}
 		return _height.getValue();
 	}
 	
 	private int getMaxScroll(){
-		return Math.max(this.getContentHeight() - height, 0);
+		return Math.max(this.getContentHeight() - height.getAsInt(), 0);
 	}
 	
 	private void applyScrollLimits(){
@@ -105,36 +110,36 @@ public class ScrollableList implements IGuiEventListener, IHoverRenderable{
 		return entries;
 	}
 	
-	public int getX(){
+	public IntSupplier getX(){
 		return x;
 	}
 	
-	public int getY(){
+	public IntSupplier getY(){
 		return y;
 	}
 	
-	public int getWidth(){
+	public IntSupplier getWidth(){
 		return width;
 	}
 	
-	public int getHeight(){
+	public IntSupplier getHeight(){
 		return height;
 	}
 	
-	public void setX(int x){
+	public void setX(IntSupplier x){
 		this.x = x;
 	}
 	
-	public void setY(int y){
+	public void setY(IntSupplier y){
 		this.y = y;
 	}
 	
-	public void setWidth(int width){
+	public void setWidth(IntSupplier width){
 		this.width = width;
 		entries.forEach(entry -> entry.setWidth(width));
 	}
 	
-	public void setHeight(int height){
+	public void setHeight(IntSupplier height){
 		this.height = height;
 		applyScrollLimits();
 	}

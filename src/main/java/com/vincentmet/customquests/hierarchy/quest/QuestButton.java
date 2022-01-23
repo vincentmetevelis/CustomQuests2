@@ -1,18 +1,27 @@
 package com.vincentmet.customquests.hierarchy.quest;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
+import com.vincentmet.customquests.gui.editor.EditorEntryWrapper;
+import com.vincentmet.customquests.gui.editor.IEditorEntry;
+import com.vincentmet.customquests.gui.editor.IEditorPage;
 import com.vincentmet.customquests.helpers.TagHelper;
 import com.vincentmet.customquests.standardcontent.buttonshapes.Shape;
-import java.util.*;
-import java.util.function.Supplier;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class QuestButton implements IJsonObjectProvider, IJsonObjectProcessor{
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+
+public class QuestButton implements IJsonObjectProvider, IJsonObjectProcessor, IEditorPage {
     private int parentQuestId;
     private IButtonShape shape;
     private IQuestingTexture icon;
@@ -169,5 +178,37 @@ public class QuestButton implements IJsonObjectProvider, IJsonObjectProcessor{
         json.addProperty("icon", icon.toString());
         json.addProperty("scale", scale);
         return json;
+    }
+
+    @Override
+    public void addPageEntries(List<IEditorEntry> list) {
+        list.add(new EditorEntryWrapper(new TranslatableComponent(Ref.MODID + ".editor.keys.shape"), new ResourceLocation(Ref.MODID, "resourcelocation"), () -> getShape().getId().toString(), newValueObject -> {
+            ResourceLocation rlValue = new ResourceLocation(newValueObject.toString());
+            for(Map.Entry<ResourceLocation, Supplier<IButtonShape>> entry : CQRegistry.getButtonShapes().entrySet()){
+                if(entry.getKey().toString().equals(rlValue.toString())){
+                    setShape(entry.getValue().get());
+                }
+            }
+            if(shape == null){
+                setShape(Shape.HEXAGON);
+            }
+        }));
+        list.add(new EditorEntryWrapper(new TranslatableComponent(Ref.MODID + ".editor.keys.icon"), new ResourceLocation(Ref.MODID, "resourcelocation"), () -> getIcon().getResourceLocation().toString(), newValueObject -> {
+            ResourceLocation newRL = ResourceLocation.tryParse(newValueObject.toString());
+            if(TagHelper.doesTagExist(newRL)){
+                List<ItemStack> tagStacks = new ArrayList<>();
+                TagHelper.getEntries(newRL).stream().map(ItemStack::new).forEach(tagStacks::add);
+                setIcon(new ItemSlideshowTexture(newRL, tagStacks));
+            }else{
+                if(ForgeRegistries.ITEMS.containsKey(newRL)){
+                    setIcon(new ItemSlideshowTexture(newRL, new ItemStack(ForgeRegistries.ITEMS.getValue(newRL))));
+                }else{
+                    setIcon(new ItemSlideshowTexture(Blocks.GRASS_BLOCK.getRegistryName(), new ItemStack(Blocks.GRASS_BLOCK)));
+                }
+            }
+        }));
+        list.add(new EditorEntryWrapper(new TranslatableComponent(Ref.MODID + ".editor.keys.scale"), new ResourceLocation(Ref.MODID, "resourcelocation"), this::getScale, newValueObject -> {
+            setScale(Double.parseDouble(newValueObject.toString()));
+        }));
     }
 }

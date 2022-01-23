@@ -1,13 +1,16 @@
 package com.vincentmet.customquests.hierarchy.quest;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.vincentmet.customquests.api.*;
-import java.util.*;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.vincentmet.customquests.api.ICurrentItemStackProvider;
+import com.vincentmet.customquests.api.IQuestingTexture;
+import com.vincentmet.customquests.helpers.rendering.ItemRenderHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ItemSlideshowTexture implements IQuestingTexture, ICurrentItemStackProvider{
 	private ResourceLocation ogResourceLocation;
@@ -30,12 +33,11 @@ public class ItemSlideshowTexture implements IQuestingTexture, ICurrentItemStack
     }
     
     @OnlyIn(Dist.CLIENT)
-	public void render(MatrixStack stack, float scale, int x, int y, int mouseX, int mouseY){
+	public void render(PoseStack matrixStack, float scale, int x, int y, float offsetX, float offsetY, int mouseX, int mouseY){
 		if(!items.isEmpty()){
 			int arrSize = items.size();
 			int currentIndex = (int)(System.currentTimeMillis()/50/delay%arrSize);
-			RenderHelper.setupGui3DDiffuseLighting();
-			Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(items.get(currentIndex), x, y);
+			ItemRenderHelper.renderGuiItem(items.get(currentIndex), x, y, scale, offsetX, offsetY);
 		}
 	}
 	@Override

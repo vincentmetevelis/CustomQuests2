@@ -1,32 +1,47 @@
 package com.vincentmet.customquests.gui;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.gui.elements.*;
-import com.vincentmet.customquests.gui.elements.impl.*;
-import com.vincentmet.customquests.helpers.*;
+import com.vincentmet.customquests.api.ChapterHelper;
+import com.vincentmet.customquests.api.QuestingStorage;
+import com.vincentmet.customquests.api.TextUtils;
+import com.vincentmet.customquests.gui.elements.ButtonState;
+import com.vincentmet.customquests.gui.elements.ChapterButton;
+import com.vincentmet.customquests.gui.elements.ScrollableList;
+import com.vincentmet.customquests.gui.elements.impl.QuestDetails;
+import com.vincentmet.customquests.gui.elements.impl.QuestingCanvas;
+import com.vincentmet.customquests.helpers.BooleanContainer;
+import com.vincentmet.customquests.helpers.Container;
+import com.vincentmet.customquests.helpers.IntCounter;
+import com.vincentmet.customquests.helpers.TooltipBuffer;
 import com.vincentmet.customquests.helpers.math.Vec2i;
 import com.vincentmet.customquests.helpers.rendering.VariableButton;
-import java.util.*;
-import java.util.function.IntSupplier;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.*;
-import net.minecraftforge.api.distmarker.*;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.OptionalInt;
+import java.util.function.IntSupplier;
+
 @OnlyIn(Dist.CLIENT)
-public class QuestingScreen extends Screen{
-	public static final int BUTTON_HEIGHT = 20;
-	public final ScreenManager screenManager = new ScreenManager();
+public class QuestingScreen extends Screen {
+	public static final IntSupplier BUTTON_HEIGHT = ()->20;
+	public final QuestingScreenManager screenManager = new QuestingScreenManager();
 	private VariableButton buttonToChapters;
 	private ScrollableList chapterList;
 	private QuestingCanvas questingCanvas;
 	public QuestDetails questDetails;
-	private final PlayerEntity localPlayer = Minecraft.getInstance().player;
+	private final Player localPlayer = Minecraft.getInstance().player;
 	private BooleanContainer queueReInit = new BooleanContainer(true);
 	
 	private final IntSupplier questingCanvasX = ()->(width>>2) + 10;
@@ -49,13 +64,13 @@ public class QuestingScreen extends Screen{
 	private final IntSupplier questDetailsWidth = ()->width-40;
 	private final IntSupplier questDetailsHeight = ()->height-40;
 	
-	private static final ITextComponent localization_noQuests = new TranslationTextComponent(Ref.MODID + ".screens.no_quests");
-	private static final ITextComponent localization_backToChapters = new TranslationTextComponent(Ref.MODID + ".screens.back_to_chapters");
+	private static final Component localization_noQuests = new TranslatableComponent(Ref.MODID + ".screens.no_quests");
+	private static final Component localization_backToChapters = new TranslatableComponent(Ref.MODID + ".screens.back_to_chapters");
 	
-	private final List<ITextComponent> tooltip_backToChapters = new ArrayList<>();
+	private final List<Component> tooltip_backToChapters = new ArrayList<>();
 	
 	public QuestingScreen(OptionalInt questId){
-		super(new TranslationTextComponent("item." + Ref.MODID + ".questing_device"));
+		super(new TranslatableComponent("item." + Ref.MODID + ".questing_device"));
 		if(questId.isPresent()){
 			screenManager.setCurrentlySelectedQuestId(questId.getAsInt());
 		}
@@ -64,8 +79,8 @@ public class QuestingScreen extends Screen{
 	
 	@Override
 	protected void init(){
-		buttonToChapters = new VariableButton(toChaptersX.getAsInt(), toChaptersY.getAsInt(), toChaptersWidth.getAsInt(), toChaptersHeight.getAsInt(), ButtonState.NORMAL.getButtonTexture(), "C", new Vec2i(0, 0), (mouseButton)->screenManager.resetCurrentQuestId(), tooltip_backToChapters);
-		chapterList = new ScrollableList(chapterListX.getAsInt(), chapterListY.getAsInt(), chapterListWidth.getAsInt(), chapterListHeight.getAsInt());
+		buttonToChapters = new VariableButton(toChaptersX, toChaptersY, toChaptersWidth, toChaptersHeight, ButtonState.NORMAL.getButtonTexture(), "C", new Vec2i(0, 0), (mouseButton)->screenManager.resetCurrentQuestId(), tooltip_backToChapters);
+		chapterList = new ScrollableList(chapterListX, chapterListY, chapterListWidth, chapterListHeight);
 		questingCanvas = new QuestingCanvas(screenManager);
 		questDetails = new QuestDetails(screenManager, questDetailsX.getAsInt(), questDetailsY.getAsInt(), questDetailsWidth.getAsInt(), questDetailsHeight.getAsInt());
 		reInit();
@@ -82,19 +97,20 @@ public class QuestingScreen extends Screen{
 	}
 	
 	public void initChapterList(){
-		IntCounter cumulativeHeight = new IntCounter(chapterListY.getAsInt(), BUTTON_HEIGHT);
+		IntCounter cumulativeHeight = new IntCounter(chapterListY.getAsInt(), BUTTON_HEIGHT.getAsInt());
 		chapterList.clear();
 		QuestingStorage.getSidedChaptersMap().forEach((chapterID, chapter) -> {
-			List<ITextComponent> chapterInfoList = new ArrayList<>();
-			chapterInfoList.add(new StringTextComponent(ClientUtils.colorify(chapter.getTitle().getText()) + TextFormatting.RESET + " #" + chapterID));
-			chapterInfoList.add(new StringTextComponent(ClientUtils.colorify(chapter.getText().getText())));
+			List<Component> chapterInfoList = new ArrayList<>();
+			chapterInfoList.add(new TextComponent(TextUtils.colorify(chapter.getTitle().getText()) + ChatFormatting.RESET + " #" + chapterID));
+			chapterInfoList.add(new TextComponent(TextUtils.colorify(chapter.getText().getText())));
 			
 			ButtonState buttonState = ButtonState.DISABLED;
-			if(ChapterHelper.isChapterUnlocked(localPlayer.getUniqueID(), chapter)){
+			if(ChapterHelper.isChapterUnlocked(localPlayer.getUUID(), chapter)){
 				buttonState = ButtonState.NORMAL;
 			}
-			
-			chapterList.add(new ChapterButton(chapterListX.getAsInt(), cumulativeHeight.getValue(), chapterListWidth.getAsInt(), BUTTON_HEIGHT, chapter.getIcon(), ClientUtils.colorify(chapter.getTitle().getText()), buttonState, (mouseButton) -> {
+
+			Container<Integer> chapterYSupplier = new Container<>(cumulativeHeight.getValue());//todo continue all of this containerization for the cumulative heights
+			chapterList.add(new ChapterButton(chapterListX, chapterYSupplier::get, chapterListWidth, BUTTON_HEIGHT, chapter.getIcon(), TextUtils.colorify(chapter.getTitle().getText()), buttonState, (mouseButton) -> {
 				screenManager.setCurrentlySelectedChapterId(chapter.getId());
 				questingCanvas.applyDraggingLimits();
 				questingCanvas.reInit(questingCanvasX.getAsInt(), questingCanvasY.getAsInt(), questingCanvasWidth.getAsInt(), questingCanvasHeight.getAsInt());
@@ -105,7 +121,7 @@ public class QuestingScreen extends Screen{
 	}
 	
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		TooltipBuffer.tooltipBuffer.clear();
 		renderBackgrounds(matrixStack);
 		
@@ -120,16 +136,16 @@ public class QuestingScreen extends Screen{
 			questDetails.renderHover(matrixStack, mouseX, mouseY, partialTicks);
 		}else{
 			//Non-hover
-			if(chapterList.getWidth() != chapterListWidth.getAsInt()){
-				chapterList.setWidth(chapterListWidth.getAsInt());
+			if(chapterList.getWidth().getAsInt() != chapterListWidth.getAsInt()){
+				chapterList.setWidth(chapterListWidth);
 			}
-			if(chapterList.getHeight() != chapterListHeight.getAsInt()){
-				chapterList.setHeight(chapterListHeight.getAsInt());
+			if(chapterList.getHeight().getAsInt() != chapterListHeight.getAsInt()){
+				chapterList.setHeight(chapterListHeight);
 			}
-			if(chapterList.getEntries().size() >=1 && chapterList.getEntries().get(0).getY() != 20-chapterList.getScrollDistance()){
-				IntCounter chapterListCounter = new IntCounter(20-chapterList.getScrollDistance(), BUTTON_HEIGHT);
+			if(chapterList.getEntries().size() >=1 && chapterList.getEntries().get(0).getY().getAsInt() != 20-chapterList.getScrollDistance()){
+				IntCounter chapterListCounter = new IntCounter(20-chapterList.getScrollDistance(), BUTTON_HEIGHT.getAsInt());
 				chapterList.getEntries().forEach(entry -> {
-					entry.setY(chapterListCounter.getValue());
+					entry.setY(()->chapterListCounter.getValue());
 					chapterListCounter.count();
 				});
 			}
@@ -147,17 +163,17 @@ public class QuestingScreen extends Screen{
 			
 			//Show message if there are no quests loaded
 			if(QuestingStorage.getSidedQuestsMap().isEmpty()){
-				Minecraft.getInstance().fontRenderer.drawStringWithShadow(matrixStack, localization_noQuests.getString(), questingCanvas.getX() + 5, questingCanvas.getY() + 5, 0xFFFFFF);
+				Minecraft.getInstance().font.drawShadow(matrixStack, localization_noQuests.getString(), questingCanvas.getX() + 5, questingCanvas.getY() + 5, 0xFFFFFF);
 			}
 		}
 		TooltipBuffer.tooltipBuffer.forEach(Runnable::run);
 	}
 	
-	private void renderBackgrounds(MatrixStack matrixStack){
-		AbstractGui.fill(matrixStack, 0, 0, width, height, 0x88000000);
+	private void renderBackgrounds(PoseStack matrixStack){
+		GuiComponent.fill(matrixStack, 0, 0, width, height, 0x88000000);
 		if(!screenManager.shouldShowQuestDetails()){
-			AbstractGui.fill(matrixStack, chapterListX.getAsInt(), chapterListY.getAsInt(), chapterListX.getAsInt() + chapterListWidth.getAsInt(), chapterListY.getAsInt() + chapterListHeight.getAsInt(), 0x88000000);
-			AbstractGui.fill(matrixStack, questingCanvasX.getAsInt(), questingCanvasY.getAsInt(), questingCanvasX.getAsInt() + questingCanvasWidth.getAsInt(), questingCanvasY.getAsInt() + questingCanvasHeight.getAsInt(), 0x88000000);
+			GuiComponent.fill(matrixStack, chapterListX.getAsInt(), chapterListY.getAsInt(), chapterListX.getAsInt() + chapterListWidth.getAsInt(), chapterListY.getAsInt() + chapterListHeight.getAsInt(), 0x88000000);
+			GuiComponent.fill(matrixStack, questingCanvasX.getAsInt(), questingCanvasY.getAsInt(), questingCanvasX.getAsInt() + questingCanvasWidth.getAsInt(), questingCanvasY.getAsInt() + questingCanvasHeight.getAsInt(), 0x88000000);
 		}
 	}
 	
@@ -203,10 +219,13 @@ public class QuestingScreen extends Screen{
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int mods){
 		if(keyCode == GLFW.GLFW_KEY_ESCAPE){
-			if(Minecraft.getInstance().currentScreen != null){
-				Minecraft.getInstance().currentScreen.closeScreen();
+			if(Minecraft.getInstance().screen != null){
+				Minecraft.getInstance().screen.onClose();
 			}
 			return true;
+		}
+		if(keyCode == GLFW.GLFW_KEY_BACKSPACE && screenManager.shouldShowQuestDetails()){
+			screenManager.resetCurrentQuestId();
 		}
 		chapterList.keyPressed(keyCode, scanCode, mods);
 		questingCanvas.keyPressed(keyCode, scanCode, mods);

@@ -1,11 +1,17 @@
 package com.vincentmet.customquests.hierarchy.quest;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.*;
+import com.vincentmet.customquests.api.IJsonObjectProcessor;
+import com.vincentmet.customquests.api.IJsonObjectProvider;
+import com.vincentmet.customquests.api.LogicType;
 import com.vincentmet.customquests.helpers.IntCounter;
-import java.util.*;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SubTasks extends HashMap<Integer, SubTask> implements IJsonObjectProvider, IJsonObjectProcessor{
 	private final int questId;

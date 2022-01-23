@@ -1,9 +1,10 @@
 package com.vincentmet.customquests.network.messages;
 
 import com.vincentmet.customquests.Config;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
+
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
 
 public class MessageUpdateServerSettings{
 	public boolean edit_mode;
@@ -16,13 +17,13 @@ public class MessageUpdateServerSettings{
 		this.give_device_on_first_login = give_device_on_first_login;
 	}
 	
-	public static void encode(MessageUpdateServerSettings packet, PacketBuffer buffer){
+	public static void encode(MessageUpdateServerSettings packet, FriendlyByteBuf buffer){
 		buffer.writeBoolean(packet.edit_mode);
 		buffer.writeBoolean(packet.reward_claim_one_per_party);
 		buffer.writeBoolean(packet.give_device_on_first_login);
 	}
 	
-	public static MessageUpdateServerSettings decode(PacketBuffer buffer) {
+	public static MessageUpdateServerSettings decode(FriendlyByteBuf buffer) {
 		return new MessageUpdateServerSettings(buffer.readBoolean(), buffer.readBoolean(), buffer.readBoolean());
 	}
 	

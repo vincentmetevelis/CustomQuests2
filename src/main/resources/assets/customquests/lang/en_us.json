@@ -49,6 +49,8 @@
 	
 	"customquests.command.progress.delete.all.success": "Successfully deleted all player and party progress!",
 	"customquests.command.progress.delete.player.success": "Successfully deleted all '%s' their progress!",
+	"customquests.command.progress.delete.party.success": "Successfully deleted all progress for party '%s' (%s)!",
+	"customquests.command.progress.delete.party.failed": "Couldn't delete party progress for party '%s', party doesn't exist!",
 	
 	"customquests.command.settings.get": "'%s' its value is: '%s'",
 	"customquests.command.settings.set": "'%s' has been updated to: '%s'",
@@ -95,5 +97,18 @@
 	
 	"customquests.standardcontent.tasks.button.item_submit": "Submit",
 	"customquests.standardcontent.tasks.button.xp_submit": "Submit",
-	"customquests.standardcontent.delivery.subtask_select": "Select this subtask"
+	"customquests.standardcontent.delivery.subtask_select": "Select this subtask",
+	
+	
+	
+	
+	
+	
+	
+	"customquests.screens.editor": "Questing Editor",
+	"customquests.editor.use_submenu": "Please click on a submenu!",
+	"customquests.editor.keys.icon": "Icon",
+	"customquests.editor.keys.shape": "Shape",
+	"customquests.editor.keys.scale": "Scale",
+	"customquests.editor.keys.questlist": "List of Quests"
 }

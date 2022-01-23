@@ -1,23 +1,31 @@
 package com.vincentmet.customquests.standardcontent.tasktypes;
 
-import com.google.gson.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.helpers.*;
+import com.vincentmet.customquests.helpers.MouseButton;
+import com.vincentmet.customquests.helpers.PlayerBoundSubtaskReference;
 import com.vincentmet.customquests.hierarchy.quest.ItemSlideshowTexture;
-import java.util.*;
-import java.util.function.Consumer;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.player.*;
-import net.minecraft.item.*;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.*;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class XpDetectTaskType implements ITaskType{
 	private static final ResourceLocation ID = new ResourceLocation(Ref.MODID, "xp_detect");
-	private static final ITextComponent TRANSLATION = new TranslationTextComponent(Ref.MODID + ".standardcontent.tasks.xp_detect");
+	private static final Component TRANSLATION = new TranslatableComponent(Ref.MODID + ".standardcontent.tasks.xp_detect");
 	public static final List<PlayerBoundSubtaskReference> TRACKING_LIST = new ArrayList<>();
 	private int questId;
 	private int taskId;
@@ -34,7 +42,7 @@ public class XpDetectTaskType implements ITaskType{
 	}
     
     @Override
-    public ITextComponent getTranslation(){
+    public Component getTranslation(){
         return TRANSLATION;
     }
 	
@@ -49,43 +57,43 @@ public class XpDetectTaskType implements ITaskType{
 	}
 	
 	@Override
-	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
-			processValue(player.experienceTotal, player);
+	public void executeSubtaskCheck(Player player, Object object){
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
+			processValue(player.totalExperience, player);
 		}
 	}
 	
-	public void processValue(int detectedXp, PlayerEntity player){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
-			int oldValue = CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId);
+	public void processValue(int detectedXp, Player player){
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
+			int oldValue = CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId);
 			if(detectedXp != oldValue){
-				CombinedProgressHelper.setValue(player.getUniqueID(), questId, taskId, subtaskId, detectedXp);
-				ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
+				CombinedProgressHelper.setValue(player.getUUID(), questId, taskId, subtaskId, detectedXp);
+				ServerUtils.sendProgressAndParties((ServerPlayer) player);
 			}
 		}
 		if(detectedXp >= amount){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
 	@Override
-	public void executeSubtaskButton(PlayerEntity player){
+	public void executeSubtaskButton(Player player){
 		/*NOOP*/
 	}
 	
 	@Override
-	public IQuestingTexture getIcon(ClientPlayerEntity player){
+	public IQuestingTexture getIcon(LocalPlayer player){
 		return icon;
 	}
 	
 	@Override
-	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks, ClientPlayerEntity player){
+	public Runnable onSlotHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks, LocalPlayer player){
 		return ()->{};
 	}
 	
 	@Override
-	public String getText(ClientPlayerEntity player){
-		return amount + " " + new TranslationTextComponent(Ref.MODID + ".general.experience").getString() + (inLevels?" "+new TranslationTextComponent(Ref.MODID + ".general.levels").getString():" " + new TranslationTextComponent(Ref.MODID + ".general.points").getString());
+	public String getText(LocalPlayer player){
+		return amount + " " + new TranslatableComponent(Ref.MODID + ".general.experience").getString() + (inLevels?" "+new TranslatableComponent(Ref.MODID + ".general.levels").getString():" " + new TranslatableComponent(Ref.MODID + ".general.points").getString());
 	}
 	
 	@Override
@@ -94,7 +102,7 @@ public class XpDetectTaskType implements ITaskType{
 	}
 	
 	@Override
-	public Consumer<MouseButton> onSlotClick(ClientPlayerEntity player){
+	public Consumer<MouseButton> onSlotClick(LocalPlayer player){
 		return (mouseButton)->{/*NOOP*/};
 	}
 	
@@ -174,7 +182,7 @@ public class XpDetectTaskType implements ITaskType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation rl = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ResourceLocation rl = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(rl != null){
 						icon = new ItemSlideshowTexture(rl, new ItemStack(ForgeRegistries.ITEMS.getValue(rl)));
 					}else{

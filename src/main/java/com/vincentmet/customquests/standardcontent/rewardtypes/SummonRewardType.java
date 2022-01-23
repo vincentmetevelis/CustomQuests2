@@ -1,20 +1,25 @@
 package com.vincentmet.customquests.standardcontent.rewardtypes;
 
-import com.google.gson.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.IRewardType;
 import com.vincentmet.customquests.helpers.MouseButton;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraftforge.registries.ForgeRegistries;
+
 import java.util.Objects;
 import java.util.function.Consumer;
-import net.minecraft.entity.*;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class SummonRewardType implements IRewardType{
 	private static ResourceLocation ID = new ResourceLocation(Ref.MODID, "summon");
@@ -31,9 +36,9 @@ public class SummonRewardType implements IRewardType{
     }
     
     @Override
-	public void executeReward(PlayerEntity player){
+	public void executeReward(Player player){
 		for(int i=0; i<count;i++){
-			(player.getEntityWorld()).addEntity(Objects.requireNonNull(entity.create((ServerWorld)player.getEntityWorld(), new CompoundNBT(), new TranslationTextComponent("Your Reward <3"), player, player.getPosition(), SpawnReason.COMMAND, true, false)));
+			(player.getLevel()).addFreshEntity(Objects.requireNonNull(entity.create((ServerLevel) player.getLevel(), new CompoundTag(), new TranslatableComponent("Your Reward <3"), player, player.blockPosition(), MobSpawnType.COMMAND, true, false)));
 		}
 	}
 	
@@ -43,13 +48,13 @@ public class SummonRewardType implements IRewardType{
 	}
 	
 	@Override
-	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+	public Runnable onSlotHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		return ()->{/*NOOP*/};
 	}
 	
 	@Override
 	public String getText(){
-		return count + "x " + entity.getName().getString();
+		return count + "x " + entity.getDescription().getString();
 	}
 	
 	@Override
@@ -59,7 +64,7 @@ public class SummonRewardType implements IRewardType{
 	
 	@Override
 	public String toString(){
-		return count + "x " + entity.getName().getString();
+		return count + "x " + entity.getDescription().getString();
 	}
 	
 	@Override
@@ -89,7 +94,7 @@ public class SummonRewardType implements IRewardType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation rl = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ResourceLocation rl = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(rl != null){
 						icon = ForgeRegistries.ITEMS.getValue(rl);
 					}else{
@@ -140,7 +145,7 @@ public class SummonRewardType implements IRewardType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation rl = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ResourceLocation rl = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(rl != null){
 						entity = ForgeRegistries.ENTITIES.getValue(rl);
 					}else{

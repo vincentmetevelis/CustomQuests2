@@ -5,10 +5,11 @@ import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.helpers.BooleanContainer;
 import com.vincentmet.customquests.hierarchy.party.Party;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
+import net.minecraft.server.level.ServerPlayer;
+
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import net.minecraft.entity.player.ServerPlayerEntity;
 
 public class PartyHelper {
 	private static final List<Integer> partiesToDelete = new ArrayList<>();
@@ -36,6 +37,13 @@ public class PartyHelper {
 	
 	public static boolean isPlayerPartyOwner(UUID player, int partyId){
 		return player.equals(getPartyOwner(partyId));
+	}
+	
+	public static String getPartyName(int partyId){
+		if(doesPartyExist(partyId)){
+			return QuestingStorage.getSidedPartiesMap().get(partyId).getName();
+		}
+		return "[Invalid party]";
 	}
 	
 	public static int createParty(UUID creatorUUID, String name){
@@ -158,8 +166,8 @@ public class PartyHelper {
 		}
 	}
 	
-	public static void forEachPlayerInPartyCurrentlyOnline(int partyId, Consumer<ServerPlayerEntity> consumer){
-		getAllUUIDsInParty(partyId).stream().map(Ref.currentServerInstance.getPlayerList()::getPlayerByUUID).filter(Objects::nonNull).forEach(consumer);
+	public static void forEachPlayerInPartyCurrentlyOnline(int partyId, Consumer<ServerPlayer> consumer){
+		getAllUUIDsInParty(partyId).stream().map(Ref.currentServerInstance.getPlayerList()::getPlayer).filter(Objects::nonNull).forEach(consumer);
 	}
 	
 	public static void syncAllPartyDataWithinParty(){

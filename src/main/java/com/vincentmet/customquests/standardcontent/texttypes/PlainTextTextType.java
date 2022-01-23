@@ -2,7 +2,7 @@ package com.vincentmet.customquests.standardcontent.texttypes;
 
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.ITextType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class PlainTextTextType implements ITextType{
     private static final ResourceLocation ID = new ResourceLocation(Ref.MODID, "plaintext");

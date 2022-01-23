@@ -1,23 +1,26 @@
 package com.vincentmet.customquests.api;
 
 import com.google.gson.JsonObject;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.Date;
 import net.minecraft.nbt.*;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.loot.providers.nbt.NbtProviders;
+import org.codehaus.plexus.util.StringInputStream;
 
 public class ApiUtils{
 	//Just to not worry about the errors, it'll fall back to the default item NBT if it fails
-	public static CompoundNBT getNbtFromJson(String jsonString){
+	public static CompoundTag getNbtFromJson(String jsonString){
 		try {
-			return JsonToNBT.getTagFromJson(jsonString);
-		}catch (CommandSyntaxException e){
+			return TagParser.parseTag(jsonString);
+		}catch (Exception ignored){
 			//NOOP
 		}
-		return new CompoundNBT();
+		return new CompoundTag();
 	}
 	
 	public static void writeTo(Path location, String filename, Object text){
@@ -82,5 +85,13 @@ public class ApiUtils{
 		}catch(IOException e){
 			e.printStackTrace();
 		}
+	}
+	
+	public static boolean hasPlayerEditorAccess(ServerPlayer serverPlayer){
+		MinecraftServer server = serverPlayer.getServer();
+		if(server != null){
+			return serverPlayer.hasPermissions(serverPlayer.getServer().getOperatorUserPermissionLevel()) && Config.SidedConfig.isEditModeOn();
+		}
+		return false;
 	}
 }

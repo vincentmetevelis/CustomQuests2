@@ -1,23 +1,35 @@
 package com.vincentmet.customquests.hierarchy.chapter;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.*;
+import com.vincentmet.customquests.api.IJsonObjectProcessor;
+import com.vincentmet.customquests.api.IJsonObjectProvider;
+import com.vincentmet.customquests.api.IQuestingTexture;
+import com.vincentmet.customquests.gui.editor.EditorEntryWrapper;
+import com.vincentmet.customquests.gui.editor.IEditorEntry;
+import com.vincentmet.customquests.gui.editor.IEditorPage;
 import com.vincentmet.customquests.helpers.TagHelper;
-import com.vincentmet.customquests.hierarchy.quest.*;
-import java.util.*;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import com.vincentmet.customquests.hierarchy.quest.ItemSlideshowTexture;
+import com.vincentmet.customquests.hierarchy.quest.TextType;
+import com.vincentmet.customquests.standardcontent.texttypes.TranslationTextType;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor{
+import java.util.ArrayList;
+import java.util.List;
+
+public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor, IEditorPage {
 	private final int id;
 	private IQuestingTexture icon;
 	private TextType title;
 	private TextType text;
 	private final QuestList quests;
-	
 	
 	public Chapter(int id, IQuestingTexture icon, TextType title, TextType text, QuestList quests){
 		this.id = id;
@@ -139,12 +151,31 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor{
 	public void setIcon(IQuestingTexture icon){
 		this.icon = icon;
 	}
-	
+
 	public void setTitle(TextType title){
 		this.title = title;
 	}
 	
 	public void setText(TextType text){
 		this.text = text;
+	}
+
+	@Override
+	public void addPageEntries(List<IEditorEntry> list) {
+		list.add(new EditorEntryWrapper(new TranslatableComponent(Ref.MODID + ".editor.keys.icon"), new ResourceLocation(Ref.MODID, "resourcelocation"), () -> getIcon().getResourceLocation().toString(), newValueObject -> {
+			ResourceLocation newRL = ResourceLocation.tryParse(newValueObject.toString());
+			if(TagHelper.doesTagExist(newRL)){
+				List<ItemStack> tagStacks = new ArrayList<>();
+				TagHelper.getEntries(newRL).stream().map(ItemStack::new).forEach(tagStacks::add);
+				setIcon(new ItemSlideshowTexture(newRL, tagStacks));
+			}else{
+				if(ForgeRegistries.ITEMS.containsKey(newRL)){
+					setIcon(new ItemSlideshowTexture(newRL, new ItemStack(ForgeRegistries.ITEMS.getValue(newRL))));
+				}else{
+					Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > icon': No valid item/tag for '" + newRL + "' found, defaulting to 'minecraft:grass_block'");
+					setIcon(new ItemSlideshowTexture(Blocks.GRASS_BLOCK.getRegistryName(), new ItemStack(Blocks.GRASS_BLOCK)));
+				}
+			}
+		}));//todo add a custom dropdown selector for available text-types here && text components
 	}
 }

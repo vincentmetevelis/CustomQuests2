@@ -1,24 +1,33 @@
 package com.vincentmet.customquests.standardcontent.tasktypes;
 
-import com.google.gson.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.helpers.*;
+import com.vincentmet.customquests.api.ButtonContext;
+import com.vincentmet.customquests.api.CombinedProgressHelper;
+import com.vincentmet.customquests.api.IQuestingTexture;
+import com.vincentmet.customquests.api.ITaskType;
+import com.vincentmet.customquests.helpers.MouseButton;
+import com.vincentmet.customquests.helpers.PlayerBoundSubtaskReference;
 import com.vincentmet.customquests.hierarchy.quest.PredicateTexture;
 import com.vincentmet.customquests.network.messages.PacketHandler;
 import com.vincentmet.customquests.standardcontent.messages.MessageCheckboxClick;
-import java.util.*;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.*;
 
 public class CheckboxTaskType implements ITaskType{
 	private static final ResourceLocation ID = new ResourceLocation(Ref.MODID, "checkbox");
-	private static final ITextComponent TRANSLATION = new TranslationTextComponent(Ref.MODID + ".standardcontent.tasks.checkbox");
-	private static final ITextComponent TRANSLATION_SUBTASK = new TranslationTextComponent(Ref.MODID + ".standardcontent.tasks.checkbox.text_subtask");
+	private static final Component TRANSLATION = new TranslatableComponent(Ref.MODID + ".standardcontent.tasks.checkbox");
+	private static final Component TRANSLATION_SUBTASK = new TranslatableComponent(Ref.MODID + ".standardcontent.tasks.checkbox.text_subtask");
 	public static final List<PlayerBoundSubtaskReference> TRACKING_LIST = new ArrayList<>();
 	private int questId;
 	private int taskId;
@@ -30,7 +39,7 @@ public class CheckboxTaskType implements ITaskType{
 	}
     
     @Override
-    public ITextComponent getTranslation(){
+    public Component getTranslation(){
         return TRANSLATION;
     }
 	
@@ -45,27 +54,27 @@ public class CheckboxTaskType implements ITaskType{
 	}
 	
 	@Override
-	public void executeSubtaskCheck(PlayerEntity player, Object object){
+	public void executeSubtaskCheck(Player player, Object object){
 		/*NOOP*/
 	}
 	
 	@Override
-	public void executeSubtaskButton(PlayerEntity player){
+	public void executeSubtaskButton(Player player){
 		/*NOOP*/
 	}
 	
 	@Override
-	public IQuestingTexture getIcon(ClientPlayerEntity playerEntity){
-		return new PredicateTexture(new ResourceLocation("minecraft", "textures/gui/container/beacon.png"), 90, 222, 16, 16, 256, 256, ()->CombinedProgressHelper.isSubtaskCompleted(playerEntity.getUniqueID(), questId, taskId, subtaskId));
+	public IQuestingTexture getIcon(LocalPlayer playerEntity){
+		return new PredicateTexture(new ResourceLocation("minecraft", "textures/gui/container/beacon.png"), 90, 222, 16, 16, 256, 256, ()->CombinedProgressHelper.isSubtaskCompleted(playerEntity.getUUID(), questId, taskId, subtaskId));
 	}
 	
 	@Override
-	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks, ClientPlayerEntity player){
+	public Runnable onSlotHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks, LocalPlayer player){
 		return ()->{/*NOOP*/};
 	}
 	
 	@Override
-	public String getText(ClientPlayerEntity player){
+	public String getText(LocalPlayer player){
 		return "\u2190 " + TRANSLATION_SUBTASK.getString();
 	}
 	
@@ -75,9 +84,9 @@ public class CheckboxTaskType implements ITaskType{
 	}
     
     @Override
-    public Consumer<MouseButton> onSlotClick(ClientPlayerEntity player){
+    public Consumer<MouseButton> onSlotClick(LocalPlayer player){
 		return (mouseButton)->{
-			if(!CombinedProgressHelper.isSubtaskCompleted(player.getUniqueID(), questId, taskId, subtaskId)){
+			if(!CombinedProgressHelper.isSubtaskCompleted(player.getUUID(), questId, taskId, subtaskId)){
 				PacketHandler.CHANNEL.sendToServer(new MessageCheckboxClick(questId, taskId, subtaskId));
 			}
 		};

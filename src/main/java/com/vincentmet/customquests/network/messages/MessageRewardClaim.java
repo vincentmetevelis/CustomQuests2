@@ -1,10 +1,11 @@
 package com.vincentmet.customquests.network.messages;
 
 import com.vincentmet.customquests.api.CombinedProgressHelper;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
+
 import java.util.Objects;
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
 
 public class MessageRewardClaim{
 	public int questId;
@@ -15,12 +16,12 @@ public class MessageRewardClaim{
 		this.rewardId = rewardId;
 	}
 	
-	public static void encode(MessageRewardClaim packet, PacketBuffer buffer){
+	public static void encode(MessageRewardClaim packet, FriendlyByteBuf buffer){
 		buffer.writeInt(packet.questId);
 		buffer.writeInt(packet.rewardId);
 	}
 	
-	public static MessageRewardClaim decode(PacketBuffer buffer) {
+	public static MessageRewardClaim decode(FriendlyByteBuf buffer) {
 		if(buffer.readableBytes() >= 8){//2 ints
 			int questID = buffer.readInt();
 			int rewardID = buffer.readInt();
@@ -32,7 +33,7 @@ public class MessageRewardClaim{
 	public static void handle(final MessageRewardClaim message, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			if(message!=null){
-				CombinedProgressHelper.claimReward(Objects.requireNonNull(ctx.get().getSender()).getUniqueID(), message.questId, message.rewardId);
+				CombinedProgressHelper.claimReward(Objects.requireNonNull(ctx.get().getSender()).getUUID(), message.questId, message.rewardId);
 			}
 		});
 		ctx.get().setPacketHandled(true);

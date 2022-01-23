@@ -3,10 +3,17 @@ package com.vincentmet.customquests.hierarchy.chapter;
 import com.google.gson.*;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
+import com.vincentmet.customquests.gui.editor.EditorEntryWrapper;
+import com.vincentmet.customquests.gui.editor.IEditorEntry;
+import com.vincentmet.customquests.gui.editor.IEditorPage;
 import com.vincentmet.customquests.helpers.IntCounter;
-import java.util.HashSet;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 
-public class QuestList extends HashSet<Integer> implements IJsonArrayProcessor, IJsonArrayProvider{
+import java.util.HashSet;
+import java.util.List;
+
+public class QuestList extends HashSet<Integer> implements IJsonArrayProcessor, IJsonArrayProvider, IEditorPage {
 	private final int parentChapterId;
 	
 	public QuestList(int parentChapterId){
@@ -45,5 +52,15 @@ public class QuestList extends HashSet<Integer> implements IJsonArrayProcessor, 
 		JsonArray json = new JsonArray();
 		forEach(json::add);
 		return json;
+	}
+
+	@Override
+	public void addPageEntries(List<IEditorEntry> list) {
+		forEach(questId -> {
+			list.add(new EditorEntryWrapper(new TextComponent(""), new ResourceLocation(Ref.MODID, "integer"), () -> questId, newValueObject -> {
+				//todo no clue on how to add/remove ids from the list, maybe use the selectorlist for it?
+			}));
+			//todo add height to the editor keyvalue??? or allow for scene switching with parameters/parents
+		});
 	}
 }

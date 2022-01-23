@@ -1,25 +1,34 @@
 package com.vincentmet.customquests.standardcontent.tasktypes;
 
-import com.google.gson.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.helpers.*;
+import com.vincentmet.customquests.helpers.MouseButton;
+import com.vincentmet.customquests.helpers.PlayerBoundSubtaskReference;
+import com.vincentmet.customquests.helpers.WorldHelper;
 import com.vincentmet.customquests.hierarchy.quest.ItemSlideshowTexture;
-import java.util.*;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.dimension.DimensionType;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.player.*;
-import net.minecraft.item.*;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.*;
-import net.minecraft.world.DimensionType;
 
 public class TravelTaskType implements ITaskType{
 	private static final ResourceLocation ID = new ResourceLocation(Ref.MODID, "travel");
-	private static final ITextComponent TRANSLATION_TASK_TITLE = new TranslationTextComponent(Ref.MODID + ".standardcontent.tasks.travel");
-	private static final ITextComponent TRANSLATION_DIMENSION = new TranslationTextComponent(Ref.MODID + ".general.dimension");
-	private static final ITextComponent TRANSLATION_POSITION = new TranslationTextComponent(Ref.MODID + ".general.position");
+	private static final Component TRANSLATION_TASK_TITLE = new TranslatableComponent(Ref.MODID + ".standardcontent.tasks.travel");
+	private static final Component TRANSLATION_DIMENSION = new TranslatableComponent(Ref.MODID + ".general.dimension");
+	private static final Component TRANSLATION_POSITION = new TranslatableComponent(Ref.MODID + ".general.position");
 	public static final List<PlayerBoundSubtaskReference> TRACKING_LIST = new ArrayList<>();
 	private int questId;
 	private int taskId;
@@ -39,7 +48,7 @@ public class TravelTaskType implements ITaskType{
 	}
     
     @Override
-    public ITextComponent getTranslation(){
+    public Component getTranslation(){
         return TRANSLATION_TASK_TITLE;
     }
 	
@@ -54,46 +63,46 @@ public class TravelTaskType implements ITaskType{
 	}
 	
 	@Override
-	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
+	public void executeSubtaskCheck(Player player, Object object){
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
 			if(range <= -1){
 				if(WorldHelper.isPlayerInDimension(player, dimension)){
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, getCompletionAmount());
-					ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, getCompletionAmount());
+					ServerUtils.sendProgressAndParties((ServerPlayer) 	player);
 				}
 			}else{
 				if(WorldHelper.isPlayerInDimension(player, dimension) && WorldHelper.isPlayerInRange(player, x, y, z, range)){
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, getCompletionAmount());
-					ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, getCompletionAmount());
+					ServerUtils.sendProgressAndParties((ServerPlayer) player);
 				}
 			}
 			processValue(player);
 		}
 	}
 	
-	public void processValue(PlayerEntity player){
-		if(CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId) >= getCompletionAmount()){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+	public void processValue(Player player){
+		if(CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId) >= getCompletionAmount()){
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
 	@Override
-	public void executeSubtaskButton(PlayerEntity player){
+	public void executeSubtaskButton(Player player){
 		/*NOOP*/
 	}
 	
 	@Override
-	public IQuestingTexture getIcon(ClientPlayerEntity player){
+	public IQuestingTexture getIcon(LocalPlayer player){
 		return icon;
 	}
 	
 	@Override
-	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks, ClientPlayerEntity player){
+	public Runnable onSlotHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks, LocalPlayer player){
 		return ()->{/*NOOP*/};
 	}
 	
 	@Override
-	public String getText(ClientPlayerEntity player){
+	public String getText(LocalPlayer player){
 		if(range <= -1){
 			return TRANSLATION_DIMENSION.getString() + ": " + dimension.toString();
 		}else{
@@ -107,7 +116,7 @@ public class TravelTaskType implements ITaskType{
 	}
     
     @Override
-    public Consumer<MouseButton> onSlotClick(ClientPlayerEntity player){
+    public Consumer<MouseButton> onSlotClick(LocalPlayer player){
 		return (mouseButton)->{/*NOOP*/};
     }
     
@@ -147,22 +156,22 @@ public class TravelTaskType implements ITaskType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					dimension = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					dimension = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(dimension == null){
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > dimension': Value is not a valid dimension, please use a valid dimension id, defaulting to 'minecraft:overworld'!");
-						dimension = DimensionType.OVERWORLD_ID;
+						dimension = DimensionType.OVERWORLD_LOCATION.location();//todo test this RL
 					}
 				}else{
 					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > dimension': Value is not a String, defaulting to 'minecraft:overworld'!");
-					dimension = DimensionType.OVERWORLD_ID;
+					dimension = DimensionType.OVERWORLD_LOCATION.location();
 				}
 			}else{
 				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > dimension': Value is not a JsonPrimitive, please use a String, defaulting to 'minecraft:overworld'!");
-				dimension = DimensionType.OVERWORLD_ID;
+				dimension = DimensionType.OVERWORLD_LOCATION.location();
 			}
 		}else{
 			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > dimension': Not detected, defaulting to 'minecraft:overworld'!");
-			dimension = DimensionType.OVERWORLD_ID;
+			dimension = DimensionType.OVERWORLD_LOCATION.location();
 		}
 	
 		if(json.has("x")){

@@ -1,24 +1,35 @@
 package com.vincentmet.customquests.standardcontent.tasktypes;
 
-import com.google.gson.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.helpers.*;
+import com.vincentmet.customquests.helpers.IntCounter;
+import com.vincentmet.customquests.helpers.MouseButton;
+import com.vincentmet.customquests.helpers.PlayerBoundSubtaskReference;
 import com.vincentmet.customquests.hierarchy.quest.ItemSlideshowTexture;
-import com.vincentmet.customquests.network.messages.*;
-import java.util.*;
-import java.util.function.Consumer;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.player.*;
-import net.minecraft.item.*;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.*;
+import com.vincentmet.customquests.network.messages.MessageTaskButton;
+import com.vincentmet.customquests.network.messages.PacketHandler;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 public class XpSubmitTaskType implements ITaskType{
 	private static final ResourceLocation ID = new ResourceLocation(Ref.MODID, "xp_submit");
-	private static final ITextComponent TRANSLATION = new TranslationTextComponent(Ref.MODID + ".standardcontent.tasks.xp_submit");
+	private static final Component TRANSLATION = new TranslatableComponent(Ref.MODID + ".standardcontent.tasks.xp_submit");
 	public static final List<PlayerBoundSubtaskReference> TRACKING_LIST = new ArrayList<>();
 	private int questId;
 	private int taskId;
@@ -34,7 +45,7 @@ public class XpSubmitTaskType implements ITaskType{
 	}
     
     @Override
-    public ITextComponent getTranslation(){
+    public Component getTranslation(){
         return TRANSLATION;
     }
 	
@@ -45,7 +56,7 @@ public class XpSubmitTaskType implements ITaskType{
     
     @Override
 	public boolean hasButton(ButtonContext context){
-		context.setText(new TranslationTextComponent(Ref.MODID  + ".standardcontent.tasks.button.xp_submit"));
+		context.setText(new TranslatableComponent(Ref.MODID  + ".standardcontent.tasks.button.xp_submit"));
 		context.setOnClick((mouseButton, uuid, questId, taskId) -> {
 			if(!CombinedProgressHelper.isTaskCompleted(uuid, questId, taskId)){
 				PacketHandler.CHANNEL.sendToServer(new MessageTaskButton(questId, taskId));
@@ -55,42 +66,42 @@ public class XpSubmitTaskType implements ITaskType{
 	}
 	
 	@Override
-	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
-			IntCounter xpLeftToHandIn = new IntCounter(getXpCountLeftToHandIn(player.getUniqueID(), questId, taskId, subtaskId));
+	public void executeSubtaskCheck(Player player, Object object){
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
+			IntCounter xpLeftToHandIn = new IntCounter(getXpCountLeftToHandIn(player.getUUID(), questId, taskId, subtaskId));
 			int xpBefore = xpLeftToHandIn.getValue();
 			if(inLevels){
 				if(xpLeftToHandIn.getValue() >= player.experienceLevel){
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, player.experienceLevel);
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, player.experienceLevel);
 					xpLeftToHandIn.add(-player.experienceLevel);
-					player.addExperienceLevel(-player.experienceLevel);
+					player.giveExperienceLevels(-player.experienceLevel);
 				}else{
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, xpLeftToHandIn.getValue());
-					player.addExperienceLevel(-(player.experienceLevel - xpLeftToHandIn.getValue()));
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, xpLeftToHandIn.getValue());
+					player.giveExperienceLevels(-(player.experienceLevel - xpLeftToHandIn.getValue()));
 					xpLeftToHandIn.setValue(0);
 				}
 			}else{
-				if(xpLeftToHandIn.getValue() >= player.experienceTotal){
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, player.experienceTotal);
-					xpLeftToHandIn.add(-player.experienceTotal);
-					player.giveExperiencePoints(-player.experienceTotal);
+				if(xpLeftToHandIn.getValue() >= player.totalExperience){
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, player.totalExperience);
+					xpLeftToHandIn.add(-player.totalExperience);
+					player.giveExperiencePoints(-player.totalExperience);
 				}else{
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, xpLeftToHandIn.getValue());
-					player.giveExperiencePoints(-(player.experienceTotal - xpLeftToHandIn.getValue()));
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, xpLeftToHandIn.getValue());
+					player.giveExperiencePoints(-(player.totalExperience - xpLeftToHandIn.getValue()));
 					xpLeftToHandIn.setValue(0);
 				}
 			}
 			int xpAfter = xpLeftToHandIn.getValue();
 			if(xpBefore != xpAfter){
 				processValue(player);
-				ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
+				ServerUtils.sendProgressAndParties((ServerPlayer) player);
 			}
 		}
 	}
 	
-	public void processValue(PlayerEntity player){
-		if(CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId) >= amount){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+	public void processValue(Player player){
+		if(CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId) >= amount){
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
@@ -99,23 +110,23 @@ public class XpSubmitTaskType implements ITaskType{
 	}
 	
 	@Override
-	public void executeSubtaskButton(PlayerEntity player){
+	public void executeSubtaskButton(Player player){
 		executeSubtaskCheck(player, null);
 	}
 	
 	@Override
-	public IQuestingTexture getIcon(ClientPlayerEntity player){
+	public IQuestingTexture getIcon(LocalPlayer player){
 		return icon;
 	}
 	
 	@Override
-	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks, ClientPlayerEntity player){
+	public Runnable onSlotHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks, LocalPlayer player){
 		return ()->{};
 	}
 	
 	@Override
-	public String getText(ClientPlayerEntity player){
-		return amount + " " + new TranslationTextComponent(Ref.MODID + ".general.experience").getString() + (inLevels?" "+new TranslationTextComponent(Ref.MODID + ".general.levels").getString():" " + new TranslationTextComponent(Ref.MODID + ".general.points").getString());
+	public String getText(LocalPlayer player){
+		return amount + " " + new TranslatableComponent(Ref.MODID + ".general.experience").getString() + (inLevels?" "+new TranslatableComponent(Ref.MODID + ".general.levels").getString():" " + new TranslatableComponent(Ref.MODID + ".general.points").getString());
 	}
 	
 	@Override
@@ -124,7 +135,7 @@ public class XpSubmitTaskType implements ITaskType{
 	}
 	
 	@Override
-	public Consumer<MouseButton> onSlotClick(ClientPlayerEntity player){
+	public Consumer<MouseButton> onSlotClick(LocalPlayer player){
 		return (mouseButton)->{/*NOOP*/};
 	}
 	
@@ -204,7 +215,7 @@ public class XpSubmitTaskType implements ITaskType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation rl = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ResourceLocation rl = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(rl != null){
 						icon = new ItemSlideshowTexture(rl, new ItemStack(ForgeRegistries.ITEMS.getValue(rl)));
 					}else{

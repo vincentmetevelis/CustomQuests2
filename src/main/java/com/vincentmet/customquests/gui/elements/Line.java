@@ -1,11 +1,12 @@
 package com.vincentmet.customquests.gui.elements;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import com.vincentmet.customquests.api.IButtonShape;
-import com.vincentmet.customquests.helpers.rendering.Color;
 import com.vincentmet.customquests.hierarchy.quest.Position;
-import net.minecraftforge.api.distmarker.*;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class Line implements MovableScalableCanvasEntry {
@@ -19,6 +20,8 @@ public class Line implements MovableScalableCanvasEntry {
     private final int pos1Y;
     private final int pos2X;
     private final int pos2Y;
+    private final double angle;
+    private final int length;
 
     public Line(int parentX, int parentY, int posX1, int posY1, int posX2, int posY2, int color, int thickness){
         this.parentX = parentX;
@@ -31,6 +34,10 @@ public class Line implements MovableScalableCanvasEntry {
         this.pos1Y = posY1;
         this.pos2X = posX2;
         this.pos2Y = posY2;
+        int dx = pos2X - pos1X;
+        int dy = pos2Y - pos1Y;
+        this.length = (int)Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+        this.angle = Math.toDegrees(Math.atan2(dy,dx));
     }
 
     public Line(int parentX, int parentY, Position quest, Position dependency, double questButtonScale, double depButtonScale, int color, int thickness){
@@ -46,37 +53,25 @@ public class Line implements MovableScalableCanvasEntry {
         this.pos1Y = buttonScaleAdjustedQuestPos.getY();
         this.pos2X = buttonScaleAdjustedDepPos.getX();
         this.pos2Y = buttonScaleAdjustedDepPos.getY();
+        int dx = pos2X - pos1X;
+        int dy = pos2Y - pos1Y;
+        this.length = (int)Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+        this.angle = Math.toDegrees(Math.atan2(dy,dx));
     }
     
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-        GL11.glPushMatrix();
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        GL11.glEnable(GL11.GL_POLYGON_SMOOTH);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glHint(GL11.GL_LINE_SMOOTH_HINT, GL11.GL_NICEST);
-        GL11.glHint(GL11.GL_POLYGON_SMOOTH_HINT, GL11.GL_NICEST);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        Color.color(color);
-    
-        GL11.glLineWidth(thickness);
-        GL11.glBegin(GL11.GL_LINES);
-        GL11.glVertex2i(parentX + pos1X, parentY + pos1Y);
-        GL11.glVertex2i(parentX + pos2X, parentY + pos2Y);
-        GL11.glEnd();
-    
-        GL11.glDisable(GL11.GL_LINE_SMOOTH);
-        GL11.glDisable(GL11.GL_POLYGON_SMOOTH);
-        GL11.glDisable(GL11.GL_BLEND);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-        Color.color(0xFFFFFFFF);
-        
-        GL11.glPopMatrix();
+    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+        int posX = parentX + this.pos1X;
+        int posY = parentY + this.pos1Y;
+
+        matrixStack.pushPose();
+        matrixStack.translate(posX+(thickness>>1), posY+(thickness>>1), 0);
+        matrixStack.mulPose(Vector3f.ZP.rotationDegrees((float)angle));
+        matrixStack.translate(-(posX+(thickness>>1)), -(posY+(thickness>>1)), 0);
+        GuiComponent.fill(matrixStack, posX, posY, posX + this.length, posY + this.thickness, color);
+        matrixStack.popPose();
     }
     
     @Override
-    public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-    
-    }
+    public void renderHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){}
 }

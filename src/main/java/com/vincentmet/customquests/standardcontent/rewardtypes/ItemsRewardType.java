@@ -1,20 +1,28 @@
 package com.vincentmet.customquests.standardcontent.rewardtypes;
 
-import com.google.gson.*;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.*;
+import com.vincentmet.customquests.api.ApiUtils;
+import com.vincentmet.customquests.api.IItemStacksProvider;
+import com.vincentmet.customquests.api.IRewardType;
 import com.vincentmet.customquests.helpers.MouseButton;
+import com.vincentmet.customquests.helpers.TagHelper;
 import com.vincentmet.customquests.integrations.jei.JEIHelper;
-import java.util.*;
-import java.util.function.Consumer;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	private static ResourceLocation ID = new ResourceLocation(Ref.MODID, "items");
@@ -24,8 +32,8 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	private int count;
 	private String ogNBT;
 	
-	private int parentQuestId;
-	private int parentRewardId;
+	private int questId;
+	private int rewardId;
 	
 	@Override
 	public ResourceLocation getId(){
@@ -33,7 +41,7 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	}
 	
 	@Override
-	public void executeReward(PlayerEntity player){
+	public void executeReward(Player player){
 		ItemHandlerHelper.giveItemToPlayer(player, stack);
 	}
 	
@@ -43,13 +51,13 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	}
 	
 	@Override
-	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		return ()->Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, stack, mouseX, mouseY);
+	public Runnable onSlotHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		return ()->Minecraft.getInstance().screen.renderTooltip(matrixStack, stack, mouseX, mouseY);
 	}
 	
 	@Override
 	public String getText(){
-		return stack.getCount() + "x " + stack.getItem().getName().getString();
+		return stack.getCount() + "x " + stack.getItem().getDescription().getString();
 	}
 	
 	@Override
@@ -65,7 +73,7 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	
 	@Override
 	public String toString(){
-		return stack.getCount() + "x " + stack.getItem().getName().getString();
+		return stack.getCount() + "x " + stack.getItem().getDescription().getString();
 	}
 	
 	@Override
@@ -75,7 +83,7 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 			if(jsonElement.isJsonPrimitive()){
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isNumber()){
-					parentQuestId = jsonPrimitive.getAsInt();
+					questId = jsonPrimitive.getAsInt();
 				}
 			}
 		}
@@ -84,7 +92,7 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 			if(jsonElement.isJsonPrimitive()){
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isNumber()){
-					parentRewardId = jsonPrimitive.getAsInt();
+					rewardId = jsonPrimitive.getAsInt();
 				}
 			}
 		}
@@ -95,21 +103,26 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ogRL = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
-					if(ogRL == null){
-						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > item': Value is not a valid item, please use a valid item id, defaulting to 'minecraft:grass_block'!");
+					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
+					if(ogRL != null){
+						if(!TagHelper.doesTagExist(ogRL) && !ForgeRegistries.ITEMS.containsKey(ogRL)){
+							Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > item': Value is not a valid item that exists in the game, please use a valid item, defaulting to 'minecraft:grass_block'!");
+							ogRL = Blocks.GRASS_BLOCK.getRegistryName();
+						}
+					}else{
+						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > item': Value is not a valid item ResourceLocation, defaulting to 'minecraft:grass_block'!");
 						ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 					}
 				}else{
-					Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > item': Value is not a String, defaulting to 'minecraft:grass_block'!");
+					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > item': Value is not a String, defaulting to 'minecraft:grass_block'!");
 					ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > item': Value is not a JsonPrimitive, please use a String, defaulting to 'minecraft:grass_block'!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > item': Value is not a JsonPrimitive, please use a String, defaulting to 'minecraft:grass_block'!");
 				ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > item': Not detected, defaulting to 'minecraft:grass_block'!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > item': Not detected, defaulting to 'minecraft:grass_block'!");
 			ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 		}
 		
@@ -122,19 +135,19 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 					if(jsonPrimitiveIntValue >= 1){
 						count = jsonPrimitiveIntValue;
 					}else{
-						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > count': Value is not >= 1, defaulting to '1'!");
+						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > count': Value is not >= 1, defaulting to '1'!");
 						count = 1;
 					}
 				}else{
-					Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > count': Value is not an Integer, defaulting to '1'!");
+					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > count': Value is not an Integer, defaulting to '1'!");
 					count = 1;
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > count': Value is not a JsonPrimitive, please use a Double, defaulting to '1'!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > count': Value is not a JsonPrimitive, please use a Double, defaulting to '1'!");
 				count = 1;
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > count': Not detected, defaulting to '1'!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > count': Not detected, defaulting to '1'!");
 			count = 1;
 		}
 		
@@ -145,19 +158,19 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 				if(jsonPrimitive.isString()){
 					ogNBT = jsonPrimitive.getAsString();
 					if(ogNBT == null || ogNBT.equals("")){
-						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > nbt': Value is not valid NBT, defaulting to '{ }'!");
+						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Value is not valid NBT, defaulting to '{ }'!");
 						ogNBT = "{}";
 					}
 				}else{
-					Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > nbt': Value is not a String, defaulting to '{ }'!");
+					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Value is not a String, defaulting to '{ }'!");
 					ogNBT = "{}";
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > nbt': Value is not a JsonPrimitive, please use a String, defaulting to '{ }'!");
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Value is not a JsonPrimitive, please use a String, defaulting to '{ }'!");
 				ogNBT = "{}";
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > nbt': Not detected, defaulting to '{ }'!");
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Not detected, defaulting to '{ }'!");
 			ogNBT = "{}";
 		}
 		stack = new ItemStack(ForgeRegistries.ITEMS.getValue(ogRL), count);

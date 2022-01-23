@@ -1,6 +1,6 @@
 package com.vincentmet.customquests.gui;
 
-public class ScreenManager{
+public class QuestingScreenManager{
 	private int currentlySelectedChapterId = -1;
 	private int currentlySelectedQuestId = -1;
 	

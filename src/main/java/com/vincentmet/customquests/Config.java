@@ -2,10 +2,12 @@ package com.vincentmet.customquests;
 
 import com.google.gson.*;
 import com.vincentmet.customquests.api.ApiUtils;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Config {
     
@@ -158,7 +160,7 @@ public class Config {
             return EffectiveSide.get().isClient() ? ServerToClientSyncedConfig.BACKUPS : ServerConfig.BACKUPS;
         }
         
-        public static boolean isEditModeOnByDefault(){
+        public static boolean isEditModeOn(){
             return EffectiveSide.get().isClient() ? ServerToClientSyncedConfig.EDIT_MODE : ServerConfig.EDIT_MODE;
         }
     }

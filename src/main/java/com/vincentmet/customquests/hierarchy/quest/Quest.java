@@ -3,10 +3,13 @@ package com.vincentmet.customquests.hierarchy.quest;
 import com.google.gson.*;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
+import com.vincentmet.customquests.gui.editor.IEditorEntry;
+import com.vincentmet.customquests.gui.editor.IEditorPage;
 import com.vincentmet.customquests.hierarchy.chapter.Chapter;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
+public class Quest implements IJsonObjectProvider, IJsonObjectProcessor, IEditorPage {
 	private final int questId;
 	private final QuestButton button;
 	private TextType title;
@@ -280,5 +283,10 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor{
 	
 	public boolean hasChapter(){
 		return QuestingStorage.getSidedChaptersMap().values().stream().anyMatch(chapter->chapter.getQuests().contains(questId));
+	}
+
+	@Override
+	public void addPageEntries(List<IEditorEntry> list) {
+
 	}
 }

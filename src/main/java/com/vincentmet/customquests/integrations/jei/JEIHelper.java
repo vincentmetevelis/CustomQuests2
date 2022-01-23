@@ -2,11 +2,10 @@ package com.vincentmet.customquests.integrations.jei;
 
 import mezz.jei.api.recipe.IFocus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 
 public class JEIHelper{
-    
     public static boolean isRuntimePresent(){
         try{
             Class.forName("mezz.jei.api.IModPlugin");
@@ -32,12 +31,12 @@ public class JEIHelper{
     }
     
     public static boolean hasRecipe(ItemStack stack){
-        long count = Minecraft.getInstance().world.getRecipeManager().getRecipes().stream().filter(iRecipe -> iRecipe.getRecipeOutput().getItem().equals(stack.getItem())).count();
+        long count = Minecraft.getInstance().level.getRecipeManager().getRecipes().stream().filter(iRecipe -> iRecipe.getResultItem().getItem().equals(stack.getItem())).count();
         return count>0;
     }
     
     public static boolean hasUse(ItemStack stack){
-        long count = Minecraft.getInstance().world.getRecipeManager().getRecipes()
+        long count = Minecraft.getInstance().level.getRecipeManager().getRecipes()
                                                   .stream()
                                                   .filter(recipe -> recipe.getIngredients().stream().noneMatch(ingredient->ingredient.test(stack)))
                                                   .count();

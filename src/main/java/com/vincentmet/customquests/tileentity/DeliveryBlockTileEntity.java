@@ -1,27 +1,31 @@
 package com.vincentmet.customquests.tileentity;
 
 import com.vincentmet.customquests.ItemStackHandlerCapability;
-import javax.annotation.*;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.*;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
-public class DeliveryBlockTileEntity extends TileEntity{
-	private PlayerEntity currentSubmitter;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+public class DeliveryBlockTileEntity extends BlockEntity {
+	private Player currentSubmitter;
 	
 	private final ItemStackHandlerCapability itemHandler = new ItemStackHandlerCapability(null, this);;
 	private final LazyOptional<IItemHandler> handler = LazyOptional.of(()->itemHandler);
 	
-	public DeliveryBlockTileEntity(){
-		super(null/*Objects.TileEntities.DELIVERY_BLOCK*/);
+	public DeliveryBlockTileEntity(BlockPos pos, BlockState state){
+		super(null/*Objects.TileEntities.DELIVERY_BLOCK*/, pos, state);
 	}
 	
-	public void setCurrentSubmitter(PlayerEntity currentSubmitter){
+	public void setCurrentSubmitter(Player currentSubmitter){
 		this.currentSubmitter = currentSubmitter;
 		itemHandler.setPlayer(currentSubmitter);
 	}
@@ -42,16 +46,15 @@ public class DeliveryBlockTileEntity extends TileEntity{
 	}
 	
 	@Override
-	public CompoundNBT write(CompoundNBT compound){
+	public void saveAdditional(CompoundTag compound){
 		if(currentSubmitter!=null){
-			compound.putUniqueId("currentSubmitter", currentSubmitter.getUniqueID());
+			compound.putUUID("currentSubmitter", currentSubmitter.getUUID());
 		}
-		return super.write(compound);
 	}
 	
 	@Override
-	public void read(BlockState state, CompoundNBT compound){
-		super.read(state, compound);
+	public void load(CompoundTag compound){
+		super.load(compound);
 		if(compound.contains("currentSubmitter")){
 			//setCurrentSubmitter(compound.getUniqueId("currentSubmitter"));//fixme DELIVERYBLOCK
 		}

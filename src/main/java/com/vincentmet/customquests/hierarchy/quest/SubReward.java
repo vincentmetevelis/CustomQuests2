@@ -1,9 +1,14 @@
 package com.vincentmet.customquests.hierarchy.quest;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.*;
-import net.minecraft.util.ResourceLocation;
+import com.vincentmet.customquests.api.CQRegistry;
+import com.vincentmet.customquests.api.IJsonObjectProcessor;
+import com.vincentmet.customquests.api.IJsonObjectProvider;
+import com.vincentmet.customquests.api.IRewardType;
+import net.minecraft.resources.ResourceLocation;
 
 public class SubReward implements IJsonObjectProvider, IJsonObjectProcessor{
 	private final int parentQuestId;

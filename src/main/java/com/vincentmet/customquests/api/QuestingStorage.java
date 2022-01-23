@@ -4,9 +4,11 @@ import com.vincentmet.customquests.hierarchy.chapter.Chapter;
 import com.vincentmet.customquests.hierarchy.party.Party;
 import com.vincentmet.customquests.hierarchy.progress.QuestingPlayer;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
-import java.util.*;
-import net.minecraft.util.SoundEvent;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class QuestingStorage{
 	public static final Map<String, SoundEvent> SOUNDS = new HashMap<>();

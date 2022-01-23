@@ -3,11 +3,14 @@ package com.vincentmet.customquests.hierarchy.quest;
 import com.google.gson.*;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
+import com.vincentmet.customquests.gui.editor.EditorEntryWrapper;
+import com.vincentmet.customquests.gui.editor.IEditorEntry;
+import com.vincentmet.customquests.gui.editor.IEditorPage;
 import com.vincentmet.customquests.helpers.IntCounter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DependencyList extends HashSet<Integer> implements IJsonObjectProcessor, IJsonObjectProvider{
+public class DependencyList extends HashSet<Integer> implements IJsonObjectProcessor, IJsonObjectProvider, IEditorPage {
 	private LogicType logicType = LogicType.AND;
 	private final int parentQuestId;
 	
@@ -98,5 +101,10 @@ public class DependencyList extends HashSet<Integer> implements IJsonObjectProce
 	
 	public LogicType getLogicType(){
 		return logicType;
+	}
+
+	@Override
+	public void addPageEntries(List<IEditorEntry> list) {
+		//todo list.add(new EditorEntryWrapper());
 	}
 }

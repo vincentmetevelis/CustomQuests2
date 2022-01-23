@@ -1,18 +1,21 @@
 package com.vincentmet.customquests.api;
 
-import com.vincentmet.customquests.helpers.*;
+import com.vincentmet.customquests.helpers.MouseButton;
+import com.vincentmet.customquests.helpers.QuadConsumer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+
 import java.util.UUID;
-import net.minecraft.util.text.*;
 
 public class ButtonContext{
-	private ITextComponent text = new StringTextComponent("uwu");
+	private Component text = new TextComponent("uwu");
 	private QuadConsumer<MouseButton, UUID, Integer, Integer> onClick = (mouseButton, uuid, questId, taskId)->{};
 	
-	public ITextComponent getText(){
+	public Component getText(){
 		return text;
 	}
 	
-	public ButtonContext setText(ITextComponent text){
+	public ButtonContext setText(Component text){
 		this.text = text;
 		return this;
 	}

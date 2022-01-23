@@ -3,11 +3,13 @@ package com.vincentmet.customquests;
 import com.vincentmet.customquests.command.CQCommand;
 import com.vincentmet.customquests.network.messages.PacketHandler;
 import com.vincentmet.customquests.standardcontent.StandardContentRegistry;
+import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.*;
-import net.minecraftforge.fml.event.server.*;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
 
@@ -37,15 +39,16 @@ public class BaseClass{
 		StandardContentRegistry.registerRewardTypes();
 		StandardContentRegistry.registerButtonShapes();
 		StandardContentRegistry.registerTextTypes();
+		StandardContentRegistry.registerEditorFieldTypes();
 	}
 	
-	private void serverStopping(final FMLServerStoppingEvent event){
+	private void serverStopping(final ServerStoppingEvent event){
     	Config.writeConfigToDisk(Ref.PATH_CONFIG, "config.json");
 	}
 	
-	private void serverStartup(final FMLServerStartingEvent event){
+	private void serverStartup(final ServerStartingEvent event){
     	//Main
 		Ref.currentServerInstance = event.getServer();
-        CQCommand.register(event.getServer().getCommandManager().getDispatcher());
+        CQCommand.register(event.getServer().getCommands().getDispatcher());
 	}
 }

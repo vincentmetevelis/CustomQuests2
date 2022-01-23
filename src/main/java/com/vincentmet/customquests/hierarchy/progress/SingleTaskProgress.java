@@ -1,12 +1,16 @@
 package com.vincentmet.customquests.hierarchy.progress;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.helpers.*;
+import com.vincentmet.customquests.helpers.BooleanContainer;
+import com.vincentmet.customquests.helpers.IntCounter;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
+
 import java.util.*;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
 
 public class SingleTaskProgress extends HashMap<Integer, SingleSubtaskProgress> implements IJsonObjectProcessor, IJsonObjectProvider{
 	private boolean allSubtasksCompleted = false;
@@ -144,9 +148,9 @@ public class SingleTaskProgress extends HashMap<Integer, SingleSubtaskProgress> 
 		return taskId;
 	}
 	
-	public void executeTaskButton(PlayerEntity player){
+	public void executeTaskButton(Player player){
 		if(EffectiveSide.get().isServer()){
-			QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().entrySet().stream().filter(entry->!CombinedProgressHelper.isSubtaskCompleted(player.getUniqueID(), questId, taskId, entry.getKey())).forEach(entry -> entry.getValue().getSubtask().executeSubtaskButton(player));
+			QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().entrySet().stream().filter(entry->!CombinedProgressHelper.isSubtaskCompleted(player.getUUID(), questId, taskId, entry.getKey())).forEach(entry -> entry.getValue().getSubtask().executeSubtaskButton(player));
 		}
 	}
 }

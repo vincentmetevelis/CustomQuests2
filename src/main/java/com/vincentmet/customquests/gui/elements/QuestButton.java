@@ -1,14 +1,18 @@
 package com.vincentmet.customquests.gui.elements;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.helpers.*;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.vincentmet.customquests.api.ApiUtils;
+import com.vincentmet.customquests.api.IButtonShape;
+import com.vincentmet.customquests.api.IQuestingTexture;
+import com.vincentmet.customquests.helpers.MouseButton;
+import com.vincentmet.customquests.helpers.TooltipBuffer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.network.chat.Component;
+
 import java.util.List;
 import java.util.function.Consumer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.util.text.ITextComponent;
-import org.lwjgl.opengl.GL11;
 
 public class QuestButton implements MovableScalableCanvasEntry{
 	private int parentX;
@@ -16,14 +20,14 @@ public class QuestButton implements MovableScalableCanvasEntry{
 	
 	private State buttonState;
 	private IButtonShape shape;
-	private List<ITextComponent> tooltipLines;
+	private List<Component> tooltipLines;
 	private Consumer<MouseButton> onClickCallback;
 	private int x, y;
 	private final IQuestingTexture icon;
 	private final int questId;
 	private final float buttonScale;
 	
-	public QuestButton(int parentX, int parentY, int x, int y, int questId, IQuestingTexture icon, IButtonShape shape, State buttonState, float scale, Consumer<MouseButton> onClickCallback, List<ITextComponent> tooltipLines){
+	public QuestButton(int parentX, int parentY, int x, int y, int questId, IQuestingTexture icon, IButtonShape shape, State buttonState, float scale, Consumer<MouseButton> onClickCallback, List<Component> tooltipLines){
 		this.parentX = parentX;
 		this.parentY = parentY;
 		
@@ -39,27 +43,27 @@ public class QuestButton implements MovableScalableCanvasEntry{
 	}
 	
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		GL11.glPushMatrix();
-		GL11.glTranslated(parentX + x, parentY + y, 0);
-		GL11.glScalef(buttonScale, buttonScale, 1);
-		GL11.glTranslated(-(parentX + x), -(parentY + y), 0);
-		Minecraft.getInstance().getTextureManager().bindTexture(shape.getTexture());
+	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
+		matrixStack.pushPose();
+		matrixStack.translate(parentX + x, parentY + y, 0);
+		matrixStack.scale(buttonScale, buttonScale, 1);
+		matrixStack.translate(-(parentX + x), -(parentY + y), 0);
+		RenderSystem.setShaderTexture(0, shape.getTexture());
 		if((buttonState.equals(State.NORMAL) || buttonState.equals(State.HOVER)) && ApiUtils.isMouseInBounds(mouseX, mouseY, parentX + x, parentY + y, x + parentX + (int)(buttonState.WIDTH * buttonScale), y + parentY + (int)(buttonState.HEIGHT * buttonScale))){
 			buttonState = State.HOVER;
 		}else if(buttonState.equals(State.NORMAL) || buttonState.equals(State.HOVER)){
 			buttonState = State.NORMAL;
 		}
-		AbstractGui.blit(matrixStack, parentX + x, parentY + y, buttonState.u, buttonState.v, buttonState.WIDTH, buttonState.HEIGHT, 72, 72);
-		icon.render(matrixStack, buttonScale, parentX + x + 4, parentY + y + 4, mouseX, mouseY);
-		GL11.glPopMatrix();
+		GuiComponent.blit(matrixStack, parentX + x, parentY + y, buttonState.u, buttonState.v, buttonState.WIDTH, buttonState.HEIGHT, 72, 72);
+		icon.render(matrixStack, buttonScale, parentX + x, parentY + y, 0.25f, 0.25f, mouseX, mouseY);
+		matrixStack.popPose();
 	}
 	
 	@Override
-	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
+	public void renderHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, parentX + x, parentY + y, parentX + x + (int)(buttonState.WIDTH * buttonScale), parentY + y + (int)(buttonState.HEIGHT * buttonScale))){
 			TooltipBuffer.tooltipBuffer.add(()->{
-				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.func_243308_b(matrixStack, tooltipLines, mouseX, mouseY);
+				if(Minecraft.getInstance().screen != null) Minecraft.getInstance().screen.renderComponentTooltip(matrixStack, tooltipLines, mouseX, mouseY);
 			});
 		}
 	}

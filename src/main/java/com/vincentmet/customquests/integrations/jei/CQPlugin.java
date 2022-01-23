@@ -1,9 +1,10 @@
 package com.vincentmet.customquests.integrations.jei;
 
 import com.vincentmet.customquests.Ref;
-import mezz.jei.api.*;
+import mezz.jei.api.IModPlugin;
+import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 @JeiPlugin
 public class CQPlugin implements IModPlugin{

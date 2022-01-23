@@ -1,10 +1,13 @@
 package com.vincentmet.customquests.hierarchy.quest;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.*;
+import com.vincentmet.customquests.api.IJsonObjectProcessor;
+import com.vincentmet.customquests.api.IJsonObjectProvider;
+import net.minecraft.world.entity.player.Player;
+
 import java.util.HashMap;
-import net.minecraft.entity.player.PlayerEntity;
 
 public class SubRewards extends HashMap<Integer, SubReward> implements IJsonObjectProvider, IJsonObjectProcessor{
 	private final int parentQuestId;
@@ -51,7 +54,7 @@ public class SubRewards extends HashMap<Integer, SubReward> implements IJsonObje
 		}
 	}
 	
-	public void executeAllSubrewards(PlayerEntity player){
+	public void executeAllSubrewards(Player player){
 		forEach((subtaskId, subtask)->{
 			subtask.getSubreward().executeReward(player);
 		});

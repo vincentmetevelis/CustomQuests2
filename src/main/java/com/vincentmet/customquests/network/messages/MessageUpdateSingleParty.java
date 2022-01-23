@@ -1,14 +1,18 @@
 package com.vincentmet.customquests.network.messages;
 
-import com.google.gson.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.vincentmet.customquests.api.ClientUtils;
 import com.vincentmet.customquests.api.QuestingStorage;
 import com.vincentmet.customquests.gui.QuestingScreen;
 import com.vincentmet.customquests.hierarchy.party.Party;
-import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
+
+import java.util.function.Supplier;
+
 import static com.vincentmet.customquests.Ref.CustomQuests.LOGGER;
 
 public class MessageUpdateSingleParty{
@@ -24,14 +28,14 @@ public class MessageUpdateSingleParty{
 		this.json = json;
 	}
 	
-	public static void encode(MessageUpdateSingleParty packet, PacketBuffer buffer){
+	public static void encode(MessageUpdateSingleParty packet, FriendlyByteBuf buffer){
 		buffer.writeInt(packet.partyId);
-		buffer.writeString(QuestingStorage.getSidedPartiesMap().get(packet.partyId).getJson().toString());
+		buffer.writeUtf(QuestingStorage.getSidedPartiesMap().get(packet.partyId).getJson().toString());
 	}
 	
-	public static MessageUpdateSingleParty decode(PacketBuffer buffer) {
+	public static MessageUpdateSingleParty decode(FriendlyByteBuf buffer) {
 		int partyId = buffer.readInt();
-		String stringJson = buffer.readString();
+		String stringJson = buffer.readUtf();
 		JsonObject json = new JsonParser().parse(stringJson).getAsJsonObject();
 		return new MessageUpdateSingleParty(partyId, json);
 	}
@@ -44,12 +48,13 @@ public class MessageUpdateSingleParty{
 				Party p = new Party(id);
 				p.processJson(data);
 				QuestingStorage.getSidedPartiesMap().put(id, p);
+				ClientUtils.reloadEditorIfOpen();
 				LOGGER.info("Party " + id + " synced!");
 			}catch(NumberFormatException exception){
 				LOGGER.error("Party " + message.partyId + " should be a numeric id");
 				exception.printStackTrace();
 			}
-			Screen currentScreen = Minecraft.getInstance().currentScreen;
+			Screen currentScreen = Minecraft.getInstance().screen;
 			if(currentScreen instanceof QuestingScreen){
 				((QuestingScreen)currentScreen).requestPosRecalc();
 			}

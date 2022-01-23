@@ -2,6 +2,7 @@ package com.vincentmet.customquests.standardcontent;
 
 import com.vincentmet.customquests.api.CQRegistry;
 import com.vincentmet.customquests.standardcontent.buttonshapes.Shape;
+import com.vincentmet.customquests.standardcontent.editorfieldtypes.*;
 import com.vincentmet.customquests.standardcontent.rewardtypes.*;
 import com.vincentmet.customquests.standardcontent.tasktypes.*;
 import com.vincentmet.customquests.standardcontent.texttypes.*;
@@ -59,5 +60,15 @@ public class StandardContentRegistry{
 	public static void registerTextTypes(){
 		CQRegistry.registerTextTypes(TranslationTextType::new);
 		CQRegistry.registerTextTypes(PlainTextTextType::new);
+	}
+	
+	public static void registerEditorFieldTypes(){
+		//CQRegistry.registerEditorEntryDataTypes(RegexTextFieldType::new);//todo continue here?!
+		CQRegistry.registerEditorEntryDataTypes(IntegerFieldType::new);
+		//CQRegistry.registerEditorEntryDataTypes(DoubleFieldType::new);
+		CQRegistry.registerEditorEntryDataTypes(ResourceLocationFieldType::new);
+		CQRegistry.registerEditorEntryDataTypes(PlainTextFieldType::new);
+		//CQRegistry.registerEditorEntryDataTypes(BooleanFieldType::new);//todo continue here?!
+		//CQRegistry.registerEditorEntryDataTypes(DropdownFieldType::new);//todo continue here?!
 	}
 }

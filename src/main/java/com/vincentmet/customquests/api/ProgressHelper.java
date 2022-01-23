@@ -1,11 +1,18 @@
 package com.vincentmet.customquests.api;
 
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.hierarchy.progress.*;
+import com.vincentmet.customquests.hierarchy.progress.QuestingPlayer;
+import com.vincentmet.customquests.hierarchy.progress.UserProgress;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
-import java.util.*;
-import net.minecraft.entity.player.*;
-import net.minecraftforge.fml.common.thread.EffectiveSide;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import static com.vincentmet.customquests.Ref.CustomQuests.LOGGER;
 
 public class ProgressHelper{
@@ -37,10 +44,10 @@ public class ProgressHelper{
 		return false;
 	}
 	
-	public static void executeTaskCallback(PlayerEntity player, int questId, int taskId){
+	public static void executeTaskCallback(Player player, int questId, int taskId){
 		if(EffectiveSide.get().isServer()){
-			QuestingStorage.getSidedPlayersMap().get(player.getUniqueID().toString()).getIndividualProgress().get(questId).get(taskId).executeTaskButton(player);
-			ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
+			QuestingStorage.getSidedPlayersMap().get(player.getStringUUID()).getIndividualProgress().get(questId).get(taskId).executeTaskButton(player);
+			ServerUtils.sendProgressAndParties((ServerPlayer)player);
 		}else{
 			LOGGER.warn("Tried executing task callback on client, this method should only be called on the server!");
 		}
