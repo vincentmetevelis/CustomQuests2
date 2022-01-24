@@ -9,12 +9,12 @@ public class TagHelper{
 	public static List<Item> getEntries(ResourceLocation tag){
 		List<Item> result = new ArrayList<>();
 		if(doesTagExist(tag)){
-			result.addAll(ItemTags.getCollection().get(tag).getAllElements());
+			result.addAll(ItemTags.getAllTags().getTag(tag).getValues());
 		}
 		return result;
 	}
 	
 	public static boolean doesTagExist(ResourceLocation tag){
-		return ItemTags.getCollection().get(tag) != null;
+		return ItemTags.getAllTags().getTag(tag) != null;
 	}
 }

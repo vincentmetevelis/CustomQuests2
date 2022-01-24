@@ -26,7 +26,7 @@ public class XpRewardType implements IRewardType{
     @Override
 	public void executeReward(PlayerEntity player){
 		if(inLevels){
-			player.addExperienceLevel(amount);
+			player.giveExperienceLevels(amount);
 		}else{
 			player.giveExperiencePoints(amount);
 		}

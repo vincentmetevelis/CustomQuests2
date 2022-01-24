@@ -56,27 +56,27 @@ public class XpSubmitTaskType implements ITaskType{
 	
 	@Override
 	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
-			IntCounter xpLeftToHandIn = new IntCounter(getXpCountLeftToHandIn(player.getUniqueID(), questId, taskId, subtaskId));
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
+			IntCounter xpLeftToHandIn = new IntCounter(getXpCountLeftToHandIn(player.getUUID(), questId, taskId, subtaskId));
 			int xpBefore = xpLeftToHandIn.getValue();
 			if(inLevels){
 				if(xpLeftToHandIn.getValue() >= player.experienceLevel){
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, player.experienceLevel);
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, player.experienceLevel);
 					xpLeftToHandIn.add(-player.experienceLevel);
-					player.addExperienceLevel(-player.experienceLevel);
+					player.giveExperienceLevels(-player.experienceLevel);
 				}else{
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, xpLeftToHandIn.getValue());
-					player.addExperienceLevel(-(player.experienceLevel - xpLeftToHandIn.getValue()));
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, xpLeftToHandIn.getValue());
+					player.giveExperienceLevels(-(player.experienceLevel - xpLeftToHandIn.getValue()));
 					xpLeftToHandIn.setValue(0);
 				}
 			}else{
-				if(xpLeftToHandIn.getValue() >= player.experienceTotal){
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, player.experienceTotal);
-					xpLeftToHandIn.add(-player.experienceTotal);
-					player.giveExperiencePoints(-player.experienceTotal);
+				if(xpLeftToHandIn.getValue() >= player.totalExperience){
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, player.totalExperience);
+					xpLeftToHandIn.add(-player.totalExperience);
+					player.giveExperiencePoints(-player.totalExperience);
 				}else{
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, xpLeftToHandIn.getValue());
-					player.giveExperiencePoints(-(player.experienceTotal - xpLeftToHandIn.getValue()));
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, xpLeftToHandIn.getValue());
+					player.giveExperiencePoints(-(player.totalExperience - xpLeftToHandIn.getValue()));
 					xpLeftToHandIn.setValue(0);
 				}
 			}
@@ -89,8 +89,8 @@ public class XpSubmitTaskType implements ITaskType{
 	}
 	
 	public void processValue(PlayerEntity player){
-		if(CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId) >= amount){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+		if(CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId) >= amount){
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
@@ -204,7 +204,7 @@ public class XpSubmitTaskType implements ITaskType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation rl = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ResourceLocation rl = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(rl != null){
 						icon = new ItemSlideshowTexture(rl, new ItemStack(ForgeRegistries.ITEMS.getValue(rl)));
 					}else{

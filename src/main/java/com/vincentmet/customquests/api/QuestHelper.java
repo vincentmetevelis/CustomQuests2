@@ -79,6 +79,6 @@ public class QuestHelper{
 	}
 	
 	public static void executeAllSubrewards(UUID claimer, int questId, int rewardId){
-		QuestingStorage.getSidedQuestsMap().get(questId).getRewards().get(rewardId).getSubRewards().executeAllSubrewards(Ref.currentServerInstance.getPlayerList().getPlayerByUUID(claimer));
+		QuestingStorage.getSidedQuestsMap().get(questId).getRewards().get(rewardId).getSubRewards().executeAllSubrewards(Ref.currentServerInstance.getPlayerList().getPlayer(claimer));
 	}
 }

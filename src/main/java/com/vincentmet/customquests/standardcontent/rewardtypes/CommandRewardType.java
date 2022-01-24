@@ -34,9 +34,9 @@ public class CommandRewardType implements IRewardType{
 	public void executeReward(PlayerEntity player){
 		MinecraftServer ms = player.getServer();
 		if(ms!=null){
-			final CommandDispatcher<CommandSource> dispatcher = ms.getCommandManager().getDispatcher();
+			final CommandDispatcher<CommandSource> dispatcher = ms.getCommands().getDispatcher();
 			try {
-				dispatcher.execute("execute at " + player.getDisplayName().getString() + " run " + command, player.getServer().getCommandSource().withFeedbackDisabled());
+				dispatcher.execute("execute at " + player.getDisplayName().getString() + " run " + command, player.getServer().createCommandSourceStack().withSuppressedOutput());
 			} catch (CommandSyntaxException e) {
 				e.printStackTrace();
 			}
@@ -95,7 +95,7 @@ public class CommandRewardType implements IRewardType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation rl = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ResourceLocation rl = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(rl != null){
 						icon = ForgeRegistries.ITEMS.getValue(rl);
 					}else{

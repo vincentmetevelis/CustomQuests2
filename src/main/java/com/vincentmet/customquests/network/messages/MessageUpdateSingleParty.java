@@ -26,12 +26,12 @@ public class MessageUpdateSingleParty{
 	
 	public static void encode(MessageUpdateSingleParty packet, PacketBuffer buffer){
 		buffer.writeInt(packet.partyId);
-		buffer.writeString(QuestingStorage.getSidedPartiesMap().get(packet.partyId).getJson().toString());
+		buffer.writeUtf(QuestingStorage.getSidedPartiesMap().get(packet.partyId).getJson().toString());
 	}
 	
 	public static MessageUpdateSingleParty decode(PacketBuffer buffer) {
 		int partyId = buffer.readInt();
-		String stringJson = buffer.readString();
+		String stringJson = buffer.readUtf();
 		JsonObject json = new JsonParser().parse(stringJson).getAsJsonObject();
 		return new MessageUpdateSingleParty(partyId, json);
 	}
@@ -49,7 +49,7 @@ public class MessageUpdateSingleParty{
 				LOGGER.error("Party " + message.partyId + " should be a numeric id");
 				exception.printStackTrace();
 			}
-			Screen currentScreen = Minecraft.getInstance().currentScreen;
+			Screen currentScreen = Minecraft.getInstance().screen;
 			if(currentScreen instanceof QuestingScreen){
 				((QuestingScreen)currentScreen).requestPosRecalc();
 			}

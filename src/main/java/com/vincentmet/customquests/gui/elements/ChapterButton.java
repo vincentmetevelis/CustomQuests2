@@ -26,22 +26,22 @@ public class ChapterButton implements ScrollableListEntry{
 	
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		matrixStack.push();
+		matrixStack.pushPose();
 		Color.color(0xFFFFFFFF);
 		this.button.render(matrixStack, mouseX, mouseY, partialTicks);
-		RenderHelper.setupGui3DDiffuseLighting();
+		RenderHelper.setupFor3DItems();
 		icon.render(matrixStack, 1, x + 2, y + 2, mouseX, mouseY);
-		matrixStack.pop();
+		matrixStack.popPose();
 	}
 	
 	@Override
 	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		matrixStack.push();
+		matrixStack.pushPose();
 		Color.color(0xFFFFFFFF);
 		this.button.renderHover(matrixStack, mouseX, mouseY, partialTicks);
-		RenderHelper.setupGui3DDiffuseLighting();
+		RenderHelper.setupFor3DItems();
 		icon.render(matrixStack, 1, x + 2, y + 2, mouseX, mouseY);
-		matrixStack.pop();
+		matrixStack.popPose();
 	}
 	
 	@Override

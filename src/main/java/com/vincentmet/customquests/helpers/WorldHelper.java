@@ -5,14 +5,14 @@ import net.minecraft.util.ResourceLocation;
 
 public class WorldHelper{
     public static boolean isPlayerInDimension(PlayerEntity player, ResourceLocation dimension){
-        return player.getEntityWorld().getDimensionKey().getLocation().equals(dimension);
+        return player.level.dimension().location().equals(dimension);
     }
     
     public static boolean isPlayerInBiome(PlayerEntity player, ResourceLocation biome){
-        return player.getEntityWorld().getBiome(player.getPosition()).getRegistryName().equals(biome);
+        return player.level.getBiome(player.blockPosition()).getRegistryName().equals(biome);
     }
     
     public static boolean isPlayerInRange(PlayerEntity player, int x, int y, int z, int range){
-        return (player.getPosX() >= x-range && player.getPosX() <= x+range) && (player.getPosY() >= y-range && player.getPosY() <= y+range) && (player.getPosZ() >= z-range && player.getPosZ() <= z+range);
+        return (player.getX() >= x-range && player.getX() <= x+range) && (player.getY() >= y-range && player.getY() <= y+range) && (player.getZ() >= z-range && player.getZ() <= z+range);
     }
 }

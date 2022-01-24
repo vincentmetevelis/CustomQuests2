@@ -26,12 +26,12 @@ public class MessageUpdateSingleQuest{
 	
 	public static void encode(MessageUpdateSingleQuest packet, PacketBuffer buffer){
 		buffer.writeInt(packet.questId);
-		buffer.writeString(QuestingStorage.getSidedQuestsMap().get(packet.questId).getJson().toString());
+		buffer.writeUtf(QuestingStorage.getSidedQuestsMap().get(packet.questId).getJson().toString());
 	}
 	
 	public static MessageUpdateSingleQuest decode(PacketBuffer buffer) {
 		int questId = buffer.readInt();
-		String stringJson = buffer.readString();
+		String stringJson = buffer.readUtf();
 		JsonObject json = new JsonParser().parse(stringJson).getAsJsonObject();
 		return new MessageUpdateSingleQuest(questId, json);
 	}
@@ -49,7 +49,7 @@ public class MessageUpdateSingleQuest{
 				LOGGER.error("Quest " + message.questId + " should be a numeric id");
 				exception.printStackTrace();
 			}
-			Screen currentScreen = Minecraft.getInstance().currentScreen;
+			Screen currentScreen = Minecraft.getInstance().screen;
 			if(currentScreen instanceof QuestingScreen){
 				((QuestingScreen)currentScreen).requestPosRecalc();
 			}

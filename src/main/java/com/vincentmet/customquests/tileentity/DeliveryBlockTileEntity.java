@@ -42,16 +42,16 @@ public class DeliveryBlockTileEntity extends TileEntity{
 	}
 	
 	@Override
-	public CompoundNBT write(CompoundNBT compound){
+	public CompoundNBT save(CompoundNBT compound){
 		if(currentSubmitter!=null){
-			compound.putUniqueId("currentSubmitter", currentSubmitter.getUniqueID());
+			compound.putUUID("currentSubmitter", currentSubmitter.getUUID());
 		}
-		return super.write(compound);
+		return super.save(compound);
 	}
 	
 	@Override
-	public void read(BlockState state, CompoundNBT compound){
-		super.read(state, compound);
+	public void load(BlockState state, CompoundNBT compound){
+		super.load(state, compound);
 		if(compound.contains("currentSubmitter")){
 			//setCurrentSubmitter(compound.getUniqueId("currentSubmitter"));//fixme DELIVERYBLOCK
 		}

@@ -57,15 +57,15 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 	
 	@Override
 	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
 			IntCounter correctItemInInvCount = new IntCounter();
-			player.inventory.mainInventory.forEach(invStack -> {
+			player.inventory.items.forEach(invStack -> {
 				items.stream()
 					 .filter(itemStack -> itemStack.getItem().equals(invStack.getItem()))
 					 .filter(itemStack -> {
 						 BooleanContainer invalid = new BooleanContainer(false);
 						 if(invStack.hasTag() && itemStack.hasTag()){
-							 itemStack.getTag().keySet().forEach(key -> {
+							 itemStack.getTag().getAllKeys().forEach(key -> {
 								 invalid.set(!invStack.getTag().contains(key));
 							 });
 						 }
@@ -80,16 +80,16 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 	}
 	
 	public void processValue(IntCounter correctItemInInvCount, PlayerEntity player){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
-			int oldValue = CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId);
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
+			int oldValue = CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId);
 			int newValue = correctItemInInvCount.getValue();
 			if(newValue != oldValue){
-				CombinedProgressHelper.setValue(player.getUniqueID(), questId, taskId, subtaskId, correctItemInInvCount.getValue());
+				CombinedProgressHelper.setValue(player.getUUID(), questId, taskId, subtaskId, correctItemInInvCount.getValue());
 				ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
 			}
 		}
 		if(correctItemInInvCount.getValue() >= count){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
@@ -105,13 +105,13 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 	
 	@Override
 	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks, ClientPlayerEntity player){
-		return ()->Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, icon.getCurrentItemStack(), mouseX, mouseY);
+		return ()->Minecraft.getInstance().screen.renderTooltip(matrixStack, icon.getCurrentItemStack(), mouseX, mouseY);
 	}
 	
 	@Override
 	public String getText(ClientPlayerEntity player){
 		if(items.size()==1){
-			return count + "x " + items.get(0).getItem().getName().getString();
+			return count + "x " + items.get(0).getItem().getDescription().getString();
 		}else{
 			return count + "x " + new TranslationTextComponent(Ref.MODID + ".general.tag").getString() + ": " + Arrays.stream(ogRL.getPath().split("/")).map(StringUtils::capitalize).reduce((s, s2) ->s + "/" + s2).orElse(new TranslationTextComponent(Ref.MODID + ".general.tag.empty").getString());
 		}
@@ -171,7 +171,7 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ogRL = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(ogRL == null){
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > item': Value is not a valid item, please use a valid item id, defaulting to 'minecraft:grass_block'!");
 						ogRL = Blocks.GRASS_BLOCK.getRegistryName();

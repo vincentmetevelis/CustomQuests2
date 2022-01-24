@@ -8,8 +8,8 @@ import static org.lwjgl.opengl.GL11.*;
 @OnlyIn(Dist.CLIENT)
 public class GLScissor{
 	public static void enable(int x, int y, int width, int height){
-		MainWindow mw = Minecraft.getInstance().getMainWindow();
-		double s = mw.getGuiScaleFactor();
+		MainWindow mw = Minecraft.getInstance().getWindow();
+		double s = mw.getGuiScale();
 		
 		if(width<0)width=0;
 		if(height<0)height=0;
@@ -19,7 +19,7 @@ public class GLScissor{
 		glEnable(GL_SCISSOR_TEST);
 		glScissor(
 				(int)(x * s),
-				(int)(mw.getFramebufferHeight() - ((double)(y + height) * s)),
+				(int)(mw.getHeight() - ((double)(y + height) * s)),
 				(int)(width * s),
 				(int)(height * s)
 		);

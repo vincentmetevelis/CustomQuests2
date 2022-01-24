@@ -33,12 +33,12 @@ public class ForgeEventHandler{
 	@SubscribeEvent
 	public static void onWorldStart(WorldEvent.Load event){
 		//Main
-		if(event.getWorld() instanceof ServerWorld && event.getWorld().getDimensionType().isSame(DimensionType.OVERWORLD_TYPE)){
+		if(event.getWorld() instanceof ServerWorld && event.getWorld().dimensionType().equalTo(DimensionType.DEFAULT_OVERWORLD)){
 			Ref.currentServerInstance = ((ServerWorld)event.getWorld()).getServer();
-			Ref.currentWorldDirectory = ((ServerWorld)event.getWorld()).getServer().func_240776_a_(new FolderName("."));
+			Ref.currentWorldDirectory = ((ServerWorld)event.getWorld()).getServer().getWorldPath(new FolderName("."));
 			Ref.currentProgressDirectory = Ref.currentWorldDirectory.resolve(Ref.MODID);
 			Ref.progressBackupDirectory = Ref.currentProgressDirectory.resolve("backups");
-			if(!event.getWorld().isRemote()){
+			if(!event.getWorld().isClientSide()){
 				MinecraftForge.EVENT_BUS.post(new DataLoadingEvent.Pre());
 				CQHelper.readAllFilesAndPutIntoHashmaps();
 				MinecraftForge.EVENT_BUS.post(new DataLoadingEvent.Post());
@@ -49,7 +49,7 @@ public class ForgeEventHandler{
 	@SubscribeEvent
 	public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event){
 		//Main
-		CQHelper.generateMissingProgress(event.getPlayer().getUniqueID());
+		CQHelper.generateMissingProgress(event.getPlayer().getUUID());
 		CQHelper.generateMissingPartyProgress();
 		ServerUtils.sendQuestsAndChapters((ServerPlayerEntity)event.getPlayer());
 		ServerUtils.sendProgressAndParties((ServerPlayerEntity)event.getPlayer());
@@ -68,7 +68,7 @@ public class ForgeEventHandler{
 	@SubscribeEvent
 	public static void onWorldSave(WorldEvent.Save event){
 		//Main
-		if(event.getWorld() instanceof ServerWorld && event.getWorld().getDimensionType().isSame(DimensionType.OVERWORLD_TYPE)){
+		if(event.getWorld() instanceof ServerWorld && event.getWorld().dimensionType().equalTo(DimensionType.DEFAULT_OVERWORLD)){
 			CQHelper.writeQuestsAndChaptersToFile(Ref.PATH_CONFIG, Ref.FILENAME_QUESTS + Ref.FILE_EXT_JSON);
 			CQHelper.writePlayersAndPartiesToFile(Ref.currentProgressDirectory, Ref.FILENAME_PARTIES + Ref.FILE_EXT_JSON);
 		}
@@ -78,7 +78,7 @@ public class ForgeEventHandler{
 	public static void onWorldTick(TickEvent.WorldTickEvent event){
 		//Main
 		if(event.side.isServer() && event.world.getGameTime() % 100 == 0 && event.phase == TickEvent.Phase.START){
-			event.world.getPlayers().forEach(playerEntity -> MinecraftForge.EVENT_BUS.post(new CheckCycleEvent(playerEntity)));
+			event.world.players().forEach(playerEntity -> MinecraftForge.EVENT_BUS.post(new CheckCycleEvent(playerEntity)));
 		}
 	}
 	
@@ -86,7 +86,7 @@ public class ForgeEventHandler{
 	public static void onCraft(PlayerEvent.ItemCraftedEvent event){
 		//Standard Content
 		if(EffectiveSide.get().isServer()){
-			UUID uuid = event.getPlayer().getUniqueID();
+			UUID uuid = event.getPlayer().getUUID();
 			ItemCraftTaskType.TRACKING_LIST
 					.stream()
 					.filter(entry -> entry.getPlayer().toString().equals(uuid.toString()))
@@ -103,9 +103,9 @@ public class ForgeEventHandler{
 	public static void onEntityKill(LivingDeathEvent event){
 		//Standard Content
 		if(EffectiveSide.get().isServer()){
-			Entity source = event.getSource().getTrueSource();
+			Entity source = event.getSource().getEntity();
 			if(source instanceof PlayerEntity){
-				UUID uuid = source.getUniqueID();
+				UUID uuid = source.getUUID();
 				HuntTaskType.TRACKING_LIST
 						.stream()
 						.filter(entry -> entry.getPlayer().toString().equals(uuid.toString()))
@@ -126,7 +126,7 @@ public class ForgeEventHandler{
 			PlayerEntity player = event.getPlayer();
 			BlockMinedTaskType.TRACKING_LIST
 					.stream()
-					.filter(entry -> entry.getPlayer().toString().equals(player.getUniqueID().toString()))
+					.filter(entry -> entry.getPlayer().toString().equals(player.getStringUUID()))
 					.forEach(entry -> {
 						QuestingStorage.getSidedQuestsMap().get(entry.getQuestId())
 									   .getTasks().get(entry.getTaskId())
@@ -145,7 +145,7 @@ public class ForgeEventHandler{
 				PlayerEntity player = (PlayerEntity)event.getEntity();
 				BlockPlacedTaskType.TRACKING_LIST
 						.stream()
-						.filter(entry -> entry.getPlayer().toString().equals(player.getUniqueID().toString()))
+						.filter(entry -> entry.getPlayer().toString().equals(player.getStringUUID()))
 						.forEach(entry -> {
 							QuestingStorage.getSidedQuestsMap().get(entry.getQuestId())
 										   .getTasks().get(entry.getTaskId())
@@ -159,8 +159,8 @@ public class ForgeEventHandler{
 	@SubscribeEvent
 	public static void onSubtaskComplete(QuestEvent.Task.Subtask.Completed event){
 		//Main
-		if(CombinedProgressHelper.isTaskCompleted(event.getPlayer().getUniqueID(), event.getQuestId(), event.getTaskId())){
-			CombinedProgressHelper.completeTask(event.getPlayer().getUniqueID(), event.getQuestId(), event.getTaskId());
+		if(CombinedProgressHelper.isTaskCompleted(event.getPlayer().getUUID(), event.getQuestId(), event.getTaskId())){
+			CombinedProgressHelper.completeTask(event.getPlayer().getUUID(), event.getQuestId(), event.getTaskId());
 		}
 		ServerUtils.sendProgressAndParties(event.getPlayer());
 	}
@@ -168,10 +168,10 @@ public class ForgeEventHandler{
 	@SubscribeEvent
 	public static void onTaskComplete(QuestEvent.Task.Completed event){
 		//Main
-		if(QuestingStorage.getSidedPlayersMap().get(event.getPlayer().getUniqueID().toString()).getIndividualProgress().get(event.getQuestId()).areAllTasksCompleted()){
-			QuestingStorage.getSidedPlayersMap().get(event.getPlayer().getUniqueID().toString()).getIndividualProgress().get(event.getQuestId()).setAllTasksCompleted(true);
-			QuestingStorage.getSidedPlayersMap().get(event.getPlayer().getUniqueID().toString()).getIndividualProgress().getIndividuallyCompletedQuests().add(event.getQuestId());
-			CombinedProgressHelper.completeQuest(event.getPlayer().getUniqueID(), event.getQuestId());
+		if(QuestingStorage.getSidedPlayersMap().get(event.getPlayer().getStringUUID()).getIndividualProgress().get(event.getQuestId()).areAllTasksCompleted()){
+			QuestingStorage.getSidedPlayersMap().get(event.getPlayer().getStringUUID()).getIndividualProgress().get(event.getQuestId()).setAllTasksCompleted(true);
+			QuestingStorage.getSidedPlayersMap().get(event.getPlayer().getStringUUID()).getIndividualProgress().getIndividuallyCompletedQuests().add(event.getQuestId());
+			CombinedProgressHelper.completeQuest(event.getPlayer().getUUID(), event.getQuestId());
 		}
 		ServerUtils.sendProgressAndParties(event.getPlayer());
 	}
@@ -182,23 +182,23 @@ public class ForgeEventHandler{
 		ServerUtils.sendProgressAndParties(event.getPlayer());
 		MinecraftServer server = event.getPlayer().getServer();
 		if(server != null){
-			if(ProgressHelper.isPlayerInParty(event.getPlayer().getUniqueID())){
-				int partyId = ProgressHelper.getPlayerParty(event.getPlayer().getUniqueID());
+			if(ProgressHelper.isPlayerInParty(event.getPlayer().getUUID())){
+				int partyId = ProgressHelper.getPlayerParty(event.getPlayer().getUUID());
 				PartyHelper.getAllUUIDsInParty(partyId).forEach(uuid -> {
-					ServerPlayerEntity playerEntity = server.getPlayerList().getPlayerByUUID(uuid);
+					ServerPlayerEntity playerEntity = server.getPlayerList().getPlayer(uuid);
 					if(playerEntity != null){
 						try{
 							String title = new TranslationTextComponent("customquests.general.quest_completed").getString();
-							server.getCommandManager().getDispatcher().execute("title " + playerEntity.getDisplayName().getString() + " title \"" + title + "\"", server.getCommandSource().withFeedbackDisabled());
-							server.getCommandManager().getDispatcher().execute("title " + playerEntity.getDisplayName().getString() + " subtitle \"" + ClientUtils.colorify(QuestHelper.getQuestFromId(event.getQuestId()).getTitle().getText())  + " #" + event.getQuestId() + "\"", server.getCommandSource().withFeedbackDisabled());
+							server.getCommands().getDispatcher().execute("title " + playerEntity.getDisplayName().getString() + " title \"" + title + "\"", server.createCommandSourceStack().withSuppressedOutput());
+							server.getCommands().getDispatcher().execute("title " + playerEntity.getDisplayName().getString() + " subtitle \"" + ClientUtils.colorify(QuestHelper.getQuestFromId(event.getQuestId()).getTitle().getText())  + " #" + event.getQuestId() + "\"", server.createCommandSourceStack().withSuppressedOutput());
 						}catch(CommandSyntaxException ignored){}
 					}
 				});
 			}else{
 				try{
 					String title = new TranslationTextComponent("customquests.general.quest_completed").getString();
-					server.getCommandManager().getDispatcher().execute("title " + event.getPlayer().getDisplayName().getString() + " title \"" + title + "\"", server.getCommandSource().withFeedbackDisabled());
-					server.getCommandManager().getDispatcher().execute("title " + event.getPlayer().getDisplayName().getString() + " subtitle \"" + ClientUtils.colorify(QuestHelper.getQuestFromId(event.getQuestId()).getTitle().getText())  + " #" + event.getQuestId() + "\"", server.getCommandSource().withFeedbackDisabled());
+					server.getCommands().getDispatcher().execute("title " + event.getPlayer().getDisplayName().getString() + " title \"" + title + "\"", server.createCommandSourceStack().withSuppressedOutput());
+					server.getCommands().getDispatcher().execute("title " + event.getPlayer().getDisplayName().getString() + " subtitle \"" + ClientUtils.colorify(QuestHelper.getQuestFromId(event.getQuestId()).getTitle().getText())  + " #" + event.getQuestId() + "\"", server.createCommandSourceStack().withSuppressedOutput());
 				}catch(CommandSyntaxException ignored){}
 			}
 		}
@@ -208,17 +208,17 @@ public class ForgeEventHandler{
 	public static void onCheckCycle(CheckCycleEvent event){
 		//Main
 		MinecraftForge.EVENT_BUS.post(new DataLoadingEvent.Pre());
-		event.getPlayer().world.getPlayers().forEach(playerEntity -> {
+		event.getPlayer().level.players().forEach(playerEntity -> {
 			QuestingStorage.getSidedQuestsMap().entrySet().stream()
-						   .filter(entry -> !CombinedProgressHelper.isQuestCompleted(playerEntity.getUniqueID(), entry.getKey()))
-						   .filter(entry -> CombinedProgressHelper.isQuestUnlocked(playerEntity.getUniqueID(), entry.getKey()))
+						   .filter(entry -> !CombinedProgressHelper.isQuestCompleted(playerEntity.getUUID(), entry.getKey()))
+						   .filter(entry -> CombinedProgressHelper.isQuestUnlocked(playerEntity.getUUID(), entry.getKey()))
 						   .forEach(questEntry -> {
 							   questEntry.getValue().getTasks().entrySet().stream()
-										 .filter(taskEntry -> !CombinedProgressHelper.isTaskCompleted(playerEntity.getUniqueID(), questEntry.getKey(), taskEntry.getKey()))
+										 .filter(taskEntry -> !CombinedProgressHelper.isTaskCompleted(playerEntity.getUUID(), questEntry.getKey(), taskEntry.getKey()))
 										 .forEach(taskEntry -> {
 											 taskEntry.getValue().getSubtasks().entrySet().stream()
-													  .filter(entrySubtask -> !CombinedProgressHelper.isSubtaskCompleted(playerEntity.getUniqueID(), questEntry.getKey(), taskEntry.getKey(), entrySubtask.getKey()))
-													  .forEach(entrySubtask -> entrySubtask.getValue().getSubtask().getCurrentlyTrackingList().add(new PlayerBoundSubtaskReference(playerEntity.getUniqueID(), questEntry.getKey(), taskEntry.getKey(), entrySubtask.getKey())));
+													  .filter(entrySubtask -> !CombinedProgressHelper.isSubtaskCompleted(playerEntity.getUUID(), questEntry.getKey(), taskEntry.getKey(), entrySubtask.getKey()))
+													  .forEach(entrySubtask -> entrySubtask.getValue().getSubtask().getCurrentlyTrackingList().add(new PlayerBoundSubtaskReference(playerEntity.getUUID(), questEntry.getKey(), taskEntry.getKey(), entrySubtask.getKey())));
 										 });
 						   });
 		});
@@ -229,28 +229,28 @@ public class ForgeEventHandler{
 		if(EffectiveSide.get().isServer()){
 			ItemDetectTaskType.TRACKING_LIST
 					.stream()
-					.filter(entry->entry.getPlayer().toString().equals(player.getUniqueID().toString()))
+					.filter(entry->entry.getPlayer().toString().equals(player.getStringUUID()))
 					.forEach(entry-> QuestingStorage.getSidedQuestsMap().get(entry.getQuestId())
 				                               .getTasks().get(entry.getTaskId())
 				                               .getSubtasks().get(entry.getSubtaskId())
 				                               .getSubtask().executeSubtaskCheck(player, null));
 			TravelTaskType.TRACKING_LIST
 					.stream()
-					.filter(entry->entry.getPlayer().toString().equals(player.getUniqueID().toString()))
+					.filter(entry->entry.getPlayer().toString().equals(player.getStringUUID()))
 					.forEach(entry->QuestingStorage.getSidedQuestsMap().get(entry.getQuestId())
 							.getTasks().get(entry.getTaskId())
 							.getSubtasks().get(entry.getSubtaskId())
 							.getSubtask().executeSubtaskCheck(player, null));
 			BiomeDetectTaskType.TRACKING_LIST
 					.stream()
-					.filter(entry->entry.getPlayer().toString().equals(player.getUniqueID().toString()))
+					.filter(entry->entry.getPlayer().toString().equals(player.getStringUUID()))
 					.forEach(entry->QuestingStorage.getSidedQuestsMap().get(entry.getQuestId())
 							.getTasks().get(entry.getTaskId())
 							.getSubtasks().get(entry.getSubtaskId())
 							.getSubtask().executeSubtaskCheck(player, null));
 			XpDetectTaskType.TRACKING_LIST
 					.stream()
-					.filter(entry->entry.getPlayer().toString().equals(player.getUniqueID().toString()))
+					.filter(entry->entry.getPlayer().toString().equals(player.getStringUUID()))
 					.forEach(entry->QuestingStorage.getSidedQuestsMap().get(entry.getQuestId())
 							.getTasks().get(entry.getTaskId())
 							.getSubtasks().get(entry.getSubtaskId())
@@ -260,7 +260,7 @@ public class ForgeEventHandler{
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void syncProgressEvent(CheckCycleEvent event){
-		UUID eventPlayerUUID = event.getPlayer().getUniqueID();
+		UUID eventPlayerUUID = event.getPlayer().getUUID();
 		if(ProgressHelper.isPlayerInParty(eventPlayerUUID)){
 			int partyId = ProgressHelper.getPlayerParty(eventPlayerUUID);
 			PartyHelper.syncDataBetweenPartyMembers(partyId);
@@ -284,13 +284,13 @@ public class ForgeEventHandler{
 	
 	@SubscribeEvent
 	public static void onClientTick(TickEvent.ClientTickEvent event){
-		if(Objects.KeyBinds.OPEN_QUESTING_SCREEN.isPressed() && (Minecraft.getInstance().currentScreen == null || Minecraft.getInstance().currentScreen instanceof InventoryScreen)){
+		if(Objects.KeyBinds.OPEN_QUESTING_SCREEN.isDown() && (Minecraft.getInstance().screen == null || Minecraft.getInstance().screen instanceof InventoryScreen)){
 			ClientUtils.openQuestingScreen();
 		}
-		if(Objects.KeyBinds.CLAIM_ALL_REWARDS.isPressed()){
+		if(Objects.KeyBinds.CLAIM_ALL_REWARDS.isDown()){
 			QuestingStorage.getSidedQuestsMap().entrySet()
 						   .stream()
-						   .filter(entry -> CombinedProgressHelper.canClaimReward(Minecraft.getInstance().player.getUniqueID(), entry.getKey()))
+						   .filter(entry -> CombinedProgressHelper.canClaimReward(Minecraft.getInstance().player.getUUID(), entry.getKey()))
 						   .forEach(entry ->PacketHandler.CHANNEL.sendToServer(new MessageRewardClaim(entry.getKey(), -1)));
 		}
 	}

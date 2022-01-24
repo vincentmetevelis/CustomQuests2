@@ -43,11 +43,11 @@ public class ItemStackHandlerCapability extends ItemStackHandler{
 	public void onContentsChanged(int slot){
 		if(player!=null&&activeSubtask.getLeft() >= 0 && activeSubtask.getMiddle() >= 0 && activeSubtask.getRight() >= 0){//todo DELIVERYBLOCK add some more uuid checks here
 			if(getStackInSlot(slot).getCount()>0){
-				CombinedProgressHelper.addValue(player.getUniqueID(), activeSubtask.getLeft(), activeSubtask.getMiddle(), activeSubtask.getRight(), 1);
+				CombinedProgressHelper.addValue(player.getUUID(), activeSubtask.getLeft(), activeSubtask.getMiddle(), activeSubtask.getRight(), 1);
 				setStackInSlot(slot, new ItemStack(getStackInSlot(slot).getItem(), getStackInSlot(slot).getCount()-1));
 			}
 		}
-		te.markDirty();
+		te.setChanged();
 	}
 	
 	@Override
@@ -55,7 +55,7 @@ public class ItemStackHandlerCapability extends ItemStackHandler{
 		Task task = QuestHelper.getTaskFromId(activeSubtask.getLeft(), activeSubtask.getMiddle());
 		SubTask subtask = QuestHelper.getSubtaskFromId(activeSubtask.getLeft(), activeSubtask.getMiddle(), activeSubtask.getRight());
 		if(task!=null &&subtask!=null && subtask.getSubtask() instanceof ItemSubmitTaskType){
-			return ((ItemSubmitTaskType)subtask.getSubtask()).getItemStacks().stream().anyMatch(itemStack -> ItemStack.areItemsEqual(itemStack, stack));
+			return ((ItemSubmitTaskType)subtask.getSubtask()).getItemStacks().stream().anyMatch(itemStack -> ItemStack.isSame(itemStack, stack));
 		}else{
 			return false;
 		}

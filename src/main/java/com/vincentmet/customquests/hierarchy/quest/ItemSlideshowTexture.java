@@ -34,8 +34,8 @@ public class ItemSlideshowTexture implements IQuestingTexture, ICurrentItemStack
 		if(!items.isEmpty()){
 			int arrSize = items.size();
 			int currentIndex = (int)(System.currentTimeMillis()/50/delay%arrSize);
-			RenderHelper.setupGui3DDiffuseLighting();
-			Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(items.get(currentIndex), x, y);
+			RenderHelper.setupFor3DItems();
+			Minecraft.getInstance().getItemRenderer().renderGuiItem(items.get(currentIndex), x, y);
 		}
 	}
 	@Override

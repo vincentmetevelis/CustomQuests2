@@ -9,12 +9,12 @@ import net.minecraft.util.ResourceLocation;
 
 public class Objects{
 	public static final class ItemBlocks{
-		public static final Item QUESTING_BLOCK = new BlockItem(Blocks.QUESTING_BLOCK, new Item.Properties().group(ItemGroups.cqTab)).setRegistryName(new ResourceLocation(Ref.MODID, "questing_block"));
+		public static final Item QUESTING_BLOCK = new BlockItem(Blocks.QUESTING_BLOCK, new Item.Properties().tab(ItemGroups.cqTab)).setRegistryName(new ResourceLocation(Ref.MODID, "questing_block"));
 		//public static final Item DELIVERY_BLOCK = new BlockItem(Blocks.DELIVERY_BLOCK, new Item.Properties().group(ItemGroups.cqTab)).setRegistryName(new ResourceLocation(Ref.MODID, "delivery_block"));
 	}
 	
 	public static final class Items{
-		public static final Item QUESTING_DEVICE = new QuestingDevice(new Item.Properties().group(ItemGroups.cqTab)).setRegistryName(new ResourceLocation(Ref.MODID, "questing_device"));
+		public static final Item QUESTING_DEVICE = new QuestingDevice(new Item.Properties().tab(ItemGroups.cqTab)).setRegistryName(new ResourceLocation(Ref.MODID, "questing_device"));
 	}
 	
 	public static final class Blocks{
@@ -29,7 +29,7 @@ public class Objects{
 	public static final class ItemGroups{
 		public static final ItemGroup cqTab = new ItemGroup("customquests"){
 			@Override
-			public ItemStack createIcon(){
+			public ItemStack makeIcon(){
 				return new ItemStack(Items.QUESTING_DEVICE);
 			}
 		};

@@ -32,12 +32,12 @@ public class JEIHelper{
     }
     
     public static boolean hasRecipe(ItemStack stack){
-        long count = Minecraft.getInstance().world.getRecipeManager().getRecipes().stream().filter(iRecipe -> iRecipe.getRecipeOutput().getItem().equals(stack.getItem())).count();
+        long count = Minecraft.getInstance().level.getRecipeManager().getRecipes().stream().filter(iRecipe -> iRecipe.getResultItem().getItem().equals(stack.getItem())).count();
         return count>0;
     }
     
     public static boolean hasUse(ItemStack stack){
-        long count = Minecraft.getInstance().world.getRecipeManager().getRecipes()
+        long count = Minecraft.getInstance().level.getRecipeManager().getRecipes()
                                                   .stream()
                                                   .filter(recipe -> recipe.getIngredients().stream().noneMatch(ingredient->ingredient.test(stack)))
                                                   .count();

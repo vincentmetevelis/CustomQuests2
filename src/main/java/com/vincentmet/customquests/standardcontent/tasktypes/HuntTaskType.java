@@ -53,10 +53,10 @@ public class HuntTaskType implements ITaskType{
 	
 	@Override
 	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
 			LivingDeathEvent event = (LivingDeathEvent)object;
 			if(event.getEntity().getType().equals(entityType)){
-				CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, 1);
+				CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, 1);
 				ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
 			}
 			processValue(player);
@@ -64,8 +64,8 @@ public class HuntTaskType implements ITaskType{
 	}
 	
 	public void processValue(PlayerEntity player){
-		if(CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId) >= count){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+		if(CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId) >= count){
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
@@ -86,7 +86,7 @@ public class HuntTaskType implements ITaskType{
 	
 	@Override
 	public String getText(ClientPlayerEntity player){
-		return count + "x " + entityType.getName().getString();
+		return count + "x " + entityType.getDescription().getString();
 	}
 	
 	@Override
@@ -135,7 +135,7 @@ public class HuntTaskType implements ITaskType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ogRL = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(ogRL == null){
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > entity': Value is not a valid item, please use a valid item id, defaulting to 'minecraft:pig'!");
 						ogRL = EntityType.PIG.getRegistryName();
@@ -184,7 +184,7 @@ public class HuntTaskType implements ITaskType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation rl = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ResourceLocation rl = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(rl != null){
 						icon = new ItemSlideshowTexture(rl, new ItemStack(ForgeRegistries.ITEMS.getValue(rl)));
 					}else{

@@ -32,7 +32,7 @@ public class MessageRewardClaim{
 	public static void handle(final MessageRewardClaim message, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			if(message!=null){
-				CombinedProgressHelper.claimReward(Objects.requireNonNull(ctx.get().getSender()).getUniqueID(), message.questId, message.rewardId);
+				CombinedProgressHelper.claimReward(Objects.requireNonNull(ctx.get().getSender()).getUUID(), message.questId, message.rewardId);
 			}
 		});
 		ctx.get().setPacketHandled(true);

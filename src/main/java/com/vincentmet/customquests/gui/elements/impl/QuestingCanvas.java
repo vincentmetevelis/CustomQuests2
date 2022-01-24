@@ -51,8 +51,8 @@ public class QuestingCanvas implements IHoverRenderable, IGuiEventListener{
 				        if(ChapterHelper.areQuestsInSameChapter(entry.getKey(), depID)){
 				            if(q1 != null && q2 != null){
 					            int color = 0xFFFF0000;
-					            if(CombinedProgressHelper.isQuestCompleted(PLAYER.getUniqueID(), q2.getQuestId()) && !CombinedProgressHelper.isQuestCompleted(PLAYER.getUniqueID(), q1.getQuestId()))color = 0xFFFFFF00;
-					            if(CombinedProgressHelper.isQuestCompleted(PLAYER.getUniqueID(), q2.getQuestId()) && CombinedProgressHelper.isQuestCompleted(PLAYER.getUniqueID(), q1.getQuestId()))color = 0xFF00FF00;
+					            if(CombinedProgressHelper.isQuestCompleted(PLAYER.getUUID(), q2.getQuestId()) && !CombinedProgressHelper.isQuestCompleted(PLAYER.getUUID(), q1.getQuestId()))color = 0xFFFFFF00;
+					            if(CombinedProgressHelper.isQuestCompleted(PLAYER.getUUID(), q2.getQuestId()) && CombinedProgressHelper.isQuestCompleted(PLAYER.getUUID(), q1.getQuestId()))color = 0xFF00FF00;
 					            entries.add(new Line(x, y, q1.getPosition().clone().add(offsetX, offsetY), q2.getPosition().clone().add(offsetX, offsetY), q1.getButton().getScale(), q2.getButton().getScale(), color, 2));
 				            }
 				        }
@@ -72,7 +72,7 @@ public class QuestingCanvas implements IHoverRenderable, IGuiEventListener{
 					List<ITextComponent> questInfoList = new ArrayList<>();
 					questInfoList.add(new StringTextComponent(ClientUtils.colorify(entry.getValue().getTitle().getText()) + TextFormatting.RESET + " #" + entry.getKey()));
 					questInfoList.add(new StringTextComponent(ClientUtils.colorify(entry.getValue().getSubtitle().getText())));
-					if(!CombinedProgressHelper.isQuestUnlocked(PLAYER.getUniqueID(), entry.getValue().getQuestId())){
+					if(!CombinedProgressHelper.isQuestUnlocked(PLAYER.getUUID(), entry.getValue().getQuestId())){
 						questInfoList.add(new StringTextComponent(""));
 						if(entry.getValue().getDependencyList().getLogicType() == LogicType.OR){
 							questInfoList.add(new TranslationTextComponent("customquests.screens.complete_one", entry.getValue().getDependencyList().getLogicType()));
@@ -84,13 +84,13 @@ public class QuestingCanvas implements IHoverRenderable, IGuiEventListener{
 						});
 					}
 					QuestButton.State buttonState = QuestButton.State.NORMAL;
-					if(!CombinedProgressHelper.isQuestUnlocked(PLAYER.getUniqueID(), entry.getValue().getQuestId())) buttonState = QuestButton.State.DISABLED;
-					if(CombinedProgressHelper.isQuestCompleted(PLAYER.getUniqueID(), entry.getValue().getQuestId())) buttonState = QuestButton.State.GREEN;
-					if(CombinedProgressHelper.isQuestCompleted(PLAYER.getUniqueID(), entry.getValue().getQuestId()) && !CombinedProgressHelper.isQuestClaimed(PLAYER.getUniqueID(), entry.getValue().getQuestId())) buttonState = QuestButton.State.BLUE;
+					if(!CombinedProgressHelper.isQuestUnlocked(PLAYER.getUUID(), entry.getValue().getQuestId())) buttonState = QuestButton.State.DISABLED;
+					if(CombinedProgressHelper.isQuestCompleted(PLAYER.getUUID(), entry.getValue().getQuestId())) buttonState = QuestButton.State.GREEN;
+					if(CombinedProgressHelper.isQuestCompleted(PLAYER.getUUID(), entry.getValue().getQuestId()) && !CombinedProgressHelper.isQuestClaimed(PLAYER.getUUID(), entry.getValue().getQuestId())) buttonState = QuestButton.State.BLUE;
 			
 					entries.add(new QuestButton(x, y, entry.getValue().getPosition().getX() + offsetX, entry.getValue().getPosition().getY() + offsetY, entry.getKey(), entry.getValue().getButton().getIcon(), entry.getValue().getButton().getShape(), buttonState, (float)entry.getValue().getButton().getScale(), (mouseButton) -> {
 						screenManager.setCurrentlySelectedQuestId(entry.getValue().getQuestId());
-						Screen currentScreen = Minecraft.getInstance().currentScreen;
+						Screen currentScreen = Minecraft.getInstance().screen;
 						if(currentScreen instanceof QuestingScreen) ((QuestingScreen)currentScreen).questDetails.reInit();
 						PLAYER.playSound(QuestingStorage.SOUNDS.get("quest" + entry.getKey()), 1, 1);
 					}, questInfoList));
@@ -132,7 +132,7 @@ public class QuestingCanvas implements IHoverRenderable, IGuiEventListener{
 			   .filter(entry -> entry instanceof QuestButton)
 			   .map(entry -> (QuestButton)entry)
 			   .forEach(entry -> {
-						if(CombinedProgressHelper.isQuestCompleted(PLAYER.getUniqueID(), entry.getQuestId()) || CombinedProgressHelper.isQuestUnlocked(PLAYER.getUniqueID(), entry.getQuestId())){
+						if(CombinedProgressHelper.isQuestCompleted(PLAYER.getUUID(), entry.getQuestId()) || CombinedProgressHelper.isQuestUnlocked(PLAYER.getUUID(), entry.getQuestId())){
 							entry.mouseClicked(mouseX, mouseY, mouseButton);
 						}
 				})

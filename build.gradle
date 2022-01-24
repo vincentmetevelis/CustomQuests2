@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -13,7 +13,6 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 repositories {
     maven { url = 'https://dvs1.progwml6.com/files/maven/' }
-    maven { url = 'https://maven.tehnut.info' }
     maven { url 'https://maven.blamejared.com' }
 }
 
@@ -24,13 +23,12 @@ archivesBaseName = property('id')
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    mappings channel: 'snapshot', version: property('mcp.version')
+    mappings channel: 'official', version: property('mc.version')
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
             workingDirectory project.file('run')
             ideaModule "${project.name}.main"
-            args '--username', property('mc.username'), '--password', property('mc.password')
             mods {
                 customquests {
                     source sourceSets.main
@@ -69,8 +67,6 @@ dependencies {
 
     compileOnly fg.deobf("mezz.jei:jei-${property('jei.mcversion')}:${property('jei.version')}:api")
     runtimeOnly fg.deobf("mezz.jei:jei-${property('jei.mcversion')}:${property('jei.version')}")
-
-    compileOnly fg.deobf("net.darkhax.wawla:WAWLA-${property('mc.version')}:${property('wawla.version')}")
 
     implementation 'com.intellij:annotations:+@jar'
 }

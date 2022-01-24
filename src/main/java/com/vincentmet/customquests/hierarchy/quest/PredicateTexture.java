@@ -32,11 +32,11 @@ public class PredicateTexture implements IQuestingTexture{
     @OnlyIn(Dist.CLIENT)
 	public void render(MatrixStack matrixStack, float scale, int x, int y, int mouseX, int mouseY){
 		if(showing.get()){
-			matrixStack.push();
+			matrixStack.pushPose();
 			matrixStack.scale(scale, scale, 1);
-			Minecraft.getInstance().textureManager.bindTexture(texture);
+			Minecraft.getInstance().textureManager.bind(texture);
 			AbstractGui.blit(matrixStack, x, y, texU, texV, texWidth, texHeight, texSizeX, texSizeY);
-			matrixStack.pop();
+			matrixStack.popPose();
 		}
 	}
 	

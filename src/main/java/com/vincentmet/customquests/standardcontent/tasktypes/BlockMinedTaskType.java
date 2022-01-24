@@ -56,12 +56,12 @@ public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 	
 	@Override
 	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
 			BlockEvent.BreakEvent event = (BlockEvent.BreakEvent)object;
 			items.stream()
 				 .filter(itemStack->event.getState().getBlock().asItem().getRegistryName().equals(itemStack.getItem().getRegistryName()))
 				 .forEach(itemStack -> {
-					 CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, 1);
+					 CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, 1);
 					 ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
 				 })
 			;
@@ -70,8 +70,8 @@ public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 	}
 	
 	public void processValue(PlayerEntity player){
-		if(CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId) >= count){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+		if(CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId) >= count){
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
@@ -87,13 +87,13 @@ public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 	
 	@Override
 	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks, ClientPlayerEntity player){
-		return ()->Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, icon.getCurrentItemStack(), mouseX, mouseY);
+		return ()->Minecraft.getInstance().screen.renderTooltip(matrixStack, icon.getCurrentItemStack(), mouseX, mouseY);
 	}
 	
 	@Override
 	public String getText(ClientPlayerEntity player){
 		if(items.size()==1){
-			return count + "x " + items.get(0).getItem().getName().getString();
+			return count + "x " + items.get(0).getItem().getDescription().getString();
 		}else{
 			return count + "x " + new TranslationTextComponent(Ref.MODID + ".general.tag").getString() + ": " + Arrays.stream(ogRL.getPath().split("/")).map(StringUtils::capitalize).reduce((s, s2) ->s + "/" + s2).orElse(new TranslationTextComponent(Ref.MODID + ".general.tag.empty").getString());
 		}
@@ -153,7 +153,7 @@ public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ogRL = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(ogRL == null){
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > block': Value is not a valid block, please use a valid item id, defaulting to 'minecraft:grass_block'!");
 						ogRL = Blocks.GRASS_BLOCK.getRegistryName();

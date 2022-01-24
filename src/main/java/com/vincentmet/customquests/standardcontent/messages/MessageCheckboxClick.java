@@ -35,8 +35,8 @@ public class MessageCheckboxClick{
 	public static void handle(final MessageCheckboxClick message, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			if(message!=null){
-				CombinedProgressHelper.setValue(ctx.get().getSender().getUniqueID(), message.questId, message.taskId, message.subtaskId, 1);
-				CombinedProgressHelper.completeSubtask(ctx.get().getSender().getUniqueID(), message.questId, message.taskId, message.subtaskId);
+				CombinedProgressHelper.setValue(ctx.get().getSender().getUUID(), message.questId, message.taskId, message.subtaskId, 1);
+				CombinedProgressHelper.completeSubtask(ctx.get().getSender().getUUID(), message.questId, message.taskId, message.subtaskId);
 			}
 		});
 		ctx.get().setPacketHandled(true);

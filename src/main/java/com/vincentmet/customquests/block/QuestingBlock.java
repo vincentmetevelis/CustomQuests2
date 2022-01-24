@@ -12,15 +12,15 @@ import net.minecraft.util.math.shapes.*;
 import net.minecraft.world.*;
 
 public class QuestingBlock extends Block{
-	public static final DirectionProperty FACING = HorizontalBlock.HORIZONTAL_FACING;
+	public static final DirectionProperty FACING = HorizontalBlock.FACING;
 	public QuestingBlock(){
-		super(Properties.create(new Material.Builder(MaterialColor.BLACK).build()).harvestLevel(0).hardnessAndResistance(1F).doesNotBlockMovement());
+		super(Properties.of(new Material.Builder(MaterialColor.COLOR_BLACK).build()).harvestLevel(0).strength(1F).noCollission());
 	}
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit){
-		if(world.isRemote){
+	public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit){
+		if(world.isClientSide()){
 			ClientUtils.openQuestingScreen();
 			return ActionResultType.SUCCESS;
 		}
@@ -28,26 +28,26 @@ public class QuestingBlock extends Block{
 	}
 	@SuppressWarnings("deprecation")
 	@Override
-	public BlockRenderType getRenderType(BlockState state){
+	public BlockRenderType getRenderShape(BlockState state){
 		return BlockRenderType.MODEL;
 	}
 	
-	public void fillStateContainer(StateContainer.Builder<Block, BlockState> builder) {
+	public void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
 		builder.add(FACING);
 	}
 	
 	public BlockState getStateForPlacement(BlockItemUseContext context) {
-		return this.getDefaultState().with(FACING, context.getPlacementHorizontalFacing().getOpposite());
+		return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
 	}
 	
 	@SuppressWarnings("deprecation")
 	public BlockState rotate(BlockState state, Rotation rot) {
-		return state.with(FACING, rot.rotate(state.get(FACING)));
+		return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
 	}
 	
 	@SuppressWarnings("deprecation")
 	public BlockState mirror(BlockState state, Mirror mirrorIn) {
-		return state.rotate(mirrorIn.toRotation(state.get(FACING)));
+		return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -64,13 +64,13 @@ public class QuestingBlock extends Block{
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos){
+	public VoxelShape getOcclusionShape(BlockState state, IBlockReader worldIn, BlockPos pos){
 		return VoxelShapes.create(new AxisAlignedBB(0, 0, 0, 1, .7, 1));
 	}
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public VoxelShape getRaytraceShape(BlockState state, IBlockReader worldIn, BlockPos pos){
+	public VoxelShape getVisualShape(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context){
 		return VoxelShapes.create(new AxisAlignedBB(0, 0, 0, 1, .7, 1));
 	}
 	

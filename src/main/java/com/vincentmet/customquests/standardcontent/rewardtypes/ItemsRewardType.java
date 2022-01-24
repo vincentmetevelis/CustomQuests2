@@ -44,12 +44,12 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	
 	@Override
 	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		return ()->Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, stack, mouseX, mouseY);
+		return ()->Minecraft.getInstance().screen.renderTooltip(matrixStack, stack, mouseX, mouseY);
 	}
 	
 	@Override
 	public String getText(){
-		return stack.getCount() + "x " + stack.getItem().getName().getString();
+		return stack.getCount() + "x " + stack.getItem().getDescription().getString();
 	}
 	
 	@Override
@@ -65,7 +65,7 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	
 	@Override
 	public String toString(){
-		return stack.getCount() + "x " + stack.getItem().getName().getString();
+		return stack.getCount() + "x " + stack.getItem().getDescription().getString();
 	}
 	
 	@Override
@@ -95,7 +95,7 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ogRL = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(ogRL == null){
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + parentQuestId + " > rewards > entries > " + parentRewardId + " > content > item': Value is not a valid item, please use a valid item id, defaulting to 'minecraft:grass_block'!");
 						ogRL = Blocks.GRASS_BLOCK.getRegistryName();

@@ -146,7 +146,7 @@ public class SingleTaskProgress extends HashMap<Integer, SingleSubtaskProgress> 
 	
 	public void executeTaskButton(PlayerEntity player){
 		if(EffectiveSide.get().isServer()){
-			QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().entrySet().stream().filter(entry->!CombinedProgressHelper.isSubtaskCompleted(player.getUniqueID(), questId, taskId, entry.getKey())).forEach(entry -> entry.getValue().getSubtask().executeSubtaskButton(player));
+			QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().entrySet().stream().filter(entry->!CombinedProgressHelper.isSubtaskCompleted(player.getUUID(), questId, taskId, entry.getKey())).forEach(entry -> entry.getValue().getSubtask().executeSubtaskButton(player));
 		}
 	}
 }

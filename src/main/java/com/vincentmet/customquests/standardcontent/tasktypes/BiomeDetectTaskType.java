@@ -49,9 +49,9 @@ public class BiomeDetectTaskType implements ITaskType{
 	
 	@Override
 	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
 			if(WorldHelper.isPlayerInBiome(player, biome)){
-				CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, getCompletionAmount());
+				CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, getCompletionAmount());
 				ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
 			}
 			processValue(player);
@@ -59,8 +59,8 @@ public class BiomeDetectTaskType implements ITaskType{
 	}
 	
 	public void processValue(PlayerEntity player){
-		if(CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId) >= getCompletionAmount()){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+		if(CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId) >= getCompletionAmount()){
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
@@ -130,22 +130,22 @@ public class BiomeDetectTaskType implements ITaskType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					biome = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					biome = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(biome == null){
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > biome': Value is not a valid dimension, please use a valid biome id, defaulting to 'minecraft:plains'!");
-						biome = Biomes.PLAINS.getLocation();
+						biome = Biomes.PLAINS.location();
 					}
 				}else{
 					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > biome': Value is not a String, defaulting to 'minecraft:plains'!");
-					biome = Biomes.PLAINS.getLocation();
+					biome = Biomes.PLAINS.location();
 				}
 			}else{
 				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > biome': Value is not a JsonPrimitive, please use a String, defaulting to 'minecraft:plains'!");
-				biome = Biomes.PLAINS.getLocation();
+				biome = Biomes.PLAINS.location();
 			}
 		}else{
 			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > biome': Not detected, defaulting to 'minecraft:plains'!");
-			biome = Biomes.PLAINS.getLocation();
+			biome = Biomes.PLAINS.location();
 		}
 	}
 	

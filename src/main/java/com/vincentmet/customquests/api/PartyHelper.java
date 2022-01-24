@@ -159,7 +159,7 @@ public class PartyHelper {
 	}
 	
 	public static void forEachPlayerInPartyCurrentlyOnline(int partyId, Consumer<ServerPlayerEntity> consumer){
-		getAllUUIDsInParty(partyId).stream().map(Ref.currentServerInstance.getPlayerList()::getPlayerByUUID).filter(Objects::nonNull).forEach(consumer);
+		getAllUUIDsInParty(partyId).stream().map(Ref.currentServerInstance.getPlayerList()::getPlayer).filter(Objects::nonNull).forEach(consumer);
 	}
 	
 	public static void syncAllPartyDataWithinParty(){

@@ -12,10 +12,10 @@ public class QuestingDevice extends Item{
 	}
 	
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand){
-		if(world.isRemote){
+	public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand){
+		if(world.isClientSide()){
 			ClientUtils.openQuestingScreen();
 		}
-		return super.onItemRightClick(world, player, hand);
+		return super.use(world, player, hand);
 	}
 }

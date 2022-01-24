@@ -55,15 +55,15 @@ public class TravelTaskType implements ITaskType{
 	
 	@Override
 	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
 			if(range <= -1){
 				if(WorldHelper.isPlayerInDimension(player, dimension)){
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, getCompletionAmount());
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, getCompletionAmount());
 					ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
 				}
 			}else{
 				if(WorldHelper.isPlayerInDimension(player, dimension) && WorldHelper.isPlayerInRange(player, x, y, z, range)){
-					CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, getCompletionAmount());
+					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, getCompletionAmount());
 					ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
 				}
 			}
@@ -72,8 +72,8 @@ public class TravelTaskType implements ITaskType{
 	}
 	
 	public void processValue(PlayerEntity player){
-		if(CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId) >= getCompletionAmount()){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+		if(CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId) >= getCompletionAmount()){
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
@@ -147,22 +147,22 @@ public class TravelTaskType implements ITaskType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					dimension = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					dimension = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(dimension == null){
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > dimension': Value is not a valid dimension, please use a valid dimension id, defaulting to 'minecraft:overworld'!");
-						dimension = DimensionType.OVERWORLD_ID;
+						dimension = DimensionType.OVERWORLD_LOCATION.location();
 					}
 				}else{
 					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > dimension': Value is not a String, defaulting to 'minecraft:overworld'!");
-					dimension = DimensionType.OVERWORLD_ID;
+					dimension = DimensionType.OVERWORLD_LOCATION.location();
 				}
 			}else{
 				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > dimension': Value is not a JsonPrimitive, please use a String, defaulting to 'minecraft:overworld'!");
-				dimension = DimensionType.OVERWORLD_ID;
+				dimension = DimensionType.OVERWORLD_LOCATION.location();
 			}
 		}else{
 			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > dimension': Not detected, defaulting to 'minecraft:overworld'!");
-			dimension = DimensionType.OVERWORLD_ID;
+			dimension = DimensionType.OVERWORLD_LOCATION.location();
 		}
 	
 		if(json.has("x")){

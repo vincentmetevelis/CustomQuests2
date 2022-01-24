@@ -44,7 +44,7 @@ public class QuestButton implements MovableScalableCanvasEntry{
 		GL11.glTranslated(parentX + x, parentY + y, 0);
 		GL11.glScalef(buttonScale, buttonScale, 1);
 		GL11.glTranslated(-(parentX + x), -(parentY + y), 0);
-		Minecraft.getInstance().getTextureManager().bindTexture(shape.getTexture());
+		Minecraft.getInstance().getTextureManager().bind(shape.getTexture());
 		if((buttonState.equals(State.NORMAL) || buttonState.equals(State.HOVER)) && ApiUtils.isMouseInBounds(mouseX, mouseY, parentX + x, parentY + y, x + parentX + (int)(buttonState.WIDTH * buttonScale), y + parentY + (int)(buttonState.HEIGHT * buttonScale))){
 			buttonState = State.HOVER;
 		}else if(buttonState.equals(State.NORMAL) || buttonState.equals(State.HOVER)){
@@ -59,7 +59,7 @@ public class QuestButton implements MovableScalableCanvasEntry{
 	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, parentX + x, parentY + y, parentX + x + (int)(buttonState.WIDTH * buttonScale), parentY + y + (int)(buttonState.HEIGHT * buttonScale))){
 			TooltipBuffer.tooltipBuffer.add(()->{
-				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.func_243308_b(matrixStack, tooltipLines, mouseX, mouseY);
+				if(Minecraft.getInstance().screen != null) Minecraft.getInstance().screen.renderComponentTooltip(matrixStack, tooltipLines, mouseX, mouseY);
 			});
 		}
 	}

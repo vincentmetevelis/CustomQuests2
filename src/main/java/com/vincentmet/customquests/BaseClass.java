@@ -46,6 +46,6 @@ public class BaseClass{
 	private void serverStartup(final FMLServerStartingEvent event){
     	//Main
 		Ref.currentServerInstance = event.getServer();
-        CQCommand.register(event.getServer().getCommandManager().getDispatcher());
+        CQCommand.register(event.getServer().getCommands().getDispatcher());
 	}
 }

@@ -12,7 +12,7 @@ public class MessageDiscord{
 	}
 	
 	public static void handle(final MessageDiscord message, Supplier<NetworkEvent.Context> ctx) {
-		ctx.get().enqueueWork(() -> Util.getOSType().openURI("https://discord.gg/TmgVdAb"));
+		ctx.get().enqueueWork(() -> Util.getPlatform().openUri("https://discord.gg/TmgVdAb"));
 		ctx.get().setPacketHandled(true);
 	}
 }

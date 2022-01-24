@@ -23,20 +23,20 @@ public class TextButton implements ScrollableListEntry{
 	
 	@Override
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		matrixStack.push();
+		matrixStack.pushPose();
 		Color.color(0xFFFFFFFF);
 		this.button.render(matrixStack, mouseX, mouseY, partialTicks);
-		RenderHelper.setupGui3DDiffuseLighting();
-		matrixStack.pop();
+		RenderHelper.setupFor3DItems();
+		matrixStack.popPose();
 	}
 	
 	@Override
 	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		matrixStack.push();
+		matrixStack.pushPose();
 		Color.color(0xFFFFFFFF);
 		this.button.renderHover(matrixStack, mouseX, mouseY, partialTicks);
-		RenderHelper.setupGui3DDiffuseLighting();
-		matrixStack.pop();
+		RenderHelper.setupFor3DItems();
+		matrixStack.popPose();
 	}
 	
 	@Override

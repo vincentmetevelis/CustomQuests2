@@ -41,7 +41,7 @@ public class MessageUpdateDelivery{
 			if(message!=null && message.pos!=null){
 				ServerPlayerEntity serverPlayerEntity = ctx.get().getSender();
 				if(serverPlayerEntity!=null){
-					TileEntity te = serverPlayerEntity.world.getTileEntity(message.pos);
+					TileEntity te = serverPlayerEntity.level.getBlockEntity(message.pos);
 					if(te instanceof DeliveryBlockTileEntity){
 						DeliveryBlockTileEntity dbte = (DeliveryBlockTileEntity)te;//todo DELIVERYBLOCK add player in range check here or add some owner tag
 						ItemStackHandlerCapability ishc = dbte.getItemHandler();

@@ -33,7 +33,7 @@ public class SummonRewardType implements IRewardType{
     @Override
 	public void executeReward(PlayerEntity player){
 		for(int i=0; i<count;i++){
-			(player.getEntityWorld()).addEntity(Objects.requireNonNull(entity.create((ServerWorld)player.getEntityWorld(), new CompoundNBT(), new TranslationTextComponent("Your Reward <3"), player, player.getPosition(), SpawnReason.COMMAND, true, false)));
+			(player.level).addFreshEntity(Objects.requireNonNull(entity.create((ServerWorld)player.level, new CompoundNBT(), new TranslationTextComponent("Your Reward <3"), player, player.blockPosition(), SpawnReason.COMMAND, true, false)));
 		}
 	}
 	
@@ -49,7 +49,7 @@ public class SummonRewardType implements IRewardType{
 	
 	@Override
 	public String getText(){
-		return count + "x " + entity.getName().getString();
+		return count + "x " + entity.getDescription().getString();
 	}
 	
 	@Override
@@ -59,7 +59,7 @@ public class SummonRewardType implements IRewardType{
 	
 	@Override
 	public String toString(){
-		return count + "x " + entity.getName().getString();
+		return count + "x " + entity.getDescription().getString();
 	}
 	
 	@Override
@@ -89,7 +89,7 @@ public class SummonRewardType implements IRewardType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation rl = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ResourceLocation rl = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(rl != null){
 						icon = ForgeRegistries.ITEMS.getValue(rl);
 					}else{
@@ -140,7 +140,7 @@ public class SummonRewardType implements IRewardType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation rl = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ResourceLocation rl = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(rl != null){
 						entity = ForgeRegistries.ENTITIES.getValue(rl);
 					}else{

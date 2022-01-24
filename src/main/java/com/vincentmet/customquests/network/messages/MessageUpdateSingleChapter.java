@@ -26,12 +26,12 @@ public class MessageUpdateSingleChapter{
 	
 	public static void encode(MessageUpdateSingleChapter packet, PacketBuffer buffer){
 		buffer.writeInt(packet.chapterId);
-		buffer.writeString(QuestingStorage.getSidedChaptersMap().get(packet.chapterId).getJson().toString());
+		buffer.writeUtf(QuestingStorage.getSidedChaptersMap().get(packet.chapterId).getJson().toString());
 	}
 	
 	public static MessageUpdateSingleChapter decode(PacketBuffer buffer) {
 		int chapterId = buffer.readInt();
-		String stringJson = buffer.readString();
+		String stringJson = buffer.readUtf();
 		JsonObject json = new JsonParser().parse(stringJson).getAsJsonObject();
 		return new MessageUpdateSingleChapter(chapterId, json);
 	}
@@ -49,7 +49,7 @@ public class MessageUpdateSingleChapter{
 				LOGGER.error("Chapter " + message.chapterId + " should be a numeric id");
 				exception.printStackTrace();
 			}
-			Screen currentScreen = Minecraft.getInstance().currentScreen;
+			Screen currentScreen = Minecraft.getInstance().screen;
 			if(currentScreen instanceof QuestingScreen){
 				((QuestingScreen)currentScreen).requestPosRecalc();
 			}

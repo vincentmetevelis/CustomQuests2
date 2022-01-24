@@ -90,7 +90,7 @@ public class QuestingScreen extends Screen{
 			chapterInfoList.add(new StringTextComponent(ClientUtils.colorify(chapter.getText().getText())));
 			
 			ButtonState buttonState = ButtonState.DISABLED;
-			if(ChapterHelper.isChapterUnlocked(localPlayer.getUniqueID(), chapter)){
+			if(ChapterHelper.isChapterUnlocked(localPlayer.getUUID(), chapter)){
 				buttonState = ButtonState.NORMAL;
 			}
 			
@@ -147,7 +147,7 @@ public class QuestingScreen extends Screen{
 			
 			//Show message if there are no quests loaded
 			if(QuestingStorage.getSidedQuestsMap().isEmpty()){
-				Minecraft.getInstance().fontRenderer.drawStringWithShadow(matrixStack, localization_noQuests.getString(), questingCanvas.getX() + 5, questingCanvas.getY() + 5, 0xFFFFFF);
+				Minecraft.getInstance().font.drawShadow(matrixStack, localization_noQuests.getString(), questingCanvas.getX() + 5, questingCanvas.getY() + 5, 0xFFFFFF);
 			}
 		}
 		TooltipBuffer.tooltipBuffer.forEach(Runnable::run);
@@ -203,8 +203,8 @@ public class QuestingScreen extends Screen{
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int mods){
 		if(keyCode == GLFW.GLFW_KEY_ESCAPE){
-			if(Minecraft.getInstance().currentScreen != null){
-				Minecraft.getInstance().currentScreen.closeScreen();
+			if(Minecraft.getInstance().screen != null){
+				Minecraft.getInstance().screen.onClose();
 			}
 			return true;
 		}

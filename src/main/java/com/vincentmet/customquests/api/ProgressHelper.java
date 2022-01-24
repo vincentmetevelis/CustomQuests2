@@ -39,7 +39,7 @@ public class ProgressHelper{
 	
 	public static void executeTaskCallback(PlayerEntity player, int questId, int taskId){
 		if(EffectiveSide.get().isServer()){
-			QuestingStorage.getSidedPlayersMap().get(player.getUniqueID().toString()).getIndividualProgress().get(questId).get(taskId).executeTaskButton(player);
+			QuestingStorage.getSidedPlayersMap().get(player.getStringUUID()).getIndividualProgress().get(questId).get(taskId).executeTaskButton(player);
 			ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
 		}else{
 			LOGGER.warn("Tried executing task callback on client, this method should only be called on the server!");

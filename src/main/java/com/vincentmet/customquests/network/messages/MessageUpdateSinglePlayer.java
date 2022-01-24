@@ -26,13 +26,13 @@ public class MessageUpdateSinglePlayer{
 	}
 	
 	public static void encode(MessageUpdateSinglePlayer packet, PacketBuffer buffer){
-		buffer.writeString(packet.uuid);
-		buffer.writeString(QuestingStorage.getSidedPlayersMap().get(packet.uuid).getJson().toString());
+		buffer.writeUtf(packet.uuid);
+		buffer.writeUtf(QuestingStorage.getSidedPlayersMap().get(packet.uuid).getJson().toString());
 	}
 	
 	public static MessageUpdateSinglePlayer decode(PacketBuffer buffer) {
-		String uuid = buffer.readString();
-		String data = buffer.readString();
+		String uuid = buffer.readUtf();
+		String data = buffer.readUtf();
 		JsonObject json = new JsonParser().parse(data).getAsJsonObject();
 		return new MessageUpdateSinglePlayer(uuid, json);
 	}
@@ -50,7 +50,7 @@ public class MessageUpdateSinglePlayer{
 				LOGGER.error("User " + message.uuid + " should be a uuid");
 				exception.printStackTrace();
 			}
-			Screen currentScreen = Minecraft.getInstance().currentScreen;
+			Screen currentScreen = Minecraft.getInstance().screen;
 			if(currentScreen instanceof QuestingScreen){
 				((QuestingScreen)currentScreen).requestPosRecalc();
 				((QuestingScreen)currentScreen).reInit();

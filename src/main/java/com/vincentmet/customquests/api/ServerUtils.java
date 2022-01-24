@@ -6,14 +6,9 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 public class ServerUtils{
-    public static void reloadClientResources(ServerPlayerEntity player){
-        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new MessageReloadResources());
-    }
-    
     public static void sendQuestsToClient(ServerPlayerEntity player){
         PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new MessageClearQuests());
         QuestingStorage.getSidedQuestsMap().forEach((questId, quest) -> sendQuestToClient(player, questId));
-        reloadClientResources(player);
     }
     
     public static void sendQuestToClient(ServerPlayerEntity player, int questId){
@@ -31,7 +26,7 @@ public class ServerUtils{
     
     public static void sendProgressToClient(ServerPlayerEntity player){
         PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new MessageClearPlayers());
-        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new MessageUpdateSinglePlayer(player.getUniqueID().toString()));
+        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new MessageUpdateSinglePlayer(player.getStringUUID()));
     }
     
     public static void sendPartiesToClient(ServerPlayerEntity player){

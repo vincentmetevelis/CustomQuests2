@@ -56,7 +56,7 @@ public class CheckboxTaskType implements ITaskType{
 	
 	@Override
 	public IQuestingTexture getIcon(ClientPlayerEntity playerEntity){
-		return new PredicateTexture(new ResourceLocation("minecraft", "textures/gui/container/beacon.png"), 90, 222, 16, 16, 256, 256, ()->CombinedProgressHelper.isSubtaskCompleted(playerEntity.getUniqueID(), questId, taskId, subtaskId));
+		return new PredicateTexture(new ResourceLocation("minecraft", "textures/gui/container/beacon.png"), 90, 222, 16, 16, 256, 256, ()->CombinedProgressHelper.isSubtaskCompleted(playerEntity.getUUID(), questId, taskId, subtaskId));
 	}
 	
 	@Override
@@ -77,7 +77,7 @@ public class CheckboxTaskType implements ITaskType{
     @Override
     public Consumer<MouseButton> onSlotClick(ClientPlayerEntity player){
 		return (mouseButton)->{
-			if(!CombinedProgressHelper.isSubtaskCompleted(player.getUniqueID(), questId, taskId, subtaskId)){
+			if(!CombinedProgressHelper.isSubtaskCompleted(player.getUUID(), questId, taskId, subtaskId)){
 				PacketHandler.CHANNEL.sendToServer(new MessageCheckboxClick(questId, taskId, subtaskId));
 			}
 		};

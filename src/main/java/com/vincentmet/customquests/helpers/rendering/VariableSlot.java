@@ -33,7 +33,7 @@ public class VariableSlot implements IHoverRenderable{
 	
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		Color.color(0xFFFFFFFF);
-		RenderHelper.disableStandardItemLighting();
+		RenderHelper.turnOff();
 		
 		int texU = this.texture.getU();
 		int texV = this.texture.getV();
@@ -41,7 +41,7 @@ public class VariableSlot implements IHoverRenderable{
 		int texHeight = this.texture.getHeight();
 		int texP = this.texture.getBorderSize(); // P for Padding
 		
-		Minecraft.getInstance().getTextureManager().bindTexture(this.texture.getTexture());
+		Minecraft.getInstance().getTextureManager().bind(this.texture.getTexture());
 		
 		// blit -> x, y, u, v, width, height, texSizeX, texSizeY
 		AbstractGui.blit(matrixStack, x, y, texU, texV, texP, texP, texWidth, texHeight);// Left Top corner
@@ -73,7 +73,7 @@ public class VariableSlot implements IHoverRenderable{
 	public void renderHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks){
 		if(ApiUtils.isMouseInBounds(mouseX, mouseY, x, y, x+width, y+height)){
 			TooltipBuffer.tooltipBuffer.add(()->{
-				if(Minecraft.getInstance().currentScreen != null) Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, tooltipLines.stream().map(line ->IReorderingProcessor.fromString(line, Style.EMPTY)).collect(Collectors.toList()), mouseX, mouseY);
+				if(Minecraft.getInstance().screen != null) Minecraft.getInstance().screen.renderTooltip(matrixStack, tooltipLines.stream().map(line ->IReorderingProcessor.forward(line, Style.EMPTY)).collect(Collectors.toList()), mouseX, mouseY);
 			});
 		}
 	}

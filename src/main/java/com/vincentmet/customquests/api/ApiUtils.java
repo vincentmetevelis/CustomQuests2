@@ -3,17 +3,21 @@ package com.vincentmet.customquests.api;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.vincentmet.customquests.Ref;
-import java.io.*;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.JsonToNBT;
+
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
-import net.minecraft.nbt.*;
 
 public class ApiUtils{
 	//Just to not worry about the errors, it'll fall back to the default item NBT if it fails
 	public static CompoundNBT getNbtFromJson(String jsonString){
 		try {
-			return JsonToNBT.getTagFromJson(jsonString);
+			return JsonToNBT.parseTag(jsonString);
 		}catch (CommandSyntaxException e){
 			//NOOP
 		}

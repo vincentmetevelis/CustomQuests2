@@ -115,7 +115,7 @@ public class ItemSubmitTaskType implements ITaskType, IItemStacksProvider{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ogRL = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(ogRL == null){
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > item': Value is not a valid item, please use a valid item id, defaulting to 'minecraft:grass_block'!");
 						ogRL = Blocks.GRASS_BLOCK.getRegistryName();
@@ -222,15 +222,15 @@ public class ItemSubmitTaskType implements ITaskType, IItemStacksProvider{
 	
 	@Override
 	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
-			IntCounter itemsLeftToHandIn = new IntCounter(getItemCountLeftToHandIn(player.getUniqueID(), questId, taskId, subtaskId));
-			player.inventory.mainInventory.forEach(invStack -> {
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
+			IntCounter itemsLeftToHandIn = new IntCounter(getItemCountLeftToHandIn(player.getUUID(), questId, taskId, subtaskId));
+			player.inventory.items.forEach(invStack -> {
 				items.stream()
 					 .filter(itemStack -> itemStack.getItem() == invStack.getItem())
 					 .filter(itemStack -> {
 						 BooleanContainer invalid = new BooleanContainer(false);
 						 if(invStack.hasTag() && itemStack.hasTag()){
-							 itemStack.getTag().keySet().forEach(key -> {
+							 itemStack.getTag().getAllKeys().forEach(key -> {
 								 invalid.set(!invStack.getTag().contains(key));
 							 });
 						 }
@@ -238,11 +238,11 @@ public class ItemSubmitTaskType implements ITaskType, IItemStacksProvider{
 					 })
 					 .forEach(itemStack -> {
 						 if(itemsLeftToHandIn.getValue() >= invStack.getCount()){
-							 CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, invStack.getCount());
+							 CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, invStack.getCount());
 							 itemsLeftToHandIn.add(-invStack.getCount());
 							 invStack.setCount(0);
 						 }else{
-							 CombinedProgressHelper.addValue(player.getUniqueID(), questId, taskId, subtaskId, itemsLeftToHandIn.getValue());
+							 CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, itemsLeftToHandIn.getValue());
 							 invStack.setCount(invStack.getCount() - itemsLeftToHandIn.getValue());
 							 itemsLeftToHandIn.setValue(0);
 						 }
@@ -254,8 +254,8 @@ public class ItemSubmitTaskType implements ITaskType, IItemStacksProvider{
 	}
 	
 	public void processValue(PlayerEntity player){
-		if(CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId) >= count){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+		if(CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId) >= count){
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
@@ -271,13 +271,13 @@ public class ItemSubmitTaskType implements ITaskType, IItemStacksProvider{
 	
 	@Override
 	public Runnable onSlotHover(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks, ClientPlayerEntity player){
-		return ()->Minecraft.getInstance().currentScreen.renderTooltip(matrixStack, icon.getCurrentItemStack(), mouseX, mouseY);
+		return ()->Minecraft.getInstance().screen.renderTooltip(matrixStack, icon.getCurrentItemStack(), mouseX, mouseY);
 	}
 	
 	@Override
 	public String getText(ClientPlayerEntity player){
 		if(items.size()==1){
-			return count + "x " + items.get(0).getItem().getName().getString();
+			return count + "x " + items.get(0).getItem().getDescription().getString();
 		}else{
 			return count + "x " + new TranslationTextComponent(Ref.MODID + ".general.tag").getString() + ": " + Arrays.stream(ogRL.getPath().split("/")).map(StringUtils::capitalize).reduce((s, s2) ->s + "/" + s2).orElse(new TranslationTextComponent(Ref.MODID + ".general.tag.empty").getString());
 		}

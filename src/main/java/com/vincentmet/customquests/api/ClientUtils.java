@@ -7,12 +7,12 @@ import net.minecraft.util.text.TextFormatting;
 public class ClientUtils{
 	public static String colorify(String string){
 		for (TextFormatting textFormatting : TextFormatting.values()) {
-			string = string.replaceAll(String.format("~%s~", textFormatting.getFriendlyName().toUpperCase()), textFormatting.toString());
+			string = string.replaceAll(String.format("~%s~", textFormatting.getName().toUpperCase()), textFormatting.toString());
 		}
 		return string;
 	}
 	
 	public static void openQuestingScreen(){
-		Minecraft.getInstance().displayGuiScreen(new QuestingScreen());
+		Minecraft.getInstance().setScreen(new QuestingScreen());
 	}
 }

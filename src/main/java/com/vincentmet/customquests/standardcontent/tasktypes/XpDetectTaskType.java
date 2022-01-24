@@ -50,21 +50,21 @@ public class XpDetectTaskType implements ITaskType{
 	
 	@Override
 	public void executeSubtaskCheck(PlayerEntity player, Object object){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
-			processValue(player.experienceTotal, player);
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
+			processValue(player.totalExperience, player);
 		}
 	}
 	
 	public void processValue(int detectedXp, PlayerEntity player){
-		if(!CombinedProgressHelper.isQuestCompleted(player.getUniqueID(), questId)){
-			int oldValue = CombinedProgressHelper.getValue(player.getUniqueID(), questId, taskId, subtaskId);
+		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
+			int oldValue = CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId);
 			if(detectedXp != oldValue){
-				CombinedProgressHelper.setValue(player.getUniqueID(), questId, taskId, subtaskId, detectedXp);
+				CombinedProgressHelper.setValue(player.getUUID(), questId, taskId, subtaskId, detectedXp);
 				ServerUtils.sendProgressAndParties((ServerPlayerEntity)player);
 			}
 		}
 		if(detectedXp >= amount){
-			CombinedProgressHelper.completeSubtask(player.getUniqueID(), questId, taskId, subtaskId);
+			CombinedProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
 		}
 	}
 	
@@ -174,7 +174,7 @@ public class XpDetectTaskType implements ITaskType{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation rl = ResourceLocation.tryCreate(jsonPrimitiveStringValue);
+					ResourceLocation rl = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(rl != null){
 						icon = new ItemSlideshowTexture(rl, new ItemStack(ForgeRegistries.ITEMS.getValue(rl)));
 					}else{

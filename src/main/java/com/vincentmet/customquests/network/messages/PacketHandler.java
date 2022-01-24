@@ -35,7 +35,6 @@ public class PacketHandler{
 		CHANNEL.registerMessage(nextID(), MessageClearQuests.class, MessageClearQuests::encode, MessageClearQuests::decode, MessageClearQuests::handle);
 		CHANNEL.registerMessage(nextID(), MessageClearPlayers.class, MessageClearPlayers::encode, MessageClearPlayers::decode, MessageClearPlayers::handle);
 		CHANNEL.registerMessage(nextID(), MessageClearParties.class, MessageClearParties::encode, MessageClearParties::decode, MessageClearParties::handle);
-		CHANNEL.registerMessage(nextID(), MessageReloadResources.class, MessageReloadResources::encode, MessageReloadResources::decode, MessageReloadResources::handle);
 		CHANNEL.registerMessage(nextID(), MessageUpdateServerSettings.class, MessageUpdateServerSettings::encode, MessageUpdateServerSettings::decode, MessageUpdateServerSettings::handle);
 		
 		//Standard Content
