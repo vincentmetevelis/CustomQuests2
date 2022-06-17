@@ -2,10 +2,13 @@ package com.vincentmet.customquests.api;
 
 import com.google.gson.JsonObject;
 import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.event.PartyEvent;
+import com.vincentmet.customquests.event.QuestEvent;
 import com.vincentmet.customquests.helpers.BooleanContainer;
 import com.vincentmet.customquests.hierarchy.party.Party;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.MinecraftForge;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -26,7 +29,7 @@ public class PartyHelper {
 		if(doesPartyExist(partyId)){
 			return QuestingStorage.getSidedPartiesMap().get(partyId).getOwner();
 		}
-		return null;//this will never happen since its checked at data processing
+		return null;//this will never happen since it's checked at data processing
 	}
 	
 	public static void setPartyOwner(UUID player, int partyId){
@@ -91,20 +94,26 @@ public class PartyHelper {
 	//NEW STUFF
 	public static void completeQuest(int partyId, int questId){
 		if(doesPartyExist(partyId) && QuestHelper.doesQuestExist(questId)){
-			QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().get(questId).setAllTasksCompleted(true);
-			QuestingStorage.getSidedPartiesMap().get(partyId).getCollectivelyCompletedQuestList().add(questId);
+			Party party = QuestingStorage.getSidedPartiesMap().get(partyId);
+			party.getCollectiveProgress().get(questId).setAllTasksCompleted(true);
+			party.getCollectivelyCompletedQuestList().add(questId);
+			MinecraftForge.EVENT_BUS.post(new PartyEvent.Completed(party, questId));
 		}
 	}
 	
 	public static void completeTask(int partyId, int questId, int taskId){
 		if(doesPartyExist(partyId) && QuestHelper.doesTaskExist(questId, taskId)){
-			QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().get(questId).get(taskId).setAllSubtasksCompleted(true);
+			Party party = QuestingStorage.getSidedPartiesMap().get(partyId);
+			party.getCollectiveProgress().get(questId).get(taskId).setAllSubtasksCompleted(true);
+			MinecraftForge.EVENT_BUS.post(new PartyEvent.Task.Completed(party, questId, taskId));
 		}
 	}
 	
 	public static void completeSubtask(int partyId, int questId, int taskId, int subtaskId){
 		if(doesPartyExist(partyId) && QuestHelper.doesSubtaskExist(questId, taskId, subtaskId)){
-			QuestingStorage.getSidedPartiesMap().get(partyId).getCollectiveProgress().get(questId).get(taskId).get(subtaskId).setCompleted(true);
+			Party party = QuestingStorage.getSidedPartiesMap().get(partyId);
+			party.getCollectiveProgress().get(questId).get(taskId).get(subtaskId).setCompleted(true);
+			MinecraftForge.EVENT_BUS.post(new PartyEvent.Task.Subtask.Completed(party, questId, taskId, subtaskId));
 		}
 	}
 	
@@ -249,7 +258,7 @@ public class PartyHelper {
 				});
 			});
 		}
-		if(shouldSync.get()) PartyHelper.forEachPlayerInPartyCurrentlyOnline(partyId, ServerUtils::sendProgressAndParties);
+		if(shouldSync.get()) PartyHelper.forEachPlayerInPartyCurrentlyOnline(partyId, ServerUtils.Packets.SyncToClient.Progress::syncAllProgressAndPartiesToPlayer);
 	}
 	
 	public static void deleteProgress(int partyId){
@@ -259,5 +268,13 @@ public class PartyHelper {
 			party.getCollectivelyCompletedQuestList().clear();
 			CQHelper.generateMissingPartyProgress(partyId);
 		}
+	}
+
+	public static void forAllParties(Consumer<Party> consumer){
+		QuestingStorage.getSidedPartiesMap().values().forEach(consumer);
+	}
+
+	public static void forAllPlayersInParty(int partyId, Consumer<UUID> consumer){
+		getAllUUIDsInParty(partyId).forEach(consumer);
 	}
 }

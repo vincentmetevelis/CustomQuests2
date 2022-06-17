@@ -88,7 +88,12 @@ public class TextType implements IJsonObjectProcessor, IJsonObjectProvider, IEdi
     }
     
     public void setType(ITextType type){
+        String ogText = "";
+        if(type != null){
+            ogText = type.getOgText();
+        }
         this.type = type;
+        this.type.setOgText(ogText);
     }
     
     public ITextType getType(){

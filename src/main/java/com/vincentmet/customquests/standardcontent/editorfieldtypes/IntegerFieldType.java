@@ -26,27 +26,6 @@ public class IntegerFieldType implements IEditorEntryDataType {
     }
 
     @Override
-    public boolean check(Object value) {
-        try {
-            Integer.parseInt(value.toString());
-        }catch (Exception ignored){
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public Object correct(Object value) {
-        if(check(value))return value;
-        return 0;
-    }
-
-    @Override
-    public void reset(IEditorEntry editorEntry) {
-        rlValue.setText(initialValue.toString());
-    }
-
-    @Override
     public void save(IEditorEntry editorEntry) {
         initialValue = rlValue.getText();
         editorEntry.setEditorValue(initialValue);

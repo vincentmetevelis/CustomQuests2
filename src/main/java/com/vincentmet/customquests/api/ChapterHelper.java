@@ -1,9 +1,11 @@
 package com.vincentmet.customquests.api;
 
+import com.google.gson.JsonObject;
 import com.vincentmet.customquests.gui.editor.IEditorEntry;
 import com.vincentmet.customquests.hierarchy.chapter.*;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 
 import java.util.*;
 
@@ -11,6 +13,7 @@ public class ChapterHelper{
 	public static boolean doesChapterExist(int chapterId){
 		return QuestingStorage.getSidedChaptersMap().get(chapterId) != null;
 	}
+
 	public static boolean areQuestsInSameChapter(int questId1, int questId2){
 		Quest q1 = QuestHelper.getQuestFromId(questId1);
 		Quest q2 = QuestHelper.getQuestFromId(questId2);
@@ -44,7 +47,7 @@ public class ChapterHelper{
 		}
 		return new ResourceLocation("minecraft:grass_block");
 	}
-	
+
 	public static QuestList getQuests(int chapterId){
 		if(doesChapterExist(chapterId)){
 			return QuestingStorage.getSidedChaptersMap().get(chapterId).getQuests();
@@ -82,5 +85,12 @@ public class ChapterHelper{
 			QuestingStorage.getSidedChaptersMap().get(chapterId).getQuests().addPageEntries(entries);
 		}
 		return entries;
+	}
+
+	public static int getNextAvailableChapterId(){
+		if(!QuestingStorage.getSidedChaptersMap().isEmpty()){
+			return Collections.max(QuestingStorage.getSidedChaptersMap().keySet())+1;
+		}
+		return 0;
 	}
 }

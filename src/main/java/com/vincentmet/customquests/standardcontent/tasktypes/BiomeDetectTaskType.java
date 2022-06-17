@@ -61,7 +61,7 @@ public class BiomeDetectTaskType implements ITaskType{
 		if(!CombinedProgressHelper.isQuestCompleted(player.getUUID(), questId)){
 			if(WorldHelper.isPlayerInBiome(player, biome)){
 				CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, getCompletionAmount());
-				ServerUtils.sendProgressAndParties((ServerPlayer)player);
+				ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer((ServerPlayer)player);
 			}
 			processValue(player);
 		}

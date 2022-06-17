@@ -8,7 +8,7 @@ import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.IRewardType;
 import com.vincentmet.customquests.helpers.MouseButton;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
@@ -28,7 +28,7 @@ public class XpRewardType implements IRewardType{
     }
     
     @Override
-	public void executeReward(Player player){
+	public void executeReward(ServerPlayer player){
 		if(inLevels){
 			player.giveExperienceLevels(amount);
 		}else{

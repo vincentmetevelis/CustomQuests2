@@ -7,12 +7,12 @@ import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.ApiUtils;
 import com.vincentmet.customquests.api.IHoverRenderable;
 import com.vincentmet.customquests.gui.elements.ScrollingLabel;
+import com.vincentmet.customquests.helpers.CQGuiEventListener;
 import com.vincentmet.customquests.helpers.MouseButton;
 import com.vincentmet.customquests.helpers.TooltipBuffer;
 import com.vincentmet.customquests.helpers.math.Vec2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 
 @OnlyIn(Dist.CLIENT)
-public class VariableButton implements IHoverRenderable, GuiEventListener {
+public class VariableButton implements IHoverRenderable, CQGuiEventListener {
 	private final int parentX;
 	private final int parentY;
 	
@@ -80,7 +80,7 @@ public class VariableButton implements IHoverRenderable, GuiEventListener {
 	
 	private void internalRender(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks, ButtonTexture texture){
 		Color.color(0xFFFFFFFF);
-		Lighting.setupForFlatItems();//todo test
+		Lighting.setupForFlatItems();
 		
 		int x = parentX + this.x.getAsInt();
 		int y = parentY + this.y.getAsInt();

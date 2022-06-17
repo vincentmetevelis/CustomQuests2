@@ -68,7 +68,7 @@ public class XpDetectTaskType implements ITaskType{
 			int oldValue = CombinedProgressHelper.getValue(player.getUUID(), questId, taskId, subtaskId);
 			if(detectedXp != oldValue){
 				CombinedProgressHelper.setValue(player.getUUID(), questId, taskId, subtaskId, detectedXp);
-				ServerUtils.sendProgressAndParties((ServerPlayer) player);
+				ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer((ServerPlayer) player);
 			}
 		}
 		if(detectedXp >= amount){

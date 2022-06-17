@@ -10,7 +10,7 @@ import com.vincentmet.customquests.helpers.IntCounter;
 import com.vincentmet.customquests.helpers.MouseButton;
 import com.vincentmet.customquests.helpers.PlayerBoundSubtaskReference;
 import com.vincentmet.customquests.hierarchy.quest.ItemSlideshowTexture;
-import com.vincentmet.customquests.network.messages.MessageTaskButton;
+import com.vincentmet.customquests.network.messages.button.MessageTaskButton;
 import com.vincentmet.customquests.network.messages.PacketHandler;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -94,7 +94,7 @@ public class XpSubmitTaskType implements ITaskType{
 			int xpAfter = xpLeftToHandIn.getValue();
 			if(xpBefore != xpAfter){
 				processValue(player);
-				ServerUtils.sendProgressAndParties((ServerPlayer) player);
+				ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer((ServerPlayer) player);
 			}
 		}
 	}

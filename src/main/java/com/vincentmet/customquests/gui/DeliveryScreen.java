@@ -14,7 +14,7 @@ import com.vincentmet.customquests.helpers.Triple;
 import com.vincentmet.customquests.helpers.math.Vec2i;
 import com.vincentmet.customquests.helpers.rendering.VariableButton;
 import com.vincentmet.customquests.helpers.rendering.VariableSlot;
-import com.vincentmet.customquests.network.messages.MessageUpdateDelivery;
+import com.vincentmet.customquests.network.messages.sync.MessageUpdateDelivery;
 import com.vincentmet.customquests.network.messages.PacketHandler;
 import com.vincentmet.customquests.tileentity.DeliveryBlockTileEntity;
 import net.minecraft.ChatFormatting;

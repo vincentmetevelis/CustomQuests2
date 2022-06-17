@@ -3,9 +3,9 @@ package com.vincentmet.customquests.gui.elements;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.api.ApiUtils;
 import com.vincentmet.customquests.api.IHoverRenderable;
+import com.vincentmet.customquests.helpers.CQGuiEventListener;
 import com.vincentmet.customquests.helpers.IntCounter;
 import com.vincentmet.customquests.helpers.rendering.GLScissorStack;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.function.IntSupplier;
 
 @OnlyIn(Dist.CLIENT)
-public class ScrollableList implements GuiEventListener, IHoverRenderable{
+public class ScrollableList implements CQGuiEventListener, IHoverRenderable{
 	private IntSupplier x, y, width, height;
 	private int scrollDistance = 0;
 	private final List<ScrollableListEntry> entries = new ArrayList<>();

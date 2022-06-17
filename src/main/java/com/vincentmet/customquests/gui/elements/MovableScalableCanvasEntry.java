@@ -1,7 +1,7 @@
 package com.vincentmet.customquests.gui.elements;
 
 import com.vincentmet.customquests.api.IHoverRenderable;
-import net.minecraft.client.gui.components.events.GuiEventListener;
+import com.vincentmet.customquests.helpers.CQGuiEventListener;
 
-public interface MovableScalableCanvasEntry extends IHoverRenderable, GuiEventListener {
+public interface MovableScalableCanvasEntry extends IHoverRenderable, CQGuiEventListener {
 }

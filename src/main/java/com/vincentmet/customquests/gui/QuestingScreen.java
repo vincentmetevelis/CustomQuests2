@@ -5,6 +5,7 @@ import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.ChapterHelper;
 import com.vincentmet.customquests.api.QuestingStorage;
 import com.vincentmet.customquests.api.TextUtils;
+import com.vincentmet.customquests.gui.editor.ActionQueue;
 import com.vincentmet.customquests.gui.elements.ButtonState;
 import com.vincentmet.customquests.gui.elements.ChapterButton;
 import com.vincentmet.customquests.gui.elements.ScrollableList;
@@ -35,6 +36,7 @@ import java.util.function.IntSupplier;
 
 @OnlyIn(Dist.CLIENT)
 public class QuestingScreen extends Screen {
+	public final ActionQueue actionQueue = new ActionQueue();
 	public static final IntSupplier BUTTON_HEIGHT = ()->20;
 	public final QuestingScreenManager screenManager = new QuestingScreenManager();
 	private VariableButton buttonToChapters;
@@ -109,7 +111,7 @@ public class QuestingScreen extends Screen {
 				buttonState = ButtonState.NORMAL;
 			}
 
-			Container<Integer> chapterYSupplier = new Container<>(cumulativeHeight.getValue());//todo continue all of this containerization for the cumulative heights
+			Container<Integer> chapterYSupplier = new Container<>(cumulativeHeight.getValue());
 			chapterList.add(new ChapterButton(chapterListX, chapterYSupplier::get, chapterListWidth, BUTTON_HEIGHT, chapter.getIcon(), TextUtils.colorify(chapter.getTitle().getText()), buttonState, (mouseButton) -> {
 				screenManager.setCurrentlySelectedChapterId(chapter.getId());
 				questingCanvas.applyDraggingLimits();
@@ -167,6 +169,7 @@ public class QuestingScreen extends Screen {
 			}
 		}
 		TooltipBuffer.tooltipBuffer.forEach(Runnable::run);
+		actionQueue.execute();
 	}
 	
 	private void renderBackgrounds(PoseStack matrixStack){

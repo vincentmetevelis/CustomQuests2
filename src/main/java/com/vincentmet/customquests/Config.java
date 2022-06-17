@@ -118,7 +118,7 @@ public class Config {
         try {
             StringBuilder res = new StringBuilder();
             Files.readAllLines(path.resolve(filename), StandardCharsets.UTF_8).forEach(res::append);
-            return new JsonParser().parse(res.toString()).getAsJsonObject();
+            return JsonParser.parseString(res.toString()).getAsJsonObject();
         }catch (IOException e) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String out = gson.toJson(new JsonObject());

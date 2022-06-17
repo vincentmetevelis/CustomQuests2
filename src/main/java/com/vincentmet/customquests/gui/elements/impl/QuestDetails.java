@@ -13,13 +13,12 @@ import com.vincentmet.customquests.helpers.math.Vec2i;
 import com.vincentmet.customquests.helpers.rendering.GLScissorStack;
 import com.vincentmet.customquests.helpers.rendering.VariableButton;
 import com.vincentmet.customquests.helpers.rendering.VariableSlot;
-import com.vincentmet.customquests.network.messages.MessageRewardClaim;
 import com.vincentmet.customquests.network.messages.PacketHandler;
+import com.vincentmet.customquests.network.messages.button.MessageRewardClaim;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
@@ -34,7 +33,7 @@ import java.util.List;
 import java.util.function.IntSupplier;
 
 @OnlyIn(Dist.CLIENT)
-public class QuestDetails implements IHoverRenderable, GuiEventListener {
+public class QuestDetails implements IHoverRenderable, CQGuiEventListener {
 	public static final IntSupplier CLAIM_BUTTON_WIDTH = ()->50;
 	public static final IntSupplier CLAIM_BUTTON_HEIGHT = ()->20;
 	public static final IntSupplier TASK_BUTTON_WIDTH = ()->50;

@@ -1,11 +1,11 @@
 package com.vincentmet.customquests.gui.elements;
 
 import com.vincentmet.customquests.api.IHoverRenderable;
-import net.minecraft.client.gui.components.events.GuiEventListener;
+import com.vincentmet.customquests.helpers.CQGuiEventListener;
 
 import java.util.function.IntSupplier;
 
-public interface ScrollableListEntry extends IHoverRenderable, GuiEventListener {
+public interface ScrollableListEntry extends IHoverRenderable, CQGuiEventListener {
 	void setX(IntSupplier x);
 	void setY(IntSupplier y);
 	IntSupplier getX();

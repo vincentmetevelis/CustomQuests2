@@ -6,8 +6,8 @@ import com.vincentmet.customquests.event.CheckCycleEvent;
 import com.vincentmet.customquests.event.DataLoadingEvent;
 import com.vincentmet.customquests.event.QuestEvent;
 import com.vincentmet.customquests.helpers.PlayerBoundSubtaskReference;
-import com.vincentmet.customquests.network.messages.MessageRewardClaim;
 import com.vincentmet.customquests.network.messages.PacketHandler;
+import com.vincentmet.customquests.network.messages.button.MessageRewardClaim;
 import com.vincentmet.customquests.standardcontent.tasktypes.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -36,7 +36,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = Ref.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class ForgeEventHandler{
+public class ForgeEventHandler{//todo separate client events and server events!!!!!!!
 	@SubscribeEvent
 	public static void onWorldStart(WorldEvent.Load event){
 		//Main
@@ -58,9 +58,9 @@ public class ForgeEventHandler{
 		//Main
 		CQHelper.generateMissingProgress(event.getPlayer().getUUID());
 		CQHelper.generateMissingPartyProgress();
-		ServerUtils.sendQuestsAndChapters((ServerPlayer)event.getPlayer());
-		ServerUtils.sendProgressAndParties((ServerPlayer)event.getPlayer());
-		ServerUtils.sendServerConfigToClient((ServerPlayer)event.getPlayer());
+		ServerUtils.Packets.SyncToClient.Data.syncAllChaptersAndQuestsToPlayer((ServerPlayer)event.getPlayer());
+		ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer((ServerPlayer)event.getPlayer());
+		ServerUtils.Packets.SyncToClient.Config.syncConfigToPlayer((ServerPlayer)event.getPlayer());
 		
 		if(Config.SidedConfig.giveDeviceOnFirstLogin()){
 			if(event.getPlayer() instanceof ServerPlayer){
@@ -80,7 +80,7 @@ public class ForgeEventHandler{
 			CQHelper.writePlayersAndPartiesToFile(Ref.currentProgressDirectory, Ref.FILENAME_PARTIES + Ref.FILE_EXT_JSON);
 		}
 	}
-	
+
 	@SubscribeEvent
 	public static void onWorldTick(TickEvent.WorldTickEvent event){
 		//Main
@@ -169,7 +169,7 @@ public class ForgeEventHandler{
 		if(CombinedProgressHelper.isTaskCompleted(event.getPlayer().getUUID(), event.getQuestId(), event.getTaskId())){
 			CombinedProgressHelper.completeTask(event.getPlayer().getUUID(), event.getQuestId(), event.getTaskId());
 		}
-		ServerUtils.sendProgressAndParties(event.getPlayer());
+		ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer(event.getPlayer());//todo perhaps change to sendSingleSubtaskTaskToAllPlayers(ServerPlayer, questId, taskId) to reduce network data
 	}
 	
 	@SubscribeEvent
@@ -180,13 +180,13 @@ public class ForgeEventHandler{
 			QuestingStorage.getSidedPlayersMap().get(event.getPlayer().getStringUUID()).getIndividualProgress().getIndividuallyCompletedQuests().add(event.getQuestId());
 			CombinedProgressHelper.completeQuest(event.getPlayer().getUUID(), event.getQuestId());
 		}
-		ServerUtils.sendProgressAndParties(event.getPlayer());
+		ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer(event.getPlayer());//todo perhaps change to sendSingleTaskToAllPlayers(ServerPlayer, questId, taskId) to reduce network data
 	}
 	
 	@SubscribeEvent
-	public static void onQuestComplete(QuestEvent.Completed event){
+	public static void onQuestComplete(QuestEvent.Completed event){//fixme something in here calls a client side only class on the dedicated server @AlleCraft
 		//Main
-		ServerUtils.sendProgressAndParties(event.getPlayer());
+		ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer(event.getPlayer());//todo perhaps change to sendSingleQuestToAllPlayers(ServerPlayer, questId, taskId) to reduce network data
 		MinecraftServer server = event.getPlayer().getServer();
 		if(server != null){
 			if(ProgressHelper.isPlayerInParty(event.getPlayer().getUUID())){

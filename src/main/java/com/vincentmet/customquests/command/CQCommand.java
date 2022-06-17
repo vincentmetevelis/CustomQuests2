@@ -1,45 +1,57 @@
 package com.vincentmet.customquests.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.*;
-import com.mojang.brigadier.builder.*;
+import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.vincentmet.customquests.Config;
 import com.vincentmet.customquests.Objects;
-import com.vincentmet.customquests.*;
+import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.event.DataLoadingEvent;
 import com.vincentmet.customquests.helpers.PartyInviteCache;
-import com.vincentmet.customquests.network.messages.*;
-import java.util.*;
-import java.util.regex.Pattern;
-
+import com.vincentmet.customquests.hierarchy.party.Party;
+import com.vincentmet.customquests.network.messages.PacketHandler;
+import com.vincentmet.customquests.network.messages.command.MessageDiscord;
+import com.vincentmet.customquests.network.messages.command.MessageHand;
+import com.vincentmet.customquests.network.messages.command.MessageOpenEditor;
 import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.network.PacketDistributor;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
 public class CQCommand{
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher){
-        dispatcher.register(LiteralArgumentBuilder.<CommandSourceStack>literal(Ref.MODID)
+        LiteralCommandNode<CommandSourceStack> customQuestsNode = dispatcher.register(LiteralArgumentBuilder.<CommandSourceStack>literal(Ref.MODID)
                 .then(registerPartyCommand())
                 .then(registerProgressCommand())
                 .then(registerGiveCommand())
-                //.then(registerEditorCommand())
+                .then(registerEditorCommand())
                 .then(registerSettingsCommand())
                 .then(registerInfoCommand())
                 .then(registerReloadCommand())
                 //.then(registerQuestsCommand())
+                .then(registerHandCommand())
                 .then(registerDiscordCommand())
                 .then(registerUuidCommand())
                 .executes(context->{
@@ -47,7 +59,7 @@ public class CQCommand{
                         return 0;
                 })
         );
-        
+        dispatcher.register(Commands.literal("cq").redirect(customQuestsNode));
     }
     
     public static ArgumentBuilder<CommandSourceStack, ?> registerPartyCommand(){
@@ -73,7 +85,7 @@ public class CQCommand{
                                 }else{
                                     String devModeMessage = Config.SidedConfig.isDebugModeOn() ? " (ID: "+partyId+", name:'" + name + "')" : "";
                                     context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.party.create.success", devModeMessage), false);
-                                    context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils::sendProgressAndParties);
+                                    context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils.Packets.SyncToClient.Progress::syncAllProgressAndPartiesToPlayer);
                                 }
                             }else{
                                 context.getSource().sendFailure(new TranslatableComponent(Ref.MODID + ".command.party.create.invalid_name"));
@@ -209,14 +221,213 @@ public class CQCommand{
                     }
                     return cs.hasPermission(2);
                 })
-                //todo add progress give command
-                .then(Commands.literal("delete")
+                .then(Commands.literal("complete")
+                        .then(Commands.literal("all")
+                                .then(Commands.literal("chapter")
+                                        .then(Commands.argument("chapter_id", IntegerArgumentType.integer(0))
+                                                .executes(context -> {
+                                                    int chapterId = context.getArgument("chapter_id", Integer.class);
+                                                    if(ChapterHelper.doesChapterExist(chapterId)){
+                                                        ChapterHelper.getQuests(chapterId).forEach(questId -> {
+                                                            ProgressHelper.forAllPlayers(uuid -> ProgressHelper.completeQuest(uuid, questId));
+                                                            PartyHelper.forAllParties(party -> PartyHelper.completeQuest(party.getId(), questId));
+                                                        });
+                                                    }
+                                                    return 0;
+                                                })
+                                        )
+                                )
+                                .then(Commands.literal("quest")
+                                        .then(Commands.argument("quest_id", IntegerArgumentType.integer(0))
+                                                .executes(context -> {
+                                                    int questId = context.getArgument("quest_id", Integer.class);
+                                                    if(QuestHelper.doesQuestExist(questId)){
+                                                        ProgressHelper.forAllPlayers(uuid -> ProgressHelper.completeQuest(uuid, questId));
+                                                        PartyHelper.forAllParties(party -> PartyHelper.completeQuest(party.getId(), questId));
+                                                    }
+                                                    return 0;
+                                                })
+                                        )
+                                )
+                                .then(Commands.literal("task")
+                                        .then(Commands.argument("quest_id", IntegerArgumentType.integer(0))
+                                                .then(Commands.argument("task_id", IntegerArgumentType.integer(0))
+                                                        .executes(context -> {//todo test
+                                                            int questId = context.getArgument("quest_id", Integer.class);
+                                                            int taskId = context.getArgument("task_id", Integer.class);
+                                                            if(QuestHelper.doesTaskExist(questId, taskId)){
+                                                                ProgressHelper.forAllPlayers(uuid -> ProgressHelper.completeTask(uuid, questId, taskId));
+                                                                PartyHelper.forAllParties(party -> PartyHelper.completeTask(party.getId(), questId, taskId));
+                                                            }
+                                                            return 0;
+                                                        })
+                                                )
+                                        )
+                                )
+                                .then(Commands.literal("subtask")
+                                        .then(Commands.argument("quest_id", IntegerArgumentType.integer(0))
+                                                .then(Commands.argument("task_id", IntegerArgumentType.integer(0))
+                                                        .then(Commands.argument("subtask_id", IntegerArgumentType.integer(0))
+                                                                .executes(context -> {//todo test
+                                                                    int questId = context.getArgument("quest_id", Integer.class);
+                                                                    int taskId = context.getArgument("task_id", Integer.class);
+                                                                    int subtaskId = context.getArgument("subtask_id", Integer.class);
+                                                                    if(QuestHelper.doesSubtaskExist(questId, taskId, subtaskId)){
+                                                                        ProgressHelper.forAllPlayers(uuid -> ProgressHelper.completeSubtask(uuid, questId, taskId, subtaskId));
+                                                                        PartyHelper.forAllParties(party -> PartyHelper.completeSubtask(party.getId(), questId, taskId, subtaskId));
+                                                                    }
+                                                                    return 0;
+                                                                })
+                                                        )
+                                                )
+                                        )
+                                )
+                                .executes(context -> 0)
+                        )
+                        .then(Commands.literal("party")
+                                .then(Commands.argument("party_id", IntegerArgumentType.integer(0))
+                                        .then(Commands.literal("chapter")
+                                                .then(Commands.argument("chapter_id", IntegerArgumentType.integer(0))
+                                                        .executes(context -> {//todo test
+                                                            int partyId = context.getArgument("party_id", Integer.class);
+                                                            int chapterId = context.getArgument("chapter_id", Integer.class);
+                                                            if(ChapterHelper.doesChapterExist(chapterId) && PartyHelper.doesPartyExist(partyId)){
+                                                                ChapterHelper.getQuests(chapterId).forEach(questId -> {
+                                                                    PartyHelper.completeQuest(partyId, questId);
+                                                                });
+                                                            }
+                                                            return 0;
+                                                        })
+                                                )
+                                        )
+                                        .then(Commands.literal("quest")
+                                                .then(Commands.argument("quest_id", IntegerArgumentType.integer(0))
+                                                        .executes(context -> {//todo test
+                                                            int partyId = context.getArgument("party_id", Integer.class);
+                                                            int questId = context.getArgument("quest_id", Integer.class);
+                                                            if(QuestHelper.doesQuestExist(questId) && PartyHelper.doesPartyExist(partyId)){
+                                                                PartyHelper.completeQuest(partyId, questId);
+                                                            }
+                                                            return 0;
+                                                        })
+                                                )
+                                        )
+                                        .then(Commands.literal("task")
+                                                .then(Commands.argument("quest_id", IntegerArgumentType.integer(0))
+                                                        .then(Commands.argument("task_id", IntegerArgumentType.integer(0))
+                                                                .executes(context -> {//todo test
+                                                                    int partyId = context.getArgument("party_id", Integer.class);
+                                                                    int questId = context.getArgument("quest_id", Integer.class);
+                                                                    int taskId = context.getArgument("task_id", Integer.class);
+                                                                    if(QuestHelper.doesTaskExist(questId, taskId) && PartyHelper.doesPartyExist(partyId)){
+                                                                        PartyHelper.completeTask(partyId, questId, taskId);
+                                                                    }
+                                                                    return 0;
+                                                                })
+                                                        )
+                                                )
+                                        )
+                                        .then(Commands.literal("subtask")
+                                                .then(Commands.argument("quest_id", IntegerArgumentType.integer(0))
+                                                        .then(Commands.argument("task_id", IntegerArgumentType.integer(0))
+                                                                .then(Commands.argument("subtask_id", IntegerArgumentType.integer(0))
+                                                                        .executes(context -> {//todo test
+                                                                            int partyId = context.getArgument("party_id", Integer.class);
+                                                                            int questId = context.getArgument("quest_id", Integer.class);
+                                                                            int taskId = context.getArgument("task_id", Integer.class);
+                                                                            int subtaskId = context.getArgument("subtask_id", Integer.class);
+                                                                            if(QuestHelper.doesSubtaskExist(questId, taskId, subtaskId) && PartyHelper.doesPartyExist(partyId)){
+                                                                                PartyHelper.completeSubtask(partyId, questId, taskId, subtaskId);
+                                                                            }
+                                                                            return 0;
+                                                                        })
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                                .executes(context -> 0)
+                        )
+                        .then(Commands.literal("player")
+                                .then(Commands.argument("player", EntityArgument.players())
+                                        .then(Commands.literal("chapter")
+                                                .then(Commands.argument("chapter_id", IntegerArgumentType.integer(0))
+                                                        .executes(context -> {//todo test
+                                                            Collection<ServerPlayer> players = EntityArgument.getPlayers(context, "player");
+                                                            int chapterId = context.getArgument("chapter_id", Integer.class);
+                                                            for (ServerPlayer player : players){
+                                                                if(ChapterHelper.doesChapterExist(chapterId) && ProgressHelper.doesPlayerExist(player.getUUID())){
+                                                                    ChapterHelper.getQuests(chapterId).forEach(questId -> {
+                                                                        ProgressHelper.completeQuest(player.getUUID(), questId);
+                                                                    });
+                                                                }
+                                                            }
+                                                            return 0;
+                                                        })
+                                                )
+                                        )
+                                        .then(Commands.literal("quest")
+                                                .then(Commands.argument("quest_id", IntegerArgumentType.integer(0))
+                                                        .executes(context -> {//todo test
+                                                            Collection<ServerPlayer> players = EntityArgument.getPlayers(context, "player");
+                                                            int questId = context.getArgument("quest_id", Integer.class);
+                                                            for (ServerPlayer player : players) {
+                                                                if (QuestHelper.doesQuestExist(questId) && ProgressHelper.doesPlayerExist(player.getUUID())) {
+                                                                    ProgressHelper.completeQuest(player.getUUID(), questId);
+                                                                }
+                                                            }
+                                                            return 0;
+                                                        })
+                                                )
+                                        )
+                                        .then(Commands.literal("task")
+                                                .then(Commands.argument("quest_id", IntegerArgumentType.integer(0))
+                                                        .then(Commands.argument("task_id", IntegerArgumentType.integer(0))
+                                                                .executes(context -> {//todo test
+                                                                    Collection<ServerPlayer> players = EntityArgument.getPlayers(context, "player");
+                                                                    int questId = context.getArgument("quest_id", Integer.class);
+                                                                    int taskId = context.getArgument("task_id", Integer.class);
+                                                                    for (ServerPlayer player : players) {
+                                                                        if (QuestHelper.doesTaskExist(questId, taskId) && ProgressHelper.doesPlayerExist(player.getUUID())) {
+                                                                            ProgressHelper.completeTask(player.getUUID(), questId, taskId);
+                                                                        }
+                                                                    }
+                                                                    return 0;
+                                                                })
+                                                        )
+                                                )
+                                        )
+                                        .then(Commands.literal("subtask")
+                                                .then(Commands.argument("quest_id", IntegerArgumentType.integer(0))
+                                                        .then(Commands.argument("task_id", IntegerArgumentType.integer(0))
+                                                                .then(Commands.argument("subtask_id", IntegerArgumentType.integer(0))
+                                                                        .executes(context -> {//todo test
+                                                                            Collection<ServerPlayer> players = EntityArgument.getPlayers(context, "player");
+                                                                            int questId = context.getArgument("quest_id", Integer.class);
+                                                                            int taskId = context.getArgument("task_id", Integer.class);
+                                                                            int subtaskId = context.getArgument("subtask_id", Integer.class);
+                                                                            for (ServerPlayer player : players) {
+                                                                                if (QuestHelper.doesSubtaskExist(questId, taskId, subtaskId) && ProgressHelper.doesPlayerExist(player.getUUID())) {
+                                                                                    ProgressHelper.completeSubtask(player.getUUID(), questId, taskId, subtaskId);
+                                                                                }
+                                                                            }
+                                                                            return 0;
+                                                                        })
+                                                                )
+                                                        )
+                                                )
+                                        )
+                                )
+                                .executes(context -> 0)
+                        )
+                        .executes(context -> 0)
+                )
+                .then(Commands.literal("delete")//todo update with more subcommands
                         .then(Commands.literal("all")
                                 .executes(context -> {
                                     QuestingStorage.getSidedPlayersMap().forEach((uuid, questingPlayer) -> ProgressHelper.deleteProgress(UUID.fromString(uuid)));
                                     QuestingStorage.getSidedPartiesMap().forEach((partyId, party) -> PartyHelper.deleteProgress(partyId));
-                                    context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils::sendProgressToClient);
-                                    context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils::sendPartiesToClient);
+                                    context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils.Packets.SyncToClient.Progress::syncAllProgressAndPartiesToPlayer);
                                     context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.progress.delete.all.success"), false);
                                     return 0;
                                 })
@@ -227,7 +438,7 @@ public class CQCommand{
                                     Collection<ServerPlayer> serverPlayerEntities = EntityArgument.getPlayers(context, "player_name");
                                     serverPlayerEntities.forEach(playerEntity -> {
                                         ProgressHelper.deleteProgress(playerEntity.getUUID());
-                                        context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils::sendProgressToClient);
+                                        context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils.Packets.SyncToClient.Progress.Players::syncAllPlayerProgressToPlayer);
                                         context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.progress.delete.player.success", playerEntity.getDisplayName()), false);
                                     });
                                     return 0;
@@ -240,7 +451,7 @@ public class CQCommand{
                                     int partyId = IntegerArgumentType.getInteger(context, "party_id");
                                     if(PartyHelper.doesPartyExist(partyId)){
                                         PartyHelper.deleteProgress(partyId);
-                                        context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils::sendPartiesToClient);
+                                        context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils.Packets.SyncToClient.Progress.Parties::syncAllPartiesToPlayer);
                                         context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.progress.delete.party.success", partyId, PartyHelper.getPartyName(partyId)), false);
                                     }else{
                                         context.getSource().sendFailure(new TranslatableComponent(Ref.MODID + ".command.progress.delete.party.failed", partyId));
@@ -279,8 +490,10 @@ public class CQCommand{
         return Commands.literal("editor")
                 .executes(context->{
                     try{
-                        ServerPlayer player = context.getSource().getPlayerOrException();
-                        PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(()->player), new MessageOpenEditor());
+                        if(Config.SidedConfig.isEditModeOn()){
+                            ServerPlayer player = context.getSource().getPlayerOrException();
+                            PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(()->player), new MessageOpenEditor());
+                        }
                     }catch(CommandSyntaxException ignored){}
                     return 0;
                 })
@@ -300,7 +513,7 @@ public class CQCommand{
                            .executes(context -> {
                                Config.ServerConfig.CAN_REWARD_ONLY_BE_CLAIMED_ONCE = BoolArgumentType.getBool(context, "value");
                                context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.settings.set", "can_reward_only_be_claimed_once", ChatFormatting.GOLD + String.valueOf(Config.SidedConfig.canRewardOnlyBeClaimedOnce())), false);
-                               ServerUtils.sendServerConfigToAllPlayers();
+                               ServerUtils.Packets.SyncToClient.Config.syncConfigToAllPlayers();
                                return 0;
                            })
                      )
@@ -314,7 +527,7 @@ public class CQCommand{
                            .executes(context -> {
                                Config.ServerConfig.EDIT_MODE = BoolArgumentType.getBool(context, "value");
                                context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.settings.set", "edit_mode", ChatFormatting.GOLD + String.valueOf(Config.SidedConfig.isEditModeOn())), false);
-                               ServerUtils.sendServerConfigToAllPlayers();
+                               ServerUtils.Packets.SyncToClient.Config.syncConfigToAllPlayers();
                                return 0;
                            })
                      )
@@ -328,7 +541,7 @@ public class CQCommand{
                            .executes(context -> {
                                Config.ServerConfig.GIVE_DEVICE_ON_FIRST_LOGIN = BoolArgumentType.getBool(context, "value");
                                context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.settings.set", "give_device_on_first_login", ChatFormatting.GOLD + String.valueOf(Config.SidedConfig.giveDeviceOnFirstLogin())), false);
-                               ServerUtils.sendServerConfigToAllPlayers();
+                               ServerUtils.Packets.SyncToClient.Config.syncConfigToAllPlayers();
                                return 0;
                            })
                      )
@@ -342,7 +555,7 @@ public class CQCommand{
                            .executes(context -> {
                                Config.ServerConfig.DEBUG_MODE = BoolArgumentType.getBool(context, "value");
                                context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.settings.set", "debug_mode", ChatFormatting.GOLD + String.valueOf(Config.SidedConfig.isDebugModeOn())), false);
-                               ServerUtils.sendServerConfigToAllPlayers();
+                               ServerUtils.Packets.SyncToClient.Config.syncConfigToAllPlayers();
                                return 0;
                            })
                      )
@@ -356,7 +569,7 @@ public class CQCommand{
                            .executes(context -> {
                                Config.ServerConfig.GIVE_DEVICE_ON_FIRST_LOGIN = BoolArgumentType.getBool(context, "value");
                                context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.settings.set", "backups", ChatFormatting.GOLD + String.valueOf(Config.SidedConfig.areBackupsEnabled())), false);
-                               ServerUtils.sendServerConfigToAllPlayers();
+                               ServerUtils.Packets.SyncToClient.Config.syncConfigToAllPlayers();
                                return 0;
                            })
                      )
@@ -398,8 +611,8 @@ public class CQCommand{
                     context.getSource().getServer().getPlayerList().getPlayers().forEach(playerEntity->{
                         CQHelper.generateMissingProgress(playerEntity.getUUID());
                         CQHelper.generateMissingPartyProgress();
-                        ServerUtils.sendQuestsAndChapters(playerEntity);
-                        ServerUtils.sendProgressAndParties(playerEntity);
+                        ServerUtils.Packets.SyncToClient.Data.syncAllChaptersAndQuestsToPlayer(playerEntity);
+                        ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer(playerEntity);
                     });
                     context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.reload.success"), false);
                     return 0;
@@ -420,6 +633,18 @@ public class CQCommand{
         return Commands.literal("uuid")
                 .executes(context->{
                     context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.uuid", context.getSource().getPlayerOrException().getStringUUID()), false);
+                    return 0;
+                })
+        ;
+    }
+
+    public static ArgumentBuilder<CommandSourceStack, ?> registerHandCommand(){
+        return Commands.literal("hand")
+                .executes(context->{
+                    ItemStack stack = context.getSource().getPlayerOrException().getItemInHand(InteractionHand.MAIN_HAND);
+                    ServerPlayer player = context.getSource().getPlayerOrException();
+                    PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new MessageHand(stack));
+                    context.getSource().getPlayerOrException().displayClientMessage(new TextComponent("Itemstack JSON copied to clipboard!"), false);
                     return 0;
                 })
         ;

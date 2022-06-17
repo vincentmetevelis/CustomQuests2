@@ -39,7 +39,7 @@ public class VariableSlot implements IHoverRenderable{
 	
 	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		Color.color(0xFFFFFFFF);
-		Lighting.setupForFlatItems(); //todo test (before:disable)
+		Lighting.setupForFlatItems();
 		
 		int texU = this.texture.getU();
 		int texV = this.texture.getV();

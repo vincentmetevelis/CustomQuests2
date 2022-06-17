@@ -7,11 +7,11 @@ import com.vincentmet.customquests.gui.QuestingScreenManager;
 import com.vincentmet.customquests.gui.elements.Line;
 import com.vincentmet.customquests.gui.elements.MovableScalableCanvasEntry;
 import com.vincentmet.customquests.gui.elements.QuestButton;
+import com.vincentmet.customquests.helpers.CQGuiEventListener;
 import com.vincentmet.customquests.helpers.rendering.GLScissorStack;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class QuestingCanvas implements IHoverRenderable, GuiEventListener {
+public class QuestingCanvas implements IHoverRenderable, CQGuiEventListener {
 	private static final Player PLAYER = Minecraft.getInstance().player;
 	private final QuestingScreenManager screenManager;
 	private int x, y, width, height;

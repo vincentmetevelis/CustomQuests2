@@ -6,6 +6,7 @@ import com.vincentmet.customquests.api.ClientUtils;
 import com.vincentmet.customquests.api.QuestingStorage;
 import com.vincentmet.customquests.gui.editor.*;
 import com.vincentmet.customquests.gui.elements.ScrollableList;
+import com.vincentmet.customquests.helpers.Container;
 import com.vincentmet.customquests.helpers.IntCounter;
 import com.vincentmet.customquests.helpers.TooltipBuffer;
 import com.vincentmet.customquests.helpers.math.Vec2i;
@@ -58,8 +59,10 @@ public class EditorScreen extends Screen {
         actionQueue.push(() -> selectorList.setScrollDistance(0));
     }, new ArrayList<>());
     
-    private final VariableButton addChapterButton = new VariableButton(BORDER_MARGIN, ()->0, ()->20, ()->18, VariableButton.ButtonTexture.DEFAULT_NORMAL, "+", new Vec2i(), mouseButton -> ClientUtils.sendEditorCreateChapter(), new ArrayList<>());
-    private final VariableButton addQuestButton = new VariableButton(BORDER_MARGIN, ()->0, ()->20, ()->18, VariableButton.ButtonTexture.DEFAULT_NORMAL, "+", new Vec2i(), mouseButton -> ClientUtils.sendEditorCreateQuest(), new ArrayList<>());
+    private final VariableButton addChapterButton = new VariableButton(BORDER_MARGIN, ()->0, ()->20, ()->18, VariableButton.ButtonTexture.DEFAULT_NORMAL, "+", new Vec2i(), mouseButton -> ClientUtils.EditorMessages.Create.requestCreateChapter(), new ArrayList<>());
+    private final VariableButton addQuestButton = new VariableButton(BORDER_MARGIN, ()->0, ()->20, ()->18, VariableButton.ButtonTexture.DEFAULT_NORMAL, "+", new Vec2i(), mouseButton -> ClientUtils.EditorMessages.Create.requestCreateQuest(), new ArrayList<>());
+    private final VariableButton addTaskButton = new VariableButton(BORDER_MARGIN, ()->0, ()->20, ()->18, VariableButton.ButtonTexture.DEFAULT_NORMAL, "+", new Vec2i(), mouseButton -> ClientUtils.EditorMessages.Create.requestCreateTask(screenManager.getSelectedQuestId()), new ArrayList<>()); //todo test if this one adds task to different quests instead of only the first quest, if the last, add a Supplier around the getQuestId()
+
     //todo quest, task subtask, reward and subreward button (+logic)
     public EditorScreen(){
         super(new TranslatableComponent(Ref.MODID + ".screens.editor"));
@@ -75,7 +78,6 @@ public class EditorScreen extends Screen {
     public void reInit(){
         reInitSelectorList();
         propertiesSubScreen.reInit();
-        Minecraft.getInstance().setScreen(new QuestSelector());//todo remove once done testing
     }
     
     public void reInitSelectorList(){
@@ -84,7 +86,8 @@ public class EditorScreen extends Screen {
         switch(screenManager.getSelection()){
             case CHAPTERS:
                 QuestingStorage.getSidedChaptersMap().values().forEach(chapter -> {
-                    selectorList.add(new EditorChapterButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, chapter, mouseButton -> {
+                    Container<Integer> chapterItemYSupplier = new Container<>(cumulativeHeight.getValue());
+                    selectorList.add(new EditorChapterButton(SELECTION_BUTTONS_X, chapterItemYSupplier::get, SELECTION_BUTTONS_WIDTH, chapter, mouseButton -> {
                         screenManager.setSelectedChapterId(chapter.getId());
                         screenManager.set(MenuSelection.CHAPTER);
                         actionQueue.push(this::reInit);
@@ -94,19 +97,22 @@ public class EditorScreen extends Screen {
                 });
                 break;
             case CHAPTER:
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Title", mouseButton -> {
+                Container<Integer> chapterTitleContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, chapterTitleContainer::get, SELECTION_BUTTONS_WIDTH, "Title", mouseButton -> {
                     screenManager.set(MenuSelection.CHAPTER_TITLE);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
                 }));
                 cumulativeHeight.count();
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Text", mouseButton -> {
+                Container<Integer> chapterTextContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, chapterTextContainer::get, SELECTION_BUTTONS_WIDTH, "Text", mouseButton -> {
                     screenManager.set(MenuSelection.CHAPTER_TEXT);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
                 }));
                 cumulativeHeight.count();
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Quests", mouseButton -> {
+                Container<Integer> chapterQuestsContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, chapterQuestsContainer::get, SELECTION_BUTTONS_WIDTH, "Quests", mouseButton -> {
                     screenManager.set(MenuSelection.CHAPTER_QUESTLIST);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
@@ -115,7 +121,8 @@ public class EditorScreen extends Screen {
                 break;
             case QUESTS:
                 QuestingStorage.getSidedQuestsMap().values().forEach(quest -> {
-                    selectorList.add(new EditorQuestButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, quest, mouseButton -> {
+                    Container<Integer> chapterEntryContainer = new Container<>(cumulativeHeight.getValue());
+                    selectorList.add(new EditorQuestButton(SELECTION_BUTTONS_X, chapterEntryContainer::get, SELECTION_BUTTONS_WIDTH, quest, mouseButton -> {
                         screenManager.setSelectedQuestId(quest.getQuestId());
                         screenManager.set(MenuSelection.QUEST);
                         actionQueue.push(this::reInit);
@@ -125,49 +132,57 @@ public class EditorScreen extends Screen {
                 });
                 break;
             case QUEST:
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Button", mouseButton -> {
+                Container<Integer> questButtonContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questButtonContainer::get, SELECTION_BUTTONS_WIDTH, "Button", mouseButton -> {
                     screenManager.set(MenuSelection.QUEST_BUTTON);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
                 }));
                 cumulativeHeight.count();
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Title", mouseButton -> {
+                Container<Integer> questTitleContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questTitleContainer::get, SELECTION_BUTTONS_WIDTH, "Title", mouseButton -> {
                     screenManager.set(MenuSelection.QUEST_TITLE);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
                 }));
                 cumulativeHeight.count();
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Subtitle", mouseButton -> {
+                Container<Integer> questSubtitleContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questSubtitleContainer::get, SELECTION_BUTTONS_WIDTH, "Subtitle", mouseButton -> {
                     screenManager.set(MenuSelection.QUEST_SUBTITLE);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
                 }));
                 cumulativeHeight.count();
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Text", mouseButton -> {
+                Container<Integer> questTextContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questTextContainer::get, SELECTION_BUTTONS_WIDTH, "Text", mouseButton -> {
                     screenManager.set(MenuSelection.QUEST_TEXT);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
                 }));
                 cumulativeHeight.count();
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Dependencies", mouseButton -> {
+                Container<Integer> questDependenciesContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questDependenciesContainer::get, SELECTION_BUTTONS_WIDTH, "Dependencies", mouseButton -> {
                     screenManager.set(MenuSelection.QUEST_DEPENDENCIES);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
                 }));
                 cumulativeHeight.count();
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Tasks", mouseButton -> {
+                Container<Integer> questTasksContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questTasksContainer::get, SELECTION_BUTTONS_WIDTH, "Tasks", mouseButton -> {
                     screenManager.set(MenuSelection.QUEST_TASKS);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
                 }));
                 cumulativeHeight.count();
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Rewards", mouseButton -> {
+                Container<Integer> questRewardsContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questRewardsContainer::get, SELECTION_BUTTONS_WIDTH, "Rewards", mouseButton -> {
                     screenManager.set(MenuSelection.QUEST_REWARDS);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
                 }));
                 cumulativeHeight.count();
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Position", mouseButton -> {
+                Container<Integer> questPositionContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questPositionContainer::get, SELECTION_BUTTONS_WIDTH, "Position", mouseButton -> {
                     screenManager.set(MenuSelection.QUEST_POSITION);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
@@ -175,7 +190,8 @@ public class EditorScreen extends Screen {
                 cumulativeHeight.count();
                 break;
             case QUEST_DEPENDENCIES:
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Quests", mouseButton -> {
+                Container<Integer> questDependenciesQuestsContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questDependenciesQuestsContainer::get, SELECTION_BUTTONS_WIDTH, "Quests", mouseButton -> {
                     screenManager.set(MenuSelection.QUEST_DEPENDENCIES_LIST);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
@@ -183,8 +199,9 @@ public class EditorScreen extends Screen {
                 cumulativeHeight.count();
                 break;
             case QUEST_TASKS:
+                Container<Integer> questTaskContainer = new Container<>(cumulativeHeight.getValue());
                 QuestingStorage.getSidedQuestsMap().get(screenManager.getSelectedQuestId()).getTasks().values().forEach(task -> {
-                    selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, String.valueOf(task.getId()), mouseButton -> {
+                    selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questTaskContainer::get, SELECTION_BUTTONS_WIDTH, String.valueOf(task.getId()), mouseButton -> {
                         screenManager.setSelectedTaskId(task.getId());
                         screenManager.set(MenuSelection.QUEST_TASK);
                         actionQueue.push(this::reInit);
@@ -194,7 +211,8 @@ public class EditorScreen extends Screen {
                 });
                 break;
             case QUEST_TASK:
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Subtasks", mouseButton -> {
+                Container<Integer> questSubtasksContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questSubtasksContainer::get, SELECTION_BUTTONS_WIDTH, "Subtasks", mouseButton -> {
                     screenManager.set(MenuSelection.QUEST_TASK_SUBTASKS);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
@@ -203,7 +221,8 @@ public class EditorScreen extends Screen {
                 break;
             case QUEST_TASK_SUBTASKS:
                 QuestingStorage.getSidedQuestsMap().get(screenManager.getSelectedQuestId()).getTasks().get(screenManager.getSelectedTaskId()).getSubtasks().values().forEach(subtask -> {
-                    selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, String.valueOf(subtask.getSubtaskId()), mouseButton -> {
+                    Container<Integer> questSubtaskContainer = new Container<>(cumulativeHeight.getValue());
+                    selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questSubtaskContainer::get, SELECTION_BUTTONS_WIDTH, String.valueOf(subtask.getSubtaskId()), mouseButton -> {
                         screenManager.setSelectedSubtaskId(subtask.getSubtaskId());
                         screenManager.set(MenuSelection.QUEST_TASK_SUBTASK);
                         actionQueue.push(this::reInit);
@@ -214,7 +233,8 @@ public class EditorScreen extends Screen {
                 break;
             case QUEST_REWARDS:
                 QuestingStorage.getSidedQuestsMap().get(screenManager.getSelectedQuestId()).getRewards().values().forEach(reward -> {
-                    selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, String.valueOf(reward.getRewardId()), mouseButton -> {
+                    Container<Integer> questRewardContainer = new Container<>(cumulativeHeight.getValue());
+                    selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questRewardContainer::get, SELECTION_BUTTONS_WIDTH, String.valueOf(reward.getRewardId()), mouseButton -> {
                         screenManager.setSelectedRewardId(reward.getRewardId());
                         screenManager.set(MenuSelection.QUEST_REWARD);
                         actionQueue.push(this::reInit);
@@ -224,7 +244,8 @@ public class EditorScreen extends Screen {
                 });
                 break;
             case QUEST_REWARD:
-                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, "Subrewards", mouseButton -> {
+                Container<Integer> questSubrewardsContainer = new Container<>(cumulativeHeight.getValue());
+                selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questSubrewardsContainer::get, SELECTION_BUTTONS_WIDTH, "Subrewards", mouseButton -> {
                     screenManager.set(MenuSelection.QUEST_REWARD_SUBREWARDS);
                     actionQueue.push(this::reInit);
                     actionQueue.push(() -> selectorList.setScrollDistance(0));
@@ -233,7 +254,8 @@ public class EditorScreen extends Screen {
                 break;
             case QUEST_REWARD_SUBREWARDS:
                 QuestingStorage.getSidedQuestsMap().get(screenManager.getSelectedQuestId()).getRewards().get(screenManager.getSelectedRewardId()).getSubRewards().values().forEach(subreward -> {
-                    selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, ()->cumulativeHeight.getValue(), SELECTION_BUTTONS_WIDTH, String.valueOf(subreward.getSubRewardId()), mouseButton -> {
+                    Container<Integer> questSubrewardContainer = new Container<>(cumulativeHeight.getValue());
+                    selectorList.add(new EditorBlancButton(SELECTION_BUTTONS_X, questSubrewardContainer::get, SELECTION_BUTTONS_WIDTH, String.valueOf(subreward.getSubRewardId()), mouseButton -> {
                         screenManager.setSelectedSubrewardId(subreward.getSubRewardId());
                         screenManager.set(MenuSelection.QUEST_REWARD_SUBREWARD);
                         actionQueue.push(this::reInit);
@@ -266,7 +288,8 @@ public class EditorScreen extends Screen {
         if(selectorList.getEntries().size() >= 1 && selectorList.getEntries().get(0).getY().getAsInt() != 20-selectorList.getScrollDistance()){
             IntCounter chapterListCounter = new IntCounter(SELECTION_BUTTONS_Y.getAsInt()-selectorList.getScrollDistance(), SELECTOR_BUTTON_HEIGHT.getAsInt());
             selectorList.getEntries().forEach(entry -> {
-                entry.setY(()->chapterListCounter.getValue());
+                Container<Integer> chapterListCounterContainer = new Container<>(chapterListCounter.getValue());
+                entry.setY(chapterListCounterContainer::get);
                 chapterListCounter.count();
             });
         }
@@ -279,6 +302,8 @@ public class EditorScreen extends Screen {
             addChapterButton.render(matrixStack, mouseX, mouseY, partialTicks);
         }else if(screenManager.getSelection() == MenuSelection.QUESTS){
             addQuestButton.render(matrixStack, mouseX, mouseY, partialTicks);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASKS){
+            addTaskButton.render(matrixStack, mouseX, mouseY, partialTicks);
         }
         
         //Hover
@@ -291,6 +316,8 @@ public class EditorScreen extends Screen {
             addChapterButton.renderHover(matrixStack, mouseX, mouseY, partialTicks);
         }else if(screenManager.getSelection() == MenuSelection.QUESTS){
             addQuestButton.renderHover(matrixStack, mouseX, mouseY, partialTicks);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASKS){
+            addTaskButton.renderHover(matrixStack, mouseX, mouseY, partialTicks);
         }
         TooltipBuffer.tooltipBuffer.forEach(Runnable::run);
         actionQueue.execute();
@@ -312,6 +339,8 @@ public class EditorScreen extends Screen {
             addChapterButton.keyPressed(keyCode, scanCode, mods);
         }else if(screenManager.getSelection() == MenuSelection.QUESTS){
             addQuestButton.keyPressed(keyCode, scanCode, mods);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASKS){
+            addTaskButton.keyPressed(keyCode, scanCode, mods);
         }
         return true;
     }
@@ -327,6 +356,8 @@ public class EditorScreen extends Screen {
             addChapterButton.mouseClicked(mouseX, mouseY, button);
         }else if(screenManager.getSelection() == MenuSelection.QUESTS){
             addQuestButton.mouseClicked(mouseX, mouseY, button);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASKS){
+            addTaskButton.mouseClicked(mouseX, mouseY, button);
         }
         return true;
     }
@@ -342,6 +373,8 @@ public class EditorScreen extends Screen {
             addChapterButton.mouseScrolled(mouseX, mouseY, dyScroll);
         }else if(screenManager.getSelection() == MenuSelection.QUESTS){
             addQuestButton.mouseScrolled(mouseX, mouseY, dyScroll);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASKS){
+            addTaskButton.mouseScrolled(mouseX, mouseY, dyScroll);
         }
         return true;
     }
@@ -357,33 +390,94 @@ public class EditorScreen extends Screen {
             addChapterButton.mouseDragged(mouseX, mouseY, button, dx, dy);
         }else if(screenManager.getSelection() == MenuSelection.QUESTS){
             addQuestButton.mouseDragged(mouseX, mouseY, button, dx, dy);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASKS){
+            addTaskButton.mouseDragged(mouseX, mouseY, button, dx, dy);
         }
         return true;
     }
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button){
-        return propertiesSubScreen.mouseReleased(mouseX, mouseY, button);
+        selectorList.mouseReleased(mouseX, mouseY, button);
+        parentButton.mouseReleased(mouseX, mouseY, button);
+        chaptersButton.mouseReleased(mouseX, mouseY, button);
+        questsButton.mouseReleased(mouseX, mouseY, button);
+        propertiesSubScreen.mouseReleased(mouseX, mouseY, button);
+        if(screenManager.getSelection() == MenuSelection.CHAPTERS){
+            addChapterButton.mouseReleased(mouseX, mouseY, button);
+        }else if(screenManager.getSelection() == MenuSelection.QUESTS){
+            addQuestButton.mouseReleased(mouseX, mouseY, button);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASKS){
+            addTaskButton.mouseReleased(mouseX, mouseY, button);
+        }
+        return true;
     }
     
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers){
-        return propertiesSubScreen.keyReleased(keyCode, scanCode, modifiers);
+        selectorList.keyReleased(keyCode, scanCode, modifiers);
+        parentButton.keyReleased(keyCode, scanCode, modifiers);
+        chaptersButton.keyReleased(keyCode, scanCode, modifiers);
+        questsButton.keyReleased(keyCode, scanCode, modifiers);
+        propertiesSubScreen.keyReleased(keyCode, scanCode, modifiers);
+        if(screenManager.getSelection() == MenuSelection.CHAPTERS){
+            addChapterButton.keyReleased(keyCode, scanCode, modifiers);
+        }else if(screenManager.getSelection() == MenuSelection.QUESTS){
+            addQuestButton.keyReleased(keyCode, scanCode, modifiers);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASKS){
+            addTaskButton.keyReleased(keyCode, scanCode, modifiers);
+        }
+        return true;
     }
     
     @Override
     public boolean charTyped(char codePoint, int modifiers){
-        return propertiesSubScreen.charTyped(codePoint, modifiers);
+        selectorList.charTyped(codePoint, modifiers);
+        parentButton.charTyped(codePoint, modifiers);
+        chaptersButton.charTyped(codePoint, modifiers);
+        questsButton.charTyped(codePoint, modifiers);
+        propertiesSubScreen.charTyped(codePoint, modifiers);
+        if(screenManager.getSelection() == MenuSelection.CHAPTERS){
+            addChapterButton.charTyped(codePoint, modifiers);
+        }else if(screenManager.getSelection() == MenuSelection.QUESTS){
+            addQuestButton.charTyped(codePoint, modifiers);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASKS){
+            addTaskButton.charTyped(codePoint, modifiers);
+        }
+        return true;
     }
     
     @Override
     public boolean changeFocus(boolean focus){
-        return propertiesSubScreen.changeFocus(focus);
+        selectorList.changeFocus(focus);
+        parentButton.changeFocus(focus);
+        chaptersButton.changeFocus(focus);
+        questsButton.changeFocus(focus);
+        propertiesSubScreen.changeFocus(focus);
+        if(screenManager.getSelection() == MenuSelection.CHAPTERS){
+            addChapterButton.changeFocus(focus);
+        }else if(screenManager.getSelection() == MenuSelection.QUESTS){
+            addQuestButton.changeFocus(focus);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASKS){
+            addTaskButton.changeFocus(focus);
+        }
+        return true;
     }
     
     @Override
-    public void mouseMoved(double xPos, double mouseY){
-        super.mouseMoved(xPos, mouseY);
+    public void mouseMoved(double newX, double newY){
+        selectorList.mouseMoved(newX, newY);
+        parentButton.mouseMoved(newX, newY);
+        chaptersButton.mouseMoved(newX, newY);
+        questsButton.mouseMoved(newX, newY);
+        propertiesSubScreen.mouseMoved(newX, newY);
+        if(screenManager.getSelection() == MenuSelection.CHAPTERS){
+            addChapterButton.mouseMoved(newX, newY);
+        }else if(screenManager.getSelection() == MenuSelection.QUESTS){
+            addQuestButton.mouseMoved(newX, newY);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASKS){
+            addTaskButton.mouseMoved(newX, newY);
+        }
     }
     
     @Override

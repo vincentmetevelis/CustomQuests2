@@ -1,17 +1,21 @@
 package com.vincentmet.customquests.api;
 
 import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.event.QuestEvent;
 import com.vincentmet.customquests.hierarchy.progress.QuestingPlayer;
 import com.vincentmet.customquests.hierarchy.progress.UserProgress;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.util.thread.EffectiveSide;
+import org.lwjgl.system.CallbackI;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static com.vincentmet.customquests.Ref.CustomQuests.LOGGER;
 
@@ -47,13 +51,12 @@ public class ProgressHelper{
 	public static void executeTaskCallback(Player player, int questId, int taskId){
 		if(EffectiveSide.get().isServer()){
 			QuestingStorage.getSidedPlayersMap().get(player.getStringUUID()).getIndividualProgress().get(questId).get(taskId).executeTaskButton(player);
-			ServerUtils.sendProgressAndParties((ServerPlayer)player);
+			ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer((ServerPlayer)player);
 		}else{
 			LOGGER.warn("Tried executing task callback on client, this method should only be called on the server!");
 		}
 	}
-	
-	//NEW STUFF
+
 	public static void completeQuest(UUID player, int questId){
 		if(doesPlayerExist(player) && QuestHelper.doesQuestExist(questId)){
 			UserProgress userProgress = QuestingStorage.getSidedPlayersMap().get(player.toString()).getIndividualProgress();
@@ -61,18 +64,21 @@ public class ProgressHelper{
 				userProgress.getIndividuallyCompletedQuests().add(questId);
 			}
 			userProgress.get(questId).setAllTasksCompleted(true);
+			MinecraftForge.EVENT_BUS.post(new QuestEvent.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId));
 		}
 	}
 	
 	public static void completeTask(UUID player, int questId, int taskId){
 		if(doesPlayerExist(player) && QuestHelper.doesTaskExist(questId, taskId)){
 			QuestingStorage.getSidedPlayersMap().get(player.toString()).getIndividualProgress().get(questId).get(taskId).setAllSubtasksCompleted(true);
+			MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId, taskId));
 		}
 	}
 	
 	public static void completeSubtask(UUID player, int questId, int taskId, int subtaskId){
 		if(doesPlayerExist(player) && QuestHelper.doesSubtaskExist(questId, taskId, subtaskId)){
 			QuestingStorage.getSidedPlayersMap().get(player.toString()).getIndividualProgress().get(questId).get(taskId).get(subtaskId).setCompleted(true);
+			MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Subtask.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId, taskId, subtaskId));
 		}
 	}
 	
@@ -139,5 +145,11 @@ public class ProgressHelper{
 		questingPlayer.getIndividualProgress().clear();
 		questingPlayer.getIndividualProgress().getIndividuallyCompletedQuests().clear();
 		CQHelper.generateMissingProgress(uuid);
+	}
+
+	public static void forAllPlayers(Consumer<UUID> consumer){
+		QuestingStorage.getSidedPlayersMap().values().forEach(questingPlayer -> {
+			consumer.accept(questingPlayer.getUuid());
+		});
 	}
 }

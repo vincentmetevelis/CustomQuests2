@@ -1,15 +1,24 @@
 package com.vincentmet.customquests.api;
 
-import com.google.gson.*;
-import com.vincentmet.customquests.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.vincentmet.customquests.Config;
+import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.hierarchy.chapter.Chapter;
 import com.vincentmet.customquests.hierarchy.party.Party;
 import com.vincentmet.customquests.hierarchy.progress.QuestingPlayer;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import static com.vincentmet.customquests.Ref.CustomQuests.LOGGER;
 
 public class CQHelper{
@@ -152,14 +161,10 @@ public class CQHelper{
 	}
 	
 	public static boolean evalBool(LogicType logicType, List<Boolean> booleans, boolean orElse){
-		switch(logicType){
-			case OR:
-				return booleans.stream().reduce(Boolean::logicalOr).orElse(orElse);
-			case AND:
-				return booleans.stream().reduce(Boolean::logicalAnd).orElse(orElse);
-			default:
-				return true;
-		}
+		return switch (logicType) {
+			case OR -> booleans.stream().reduce(Boolean::logicalOr).orElse(orElse);
+			case AND -> booleans.stream().reduce(Boolean::logicalAnd).orElse(orElse);
+		};
 	}
 	
 	public static void writeQuestsAndChaptersToFile(Path path, String filename){

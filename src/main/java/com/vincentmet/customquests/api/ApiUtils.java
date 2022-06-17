@@ -15,12 +15,12 @@ import org.codehaus.plexus.util.StringInputStream;
 public class ApiUtils{
 	//Just to not worry about the errors, it'll fall back to the default item NBT if it fails
 	public static CompoundTag getNbtFromJson(String jsonString){
-		try {
-			return TagParser.parseTag(jsonString);
-		}catch (Exception ignored){
-			//NOOP
+		if (jsonString!=null){
+			try {
+				return TagParser.parseTag(jsonString);
+			}catch(Exception ignored){}
 		}
-		return new CompoundTag();
+		return null;
 	}
 	
 	public static void writeTo(Path location, String filename, Object text){
@@ -70,7 +70,7 @@ public class ApiUtils{
 		Path newPath = Ref.questsBackupDirectory;
 		File newFile = new File(Ref.FILENAME_QUESTS + "_" + getLocalFormattedTime() + Ref.FILE_EXT_JSON);
 		try{
-			writeTo(newPath, newFile.toString(), new String(Files.readAllBytes(oldFile.toPath()), StandardCharsets.UTF_8));
+			writeTo(newPath, newFile.toString(), Files.readString(oldFile.toPath()));
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -81,7 +81,7 @@ public class ApiUtils{
 		Path newPath = Ref.progressBackupDirectory;
 		File newFile = new File(Ref.FILENAME_PARTIES + "_" + getLocalFormattedTime() + Ref.FILE_EXT_JSON);
 		try{
-			writeTo(newPath, newFile.toString(), new String(Files.readAllBytes(oldFile.toPath()), StandardCharsets.UTF_8));
+			writeTo(newPath, newFile.toString(), Files.readString(oldFile.toPath()));
 		}catch(IOException e){
 			e.printStackTrace();
 		}

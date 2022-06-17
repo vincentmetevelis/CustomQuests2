@@ -2,6 +2,7 @@ package com.vincentmet.customquests.standardcontent.editorfieldtypes;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.api.ClientUtils;
 import com.vincentmet.customquests.gui.editor.IEditorEntry;
 import com.vincentmet.customquests.gui.editor.IEditorEntryDataType;
 import com.vincentmet.customquests.gui.elements.SingleLineTextField;
@@ -23,24 +24,6 @@ public class ResourceLocationFieldType implements IEditorEntryDataType {
     public void init(int x, int y, int width, int height, Object initialValue){
         this.initialValue = initialValue;
         this.rlValue = new SingleLineTextField(x, y, width, height, 0xFF000000, 0xFFAAAAAA, 0xFFFFFFFF, 0xFFFFFFFF, initialValue.toString(), Pattern.compile("[a-z0-9-_/.:]+"));
-    }
-
-    @Override
-    public boolean check(Object value) {
-        return ResourceLocation.isValidResourceLocation(value.toString());
-    }
-    
-    @Override
-    public Object correct(Object value){
-        if(check(value)){
-            return value;
-        }
-        return Ref.INVALID_RESOURCELOCATION;
-    }
-
-    @Override
-    public void reset(IEditorEntry editorEntry) {
-        rlValue.setText(initialValue.toString());
     }
 
     @Override

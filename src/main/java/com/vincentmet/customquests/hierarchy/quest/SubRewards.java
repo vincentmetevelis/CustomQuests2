@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.IJsonObjectProcessor;
 import com.vincentmet.customquests.api.IJsonObjectProvider;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.HashMap;
@@ -54,7 +55,7 @@ public class SubRewards extends HashMap<Integer, SubReward> implements IJsonObje
 		}
 	}
 	
-	public void executeAllSubrewards(Player player){
+	public void executeAllSubrewards(ServerPlayer player){
 		forEach((subtaskId, subtask)->{
 			subtask.getSubreward().executeReward(player);
 		});

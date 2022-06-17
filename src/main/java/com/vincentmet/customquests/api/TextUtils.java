@@ -7,6 +7,11 @@ public class TextUtils{
         for (ChatFormatting textFormatting : ChatFormatting.values()) {
             string = string.replaceAll(String.format("~%s~", textFormatting.getName().toUpperCase()), textFormatting.toString());
         }
+        string = string.replaceAll("~NEWLINE~", "\n");
+        string = string.replaceAll("~SINGLEQUOTE~", "\'");
+        string = string.replaceAll("~DOUBLEQUOTE~", "\"");
+        string = string.replaceAll("~BACKSLASH~", "\\\\");
+        string = string.replaceAll("~TAB~", "\t");
         return string;
     }
 }

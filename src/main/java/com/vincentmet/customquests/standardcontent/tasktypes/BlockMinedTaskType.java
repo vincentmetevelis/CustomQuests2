@@ -71,7 +71,7 @@ public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 				 .filter(itemStack->event.getState().getBlock().asItem().getRegistryName().equals(itemStack.getItem().getRegistryName()))
 				 .forEach(itemStack -> {
 					 CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, 1);
-					 ServerUtils.sendProgressAndParties((ServerPlayer)player);
+					 ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer((ServerPlayer)player);
 				 })
 			;
 			processValue(player);

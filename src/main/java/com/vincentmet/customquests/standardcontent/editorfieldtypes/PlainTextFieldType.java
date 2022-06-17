@@ -2,6 +2,7 @@ package com.vincentmet.customquests.standardcontent.editorfieldtypes;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.api.ClientUtils;
 import com.vincentmet.customquests.gui.editor.IEditorEntry;
 import com.vincentmet.customquests.gui.editor.IEditorEntryDataType;
 import com.vincentmet.customquests.gui.elements.SingleLineTextField;
@@ -23,23 +24,6 @@ public class PlainTextFieldType implements IEditorEntryDataType {
     public void init(int x, int y, int width, int height, Object initialValue){
         this.initialValue = initialValue;
         this.value = new SingleLineTextField(x, y, width, height, 0xFF000000, 0xFFAAAAAA, 0xFFFFFFFF, 0xFFFFFFFF, initialValue.toString(), Pattern.compile(".*"));
-    }
-    
-    @Override
-    public boolean check(Object value){
-        return value.toString() != null;
-    }
-    
-    @Override
-    public Object correct(Object value){
-        if(check(value)) return value.toString();
-        return "";
-    }
-
-    @Override
-    public void reset(IEditorEntry editorEntry) {
-        value.setText(initialValue.toString());
-
     }
 
     @Override

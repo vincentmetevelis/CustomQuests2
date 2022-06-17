@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.vincentmet.customquests.Ref;
+import com.vincentmet.customquests.api.ClientUtils;
 import com.vincentmet.customquests.api.IJsonObjectProcessor;
 import com.vincentmet.customquests.api.IJsonObjectProvider;
 import com.vincentmet.customquests.api.IQuestingTexture;
@@ -13,8 +14,6 @@ import com.vincentmet.customquests.gui.editor.IEditorEntry;
 import com.vincentmet.customquests.gui.editor.IEditorPage;
 import com.vincentmet.customquests.helpers.TagHelper;
 import com.vincentmet.customquests.hierarchy.quest.ItemSlideshowTexture;
-import com.vincentmet.customquests.hierarchy.quest.TextType;
-import com.vincentmet.customquests.standardcontent.texttypes.TranslationTextType;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -27,11 +26,11 @@ import java.util.List;
 public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor, IEditorPage {
 	private final int id;
 	private IQuestingTexture icon;
-	private TextType title;
-	private TextType text;
+	private ChapterTitleTextType title;
+	private ChapterTextTextType text;
 	private final QuestList quests;
 	
-	public Chapter(int id, IQuestingTexture icon, TextType title, TextType text, QuestList quests){
+	public Chapter(int id, IQuestingTexture icon, ChapterTitleTextType title, ChapterTextTextType text, QuestList quests){
 		this.id = id;
 		this.icon = icon;
 		this.title = title;
@@ -40,7 +39,7 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor, IEdit
 	}
 	
 	public Chapter(int id){
-		this(id, null, new TextType(id, "Chapter", "title"), new TextType(id, "Chapter", "text"), new QuestList(id));
+		this(id, null, new ChapterTitleTextType(id), new ChapterTextTextType(id), new QuestList(id));
 	}
 	
 	@Override
@@ -136,11 +135,11 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor, IEdit
 		return icon;
 	}
 	
-	public TextType getTitle(){
+	public ChapterTitleTextType getTitle(){
 		return title;
 	}
 	
-	public TextType getText(){
+	public ChapterTextTextType getText(){
 		return text;
 	}
 	
@@ -152,11 +151,11 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor, IEdit
 		this.icon = icon;
 	}
 
-	public void setTitle(TextType title){
+	public void setTitle(ChapterTitleTextType title){
 		this.title = title;
 	}
 	
-	public void setText(TextType text){
+	public void setText(ChapterTextTextType text){
 		this.text = text;
 	}
 
@@ -176,6 +175,7 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor, IEdit
 					setIcon(new ItemSlideshowTexture(Blocks.GRASS_BLOCK.getRegistryName(), new ItemStack(Blocks.GRASS_BLOCK)));
 				}
 			}
-		}));//todo add a custom dropdown selector for available text-types here && text components
+			ClientUtils.EditorMessages.Update.Chapter.requestUpdateChapterIcon(id, getIcon().getResourceLocation());
+		}));//todo add a custom dropdown selector (or a scroll-through-button(i.e. vanilla world type buttons in world gen menu)) for available text-types here && text components
 	}
 }

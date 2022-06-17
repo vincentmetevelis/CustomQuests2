@@ -12,8 +12,9 @@ import com.vincentmet.customquests.helpers.MouseButton;
 import com.vincentmet.customquests.helpers.TagHelper;
 import com.vincentmet.customquests.integrations.jei.JEIHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -41,7 +42,7 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 	}
 	
 	@Override
-	public void executeReward(Player player){
+	public void executeReward(ServerPlayer player){
 		ItemHandlerHelper.giveItemToPlayer(player, stack);
 	}
 	
@@ -157,24 +158,25 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					ogNBT = jsonPrimitive.getAsString();
-					if(ogNBT == null || ogNBT.equals("")){
-						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Value is not valid NBT, defaulting to '{ }'!");
-						ogNBT = "{}";
+					if(ogNBT.equals("")){
+						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Value is not valid NBT, defaulting to null!");
+						ogNBT = null;
 					}
 				}else{
-					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Value is not a String, defaulting to '{ }'!");
-					ogNBT = "{}";
+					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Value is not a String, defaulting to null!");
+					ogNBT = null;
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Value is not a JsonPrimitive, please use a String, defaulting to '{ }'!");
-				ogNBT = "{}";
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Value is not a JsonPrimitive, please use a String, defaulting to null!");
+				ogNBT = null;
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Not detected, defaulting to '{ }'!");
-			ogNBT = "{}";
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > nbt': Not detected, defaulting to null!");
+			ogNBT = null;
 		}
 		stack = new ItemStack(ForgeRegistries.ITEMS.getValue(ogRL), count);
-		stack.setTag(ApiUtils.getNbtFromJson(ogNBT));
+		CompoundTag tag = ApiUtils.getNbtFromJson(ogNBT);
+		if(tag != null && !tag.isEmpty())stack.setTag(tag);
 	}
 	
 	@Override

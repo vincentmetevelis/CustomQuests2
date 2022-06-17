@@ -65,7 +65,7 @@ public class HuntTaskType implements ITaskType{
 			LivingDeathEvent event = (LivingDeathEvent)object;
 			if(event.getEntity().getType().equals(entityType)){
 				CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, 1);
-				ServerUtils.sendProgressAndParties((ServerPlayer)player);
+				ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer((ServerPlayer)player);
 			}
 			processValue(player);
 		}

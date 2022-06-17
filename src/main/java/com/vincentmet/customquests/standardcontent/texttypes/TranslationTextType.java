@@ -23,7 +23,10 @@ public class TranslationTextType implements ITextType{
     
     @Override
     public String getOgText(){
-        return translationKey.getKey();
+        if (translationKey != null){
+            return translationKey.getKey();
+        }
+        return "";
     }
     
     @Override

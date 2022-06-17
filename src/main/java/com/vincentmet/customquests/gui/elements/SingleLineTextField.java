@@ -3,16 +3,16 @@ package com.vincentmet.customquests.gui.elements;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.vincentmet.customquests.api.ApiUtils;
 import com.vincentmet.customquests.api.IHoverRenderable;
+import com.vincentmet.customquests.helpers.CQGuiEventListener;
 import com.vincentmet.customquests.helpers.rendering.GLScissorStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.IntSupplier;
 import java.util.regex.Pattern;
 
-public class SingleLineTextField implements IHoverRenderable, GuiEventListener {
+public class SingleLineTextField implements IHoverRenderable, CQGuiEventListener {
     private int x, y, width, height, backgroundColor, borderColor, cursorColor, textColor;
     
     //Textarea including border
@@ -98,6 +98,15 @@ public class SingleLineTextField implements IHoverRenderable, GuiEventListener {
                     break;
                 case GLFW.GLFW_KEY_DELETE:
                     removeCharAfterCursor();
+                    break;
+                case GLFW.GLFW_KEY_V:
+                    if(modifiers == 2){
+                        String currentText = getText();
+                        String clipboardText = Minecraft.getInstance().keyboardHandler.getClipboard();
+                        String sb = currentText.substring(0, getCursorPos()) + clipboardText + currentText.substring(getCursorPos(), getMaxCursorPos());
+                        setText(sb);
+                        setCursorToRight(clipboardText.length());
+                    }
                     break;
             }
         }

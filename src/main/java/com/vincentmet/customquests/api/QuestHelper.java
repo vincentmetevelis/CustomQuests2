@@ -1,15 +1,14 @@
 package com.vincentmet.customquests.api;
 
+import com.google.gson.JsonObject;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.gui.editor.IEditorEntry;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
 import com.vincentmet.customquests.hierarchy.quest.SubTask;
 import com.vincentmet.customquests.hierarchy.quest.Task;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class QuestHelper{
 	public static Quest getQuestFromId(int questId){
@@ -97,8 +96,6 @@ public class QuestHelper{
 		QuestingStorage.getSidedQuestsMap().get(questId).getRewards().get(rewardId).getSubRewards().executeAllSubrewards(Ref.currentServerInstance.getPlayerList().getPlayer(claimer));
 	}
 
-
-
 	public static List<IEditorEntry> getEditorQuestEntries(int questId){
 		List<IEditorEntry> entries = new ArrayList<>();
 		if(doesQuestExist(questId)){
@@ -137,5 +134,90 @@ public class QuestHelper{
 			QuestingStorage.getSidedQuestsMap().get(questId).getText().addPageEntries(entries);
 		}
 		return entries;
+	}
+
+	//The next few functions are used by both the server and the client to properly delete a quest and its dependencies from the DB
+	public static void deleteQuest(int questId){
+		deleteQuestReferencesFromChapters(questId);
+		deleteQuestPlayerProgress(questId);
+		deleteQuestPartyProgress(questId);
+		deleteQuestFromDatabase(questId);
+	}
+
+	private static void deleteQuestPlayerProgress(int questId){
+		QuestingStorage.getSidedPlayersMap().values().forEach(questingPlayer -> questingPlayer.getIndividualProgress().getIndividuallyCompletedQuests().remove(questId));
+		QuestingStorage.getSidedPlayersMap().values().forEach(questingPlayer -> questingPlayer.getIndividualProgress().remove(questId));
+	}
+
+	private static void deleteQuestPartyProgress(int questId){
+		QuestingStorage.getSidedPartiesMap().values().forEach(party -> party.getCollectivelyCompletedQuestList().remove(questId));
+		QuestingStorage.getSidedPartiesMap().values().forEach(party -> party.getCollectiveProgress().remove(questId));
+	}
+
+	private static void deleteQuestReferencesFromChapters(int questId){
+		QuestingStorage.getSidedChaptersMap().values().forEach(chapter -> chapter.getQuests().remove(questId));
+	}
+
+	private static void deleteQuestFromDatabase(int questId){
+		QuestingStorage.getSidedQuestsMap().remove(questId);
+	}
+
+	public static int getNextAvailableQuestId(){
+		if(!QuestingStorage.getSidedQuestsMap().isEmpty()){
+			return Collections.max(QuestingStorage.getSidedQuestsMap().keySet())+1;
+		}
+		return 0;
+	}
+
+	public static int getNextAvailableTaskId(int questId){
+		if(!QuestingStorage.getSidedQuestsMap().isEmpty()){
+			if(doesQuestExist(questId)){
+				if(!QuestingStorage.getSidedQuestsMap().get(questId).getTasks().isEmpty()){
+					return Collections.max(QuestingStorage.getSidedQuestsMap().get(questId).getTasks().keySet())+1;
+				}
+			}
+		}
+		return 0;
+	}
+
+	public static int getNextAvailableSubtaskId(int questId, int taskId){
+		if(!QuestingStorage.getSidedQuestsMap().isEmpty()){
+			if(doesQuestExist(questId)){
+				if(!QuestingStorage.getSidedQuestsMap().get(questId).getTasks().isEmpty()){
+					if(doesTaskExist(questId, taskId)){
+						if(!QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().isEmpty()){
+							return Collections.max(QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().keySet())+1;
+						}
+					}
+				}
+			}
+		}
+		return 0;
+	}
+
+	public static int getNextAvailableRewardId(int questId){
+		if(!QuestingStorage.getSidedQuestsMap().isEmpty()){
+			if(doesQuestExist(questId)){
+				if(!QuestingStorage.getSidedQuestsMap().get(questId).getRewards().isEmpty()){
+					return Collections.max(QuestingStorage.getSidedQuestsMap().get(questId).getRewards().keySet())+1;
+				}
+			}
+		}
+		return 0;
+	}
+
+	public static int getNextAvailableSubrewardId(int questId, int rewardId){
+		if(!QuestingStorage.getSidedQuestsMap().isEmpty()){
+			if(doesQuestExist(questId)){
+				if(!QuestingStorage.getSidedQuestsMap().get(questId).getRewards().isEmpty()){
+					if(doesRewardExist(questId, rewardId)){
+						if(!QuestingStorage.getSidedQuestsMap().get(questId).getRewards().get(rewardId).getSubRewards().isEmpty()){
+							return Collections.max(QuestingStorage.getSidedQuestsMap().get(questId).getRewards().get(rewardId).getSubRewards().keySet())+1;
+						}
+					}
+				}
+			}
+		}
+		return 0;
 	}
 }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 public class CombinedProgressHelper{
     public static void completeQuest(UUID player, int questId){
@@ -18,7 +19,6 @@ public class CombinedProgressHelper{
                 int partyId = ProgressHelper.getPlayerParty(player);
                 PartyHelper.completeQuest(partyId, questId);
             }
-            MinecraftForge.EVENT_BUS.post(new QuestEvent.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId));
         }
     }
     
@@ -29,7 +29,6 @@ public class CombinedProgressHelper{
                 int partyId = ProgressHelper.getPlayerParty(player);
                 PartyHelper.completeTask(partyId, questId, taskId);
             }
-            MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId, taskId));
         }
     }
     
@@ -40,7 +39,6 @@ public class CombinedProgressHelper{
                 int partyId = ProgressHelper.getPlayerParty(player);
                 PartyHelper.completeSubtask(partyId, questId, taskId, subtaskId);
             }
-            MinecraftForge.EVENT_BUS.post(new QuestEvent.Task.Subtask.Completed(Ref.currentServerInstance.getPlayerList().getPlayer(player), questId, taskId, subtaskId));
         }
     }
     
@@ -138,7 +136,7 @@ public class CombinedProgressHelper{
                 }
             }
         }
-        ServerUtils.sendProgressAndParties(Ref.currentServerInstance.getPlayerList().getPlayer(claimer));
+        ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer(Ref.currentServerInstance.getPlayerList().getPlayer(claimer));
     }
     
     public static boolean canClaimReward(UUID claimer, int questId){

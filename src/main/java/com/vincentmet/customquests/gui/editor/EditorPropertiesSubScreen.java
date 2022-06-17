@@ -8,18 +8,19 @@ import com.vincentmet.customquests.api.IHoverRenderable;
 import com.vincentmet.customquests.api.QuestHelper;
 import com.vincentmet.customquests.gui.EditorScreen;
 import com.vincentmet.customquests.gui.EditorScreenManager;
+import com.vincentmet.customquests.helpers.CQGuiEventListener;
+import com.vincentmet.customquests.helpers.Container;
 import com.vincentmet.customquests.helpers.IntCounter;
 import com.vincentmet.customquests.helpers.math.Vec2i;
 import com.vincentmet.customquests.helpers.rendering.VariableButton;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntSupplier;
 
-public class EditorPropertiesSubScreen implements IHoverRenderable, GuiEventListener {
+public class EditorPropertiesSubScreen implements IHoverRenderable, CQGuiEventListener {
     private EditorScreen parent;
     private EditorScreenManager screenManager;
     private IntSupplier x, y, width, height;
@@ -29,6 +30,7 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, GuiEventList
     private List<KeyValueEntry> keyValueList = new ArrayList<>();
     private VariableButton removeChapterButton;
     private VariableButton removeQuestButton;
+    private VariableButton removeTaskButton;
 
     private static final TranslatableComponent TRANSLATION_USE_SUBMENU = new TranslatableComponent(Ref.MODID + ".editor.use_submenu");
     
@@ -44,14 +46,20 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, GuiEventList
     
     public void reInit(){
         removeChapterButton = new VariableButton(x, ()->0, ()->20, ()->18, VariableButton.ButtonTexture.DEFAULT_NORMAL, "-", new Vec2i(), mouseButton -> {
-            ClientUtils.sendEditorRemoveChapter(screenManager.getSelectedChapterId());
+            ClientUtils.EditorMessages.Delete.requestDeleteChapter(screenManager.getSelectedChapterId());
             screenManager.setToParent();
             parent.actionQueue.push(() -> parent.reInit());
             parent.actionQueue.push(() -> parent.resetSelectorScroll());
             
         }, new ArrayList<>());
         removeQuestButton = new VariableButton(x, ()->0, ()->20, ()->18, VariableButton.ButtonTexture.DEFAULT_NORMAL, "-", new Vec2i(), mouseButton -> {
-            ClientUtils.sendEditorRemoveQuest(screenManager.getSelectedQuestId());
+            ClientUtils.EditorMessages.Delete.requestDeleteQuest(screenManager.getSelectedQuestId());
+            screenManager.setToParent();
+            parent.actionQueue.push(() -> parent.reInit());
+            parent.actionQueue.push(() -> parent.resetSelectorScroll());
+        }, new ArrayList<>());
+        removeTaskButton = new VariableButton(x, ()->0, ()->20, ()->18, VariableButton.ButtonTexture.DEFAULT_NORMAL, "-", new Vec2i(), mouseButton -> {
+            ClientUtils.EditorMessages.Delete.requestDeleteTask(screenManager.getSelectedQuestId(), screenManager.getSelectedTaskId());
             screenManager.setToParent();
             parent.actionQueue.push(() -> parent.reInit());
             parent.actionQueue.push(() -> parent.resetSelectorScroll());
@@ -62,55 +70,64 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, GuiEventList
         switch(screenManager.getSelection()){
             case CHAPTER:
                 ChapterHelper.getEditorChapterEntries(screenManager.getSelectedChapterId()).forEach(iEditorEntry -> {
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, ()->cumulativeHeight.getValue(), width, KEY_VALUE_HEIGHT));
+                    Container<Integer> chapterEntriesYSupplier = new Container<>(cumulativeHeight.getValue());
+                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, chapterEntriesYSupplier::get, width, KEY_VALUE_HEIGHT));
                     cumulativeHeight.count();
                 });
                 break;
             case CHAPTER_TITLE:
                 ChapterHelper.getEditorChapterTitleEntries(screenManager.getSelectedChapterId()).forEach(iEditorEntry -> {
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, ()->cumulativeHeight.getValue(), width, KEY_VALUE_HEIGHT));
+                    Container<Integer> chapterEntryTitleYSupplier = new Container<>(cumulativeHeight.getValue());
+                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, chapterEntryTitleYSupplier::get, width, KEY_VALUE_HEIGHT));
                     cumulativeHeight.count();
                 });
                 break;
             case CHAPTER_TEXT:
                 ChapterHelper.getEditorChapterTextEntries(screenManager.getSelectedChapterId()).forEach(iEditorEntry -> {
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, ()->cumulativeHeight.getValue(), width, KEY_VALUE_HEIGHT));
+                    Container<Integer> chapterEntryTextYSupplier = new Container<>(cumulativeHeight.getValue());
+                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, chapterEntryTextYSupplier::get, width, KEY_VALUE_HEIGHT));
                     cumulativeHeight.count();
                 });
                 break;
             case CHAPTER_QUESTLIST:
                 ChapterHelper.getEditorChapterQuestlistEntries(screenManager.getSelectedChapterId()).forEach(iEditorEntry -> {
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, ()->cumulativeHeight.getValue(), width, KEY_VALUE_HEIGHT));
+                    Container<Integer> chapterEntryQuestsYSupplier = new Container<>(cumulativeHeight.getValue());
+                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, chapterEntryQuestsYSupplier::get, width, KEY_VALUE_HEIGHT));
                     cumulativeHeight.count();
                 });
                 break;
             case QUEST:
                 QuestHelper.getEditorQuestEntries(screenManager.getSelectedQuestId()).forEach(iEditorEntry -> {
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, ()->cumulativeHeight.getValue(), width, KEY_VALUE_HEIGHT));
+                    Container<Integer> questEntriesYSupplier = new Container<>(cumulativeHeight.getValue());
+                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, questEntriesYSupplier::get, width, KEY_VALUE_HEIGHT));
                     cumulativeHeight.count();
                 });
                 break;
             case QUEST_BUTTON:
                 QuestHelper.getEditorQuestButtonEntries(screenManager.getSelectedQuestId()).forEach(iEditorEntry -> {
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, ()->cumulativeHeight.getValue(), width, KEY_VALUE_HEIGHT));
+                    Container<Integer> questEntryButtonYSupplier = new Container<>(cumulativeHeight.getValue());
+                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, questEntryButtonYSupplier::get, width, KEY_VALUE_HEIGHT));
                     cumulativeHeight.count();
                 });
                 break;
             case QUEST_TITLE:
                 QuestHelper.getEditorQuestTitleEntries(screenManager.getSelectedQuestId()).forEach(iEditorEntry -> {
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, ()->cumulativeHeight.getValue(), width, KEY_VALUE_HEIGHT));
+                    Container<Integer> questEntryTitleYSupplier = new Container<>(cumulativeHeight.getValue());
+                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, questEntryTitleYSupplier::get, width, KEY_VALUE_HEIGHT));
                     cumulativeHeight.count();
                 });
                 break;
             case QUEST_SUBTITLE:
                 QuestHelper.getEditorQuestSubtitleEntries(screenManager.getSelectedQuestId()).forEach(iEditorEntry -> {
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, ()->cumulativeHeight.getValue(), width, KEY_VALUE_HEIGHT));
+                    Container<Integer> questEntrySubtitleYSupplier = new Container<>(cumulativeHeight.getValue());
+                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, questEntrySubtitleYSupplier::get, width, KEY_VALUE_HEIGHT));
                     cumulativeHeight.count();
                 });
                 break;
             case QUEST_TEXT:
                 QuestHelper.getEditorQuestTextEntries(screenManager.getSelectedQuestId()).forEach(iEditorEntry -> {
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, ()->cumulativeHeight.getValue(), width, KEY_VALUE_HEIGHT));
+                    Container<Integer> questEntryTextYSupplier = new Container<>(cumulativeHeight.getValue());
+                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, questEntryTextYSupplier::get, width, KEY_VALUE_HEIGHT));
                     cumulativeHeight.count();
                 });
                 break;
@@ -126,6 +143,8 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, GuiEventList
             removeChapterButton.render(matrixStack, mouseX, mouseY, partialTicks);
         }else if(screenManager.getSelection() == MenuSelection.QUEST){
             removeQuestButton.render(matrixStack, mouseX, mouseY, partialTicks);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.render(matrixStack, mouseX, mouseY, partialTicks);
         }
         if(keyValueList.isEmpty()){
             Minecraft.getInstance().font.draw(matrixStack, TRANSLATION_USE_SUBMENU, x.getAsInt()+5, y.getAsInt()+5, 0xFFFFFF);
@@ -139,6 +158,8 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, GuiEventList
             removeChapterButton.renderHover(matrixStack, mouseX, mouseY, partialTicks);
         }else if(screenManager.getSelection() == MenuSelection.QUEST){
             removeQuestButton.renderHover(matrixStack, mouseX, mouseY, partialTicks);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.renderHover(matrixStack, mouseX, mouseY, partialTicks);
         }
     }
     
@@ -149,6 +170,8 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, GuiEventList
             removeChapterButton.keyPressed(keyCode, scanCode, modifiers);
         }else if(screenManager.getSelection() == MenuSelection.QUEST){
             removeQuestButton.keyPressed(keyCode, scanCode, modifiers);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.keyPressed(keyCode, scanCode, modifiers);
         }
         return false;
     }
@@ -160,6 +183,8 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, GuiEventList
             removeChapterButton.mouseMoved(mouseX, mouseY);
         }else if(screenManager.getSelection() == MenuSelection.QUEST){
             removeQuestButton.mouseMoved(mouseX, mouseY);
+        }else if (screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.mouseMoved(mouseX, mouseY);
         }
     }
     
@@ -170,6 +195,8 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, GuiEventList
             removeChapterButton.mouseClicked(mouseX, mouseY, button);
         }else if(screenManager.getSelection() == MenuSelection.QUEST){
             removeQuestButton.mouseClicked(mouseX, mouseY, button);
+        }else if (screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.mouseClicked(mouseX, mouseY, button);
         }
         return false;
     }
@@ -177,49 +204,91 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, GuiEventList
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button){
         keyValueList.forEach(keyValueEntry -> keyValueEntry.mouseReleased(mouseX, mouseY, button));
-        removeQuestButton.mouseReleased(mouseX, mouseY, button);
+        if(screenManager.getSelection() == MenuSelection.CHAPTER){
+            removeChapterButton.mouseReleased(mouseX, mouseY, button);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST){
+            removeQuestButton.mouseReleased(mouseX, mouseY, button);
+        }else if (screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.mouseReleased(mouseX, mouseY, button);
+        }
         return false;
     }
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY){
         keyValueList.forEach(keyValueEntry -> keyValueEntry.mouseDragged(mouseX, mouseY, button, dragX, dragY));
-        removeQuestButton.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        if(screenManager.getSelection() == MenuSelection.CHAPTER){
+            removeChapterButton.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST){
+            removeQuestButton.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        }else if (screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        }
         return false;
     }
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta){
         keyValueList.forEach(keyValueEntry -> keyValueEntry.mouseScrolled(mouseX, mouseY, delta));
-        removeQuestButton.mouseScrolled(mouseX, mouseY, delta);
+        if(screenManager.getSelection() == MenuSelection.CHAPTER){
+            removeChapterButton.mouseScrolled(mouseX, mouseY, delta);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST){
+            removeQuestButton.mouseScrolled(mouseX, mouseY, delta);
+        }else if (screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.mouseScrolled(mouseX, mouseY, delta);
+        }
         return false;
     }
     
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers){
         keyValueList.forEach(keyValueEntry -> keyValueEntry.keyReleased(keyCode, scanCode, modifiers));
-        removeQuestButton.keyReleased(keyCode, scanCode, modifiers);
+        if(screenManager.getSelection() == MenuSelection.CHAPTER){
+            removeChapterButton.keyReleased(keyCode, scanCode, modifiers);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST){
+            removeQuestButton.keyReleased(keyCode, scanCode, modifiers);
+        }else if (screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.keyReleased(keyCode, scanCode, modifiers);
+        }
         return false;
     }
     
     @Override
     public boolean charTyped(char codePoint, int modifiers){
         keyValueList.forEach(keyValueEntry -> keyValueEntry.charTyped(codePoint, modifiers));
-        removeQuestButton.charTyped(codePoint, modifiers);
+        if(screenManager.getSelection() == MenuSelection.CHAPTER){
+            removeChapterButton.charTyped(codePoint, modifiers);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST){
+            removeQuestButton.charTyped(codePoint, modifiers);
+        }else if (screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.charTyped(codePoint, modifiers);
+        }
         return false;
     }
     
     @Override
     public boolean changeFocus(boolean focus){
         keyValueList.forEach(keyValueEntry -> keyValueEntry.changeFocus(focus));
-        removeQuestButton.changeFocus(focus);
+        if(screenManager.getSelection() == MenuSelection.CHAPTER){
+            removeChapterButton.changeFocus(focus);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST){
+            removeQuestButton.changeFocus(focus);
+        }else if (screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.changeFocus(focus);
+        }
         return false;
     }
     
     @Override
     public boolean isMouseOver(double mouseX, double mouseY){
         keyValueList.forEach(keyValueEntry -> keyValueEntry.isMouseOver(mouseX, mouseY));
-        removeQuestButton.isMouseOver(mouseX, mouseY);
+        if(screenManager.getSelection() == MenuSelection.CHAPTER){
+            removeChapterButton.isMouseOver(mouseX, mouseY);
+        }else if(screenManager.getSelection() == MenuSelection.QUEST){
+            removeQuestButton.isMouseOver(mouseX, mouseY);
+        }else if (screenManager.getSelection() == MenuSelection.QUEST_TASK){
+            removeTaskButton.isMouseOver(mouseX, mouseY);
+        }
         return false;
     }
     

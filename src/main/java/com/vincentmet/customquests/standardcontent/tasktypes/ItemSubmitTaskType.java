@@ -9,7 +9,7 @@ import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.helpers.*;
 import com.vincentmet.customquests.hierarchy.quest.ItemSlideshowTexture;
 import com.vincentmet.customquests.integrations.jei.JEIHelper;
-import com.vincentmet.customquests.network.messages.MessageTaskButton;
+import com.vincentmet.customquests.network.messages.button.MessageTaskButton;
 import com.vincentmet.customquests.network.messages.PacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -178,41 +178,45 @@ public class ItemSubmitTaskType implements ITaskType, IItemStacksProvider{
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
 					ogNBT = jsonPrimitive.getAsString();
-					if(ogNBT == null || ogNBT.equals("")){
-						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Value is not valid NBT, defaulting to '{ }'!");
-						ogNBT = "{}";
+					if(ogNBT.equals("")){
+						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Value is not valid NBT, defaulting to null!");
+						ogNBT = null;
 					}
 				}else{
-					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Value is not a String, defaulting to '{ }'!");
-					ogNBT = "{}";
+					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Value is not a String, defaulting to null!");
+					ogNBT = null;
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Value is not a JsonPrimitive, please use a String, defaulting to '{ }'!");
-				ogNBT = "{}";
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Value is not a JsonPrimitive, please use a String, defaulting to null!");
+				ogNBT = null;
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Not detected, defaulting to '{ }'!");
-			ogNBT = "{}";
+			Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Not detected, defaulting to null!");
+			ogNBT = null;
 		}
 	
 		CompoundTag nbt = ApiUtils.getNbtFromJson(ogNBT);
 		if(TagHelper.doesTagExist(ogRL)){
 			TagHelper.getEntries(ogRL).stream().map(item1 ->{
 				ItemStack stack = new ItemStack(item1, count);
-				if(stack.getTag() != null){
-					stack.getTag().merge(nbt);
-				}else{
-					stack.setTag(nbt);
+				if(nbt!=null){
+					if(stack.getTag() != null){
+						stack.getTag().merge(nbt);
+					}else{
+						stack.setTag(nbt);
+					}
 				}
 				return stack;
 			}).forEach(items::add);
 			icon = new ItemSlideshowTexture(ogRL, items);
 		}else{
-			ItemStack stack = new ItemStack(ForgeRegistries.ITEMS.getValue(ogRL), count, nbt);
-			if(stack.getTag() != null){
-				stack.getTag().merge(nbt);
-			}else{
-				stack.setTag(nbt);
+			ItemStack stack = new ItemStack(ForgeRegistries.ITEMS.getValue(ogRL), count);
+			if(nbt!=null){
+				if(stack.getTag() != null){
+					stack.getTag().merge(nbt);
+				}else{
+					stack.setTag(nbt);
+				}
 			}
 			items.add(stack);
 			icon = new ItemSlideshowTexture(ogRL, stack);
@@ -261,7 +265,7 @@ public class ItemSubmitTaskType implements ITaskType, IItemStacksProvider{
 							 itemsLeftToHandIn.setValue(0);
 						 }
 						 processValue(player);
-						 ServerUtils.sendProgressAndParties((ServerPlayer)player);
+						 ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer((ServerPlayer)player);
 					 });
 			});
 		}

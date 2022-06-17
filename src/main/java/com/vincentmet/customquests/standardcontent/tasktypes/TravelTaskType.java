@@ -68,12 +68,12 @@ public class TravelTaskType implements ITaskType{
 			if(range <= -1){
 				if(WorldHelper.isPlayerInDimension(player, dimension)){
 					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, getCompletionAmount());
-					ServerUtils.sendProgressAndParties((ServerPlayer) 	player);
+					ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer((ServerPlayer)player);
 				}
 			}else{
 				if(WorldHelper.isPlayerInDimension(player, dimension) && WorldHelper.isPlayerInRange(player, x, y, z, range)){
 					CombinedProgressHelper.addValue(player.getUUID(), questId, taskId, subtaskId, getCompletionAmount());
-					ServerUtils.sendProgressAndParties((ServerPlayer) player);
+					ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer((ServerPlayer) player);
 				}
 			}
 			processValue(player);
@@ -159,7 +159,7 @@ public class TravelTaskType implements ITaskType{
 					dimension = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(dimension == null){
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > dimension': Value is not a valid dimension, please use a valid dimension id, defaulting to 'minecraft:overworld'!");
-						dimension = DimensionType.OVERWORLD_LOCATION.location();//todo test this RL
+						dimension = DimensionType.OVERWORLD_LOCATION.location();
 					}
 				}else{
 					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > dimension': Value is not a String, defaulting to 'minecraft:overworld'!");

@@ -13,7 +13,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -35,11 +35,11 @@ public class CommandRewardType implements IRewardType{
     }
     
     @Override
-	public void executeReward(Player player){
+	public void executeReward(ServerPlayer player){
 		MinecraftServer ms = player.getServer();
 		if(ms!=null){
 			final CommandDispatcher<CommandSourceStack> dispatcher = ms.getCommands().getDispatcher();
-			try {
+			try {//fixme probably server client issue with the display name text component?
 				dispatcher.execute("execute at " + player.getDisplayName().getString() + " run " + command, player.getServer().createCommandSourceStack().withSuppressedOutput());
 			} catch (CommandSyntaxException e) {
 				e.printStackTrace();
