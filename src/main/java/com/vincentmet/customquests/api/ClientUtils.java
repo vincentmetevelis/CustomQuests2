@@ -6,7 +6,7 @@ import com.vincentmet.customquests.network.messages.PacketHandler;
 import com.vincentmet.customquests.network.messages.editor.cts.requests.create.*;
 import com.vincentmet.customquests.network.messages.editor.cts.requests.delete.*;
 import com.vincentmet.customquests.network.messages.editor.cts.requests.update.chapter.*;
-import com.vincentmet.customquests.network.messages.editor.cts.requests.update.quest.MessageEditorRequestUpdateQuestTitleType;
+import com.vincentmet.customquests.network.messages.editor.cts.requests.update.quest.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 

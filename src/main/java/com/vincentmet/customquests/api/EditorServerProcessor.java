@@ -149,6 +149,16 @@ public class EditorServerProcessor {
                 }
             }
 
+            public static class Subtitle{
+                public static void updateType(int chapterId, ResourceLocation newType){
+                    //todo
+                }
+
+                public static void updateText(int chapterId, String newText){
+                    //todo
+                }
+            }
+
             public static class Text{
                 public static void updateType(int chapterId, ResourceLocation newType){
                     //todo
