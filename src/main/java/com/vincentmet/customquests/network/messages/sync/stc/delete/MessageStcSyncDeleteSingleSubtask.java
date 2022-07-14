@@ -1,4 +1,4 @@
-package com.vincentmet.customquests.network.messages.sync;
+package com.vincentmet.customquests.network.messages.sync.stc.delete;
 
 import com.vincentmet.customquests.api.ClientUtils;
 import com.vincentmet.customquests.api.EditorClientProcessor;

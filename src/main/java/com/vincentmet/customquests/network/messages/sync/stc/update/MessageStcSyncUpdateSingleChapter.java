@@ -1,4 +1,4 @@
-package com.vincentmet.customquests.network.messages.sync;
+package com.vincentmet.customquests.network.messages.sync.stc.update;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -30,7 +30,7 @@ public class MessageStcSyncUpdateSingleChapter {
     public static void encode(MessageStcSyncUpdateSingleChapter packet, FriendlyByteBuf buffer){
         if(ChapterHelper.doesChapterExist(packet.chapterId) && packet.jsonObject != null){
             buffer.writeInt(packet.chapterId);
-            buffer.writeUtf(packet.jsonObject.getAsString());
+            buffer.writeUtf(packet.jsonObject.toString());
         }
     }
     

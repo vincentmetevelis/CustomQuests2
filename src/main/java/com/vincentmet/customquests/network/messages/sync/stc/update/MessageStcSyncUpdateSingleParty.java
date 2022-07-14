@@ -1,12 +1,8 @@
-package com.vincentmet.customquests.network.messages.sync;
+package com.vincentmet.customquests.network.messages.sync.stc.update;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.gui.QuestingScreen;
-import com.vincentmet.customquests.hierarchy.party.Party;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 

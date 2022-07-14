@@ -125,7 +125,7 @@ public class EditorServerProcessor {
         }
 
         public static class Quest{
-            private static class Button{
+            public static class Button{
                 public static void updateShape(int questId, ResourceLocation newShape){
                     //todo
                 }

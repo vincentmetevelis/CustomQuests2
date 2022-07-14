@@ -1,9 +1,8 @@
-package com.vincentmet.customquests.network.messages.sync;
+package com.vincentmet.customquests.network.messages.sync.stc.update;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.vincentmet.customquests.api.*;
-import com.vincentmet.customquests.hierarchy.quest.Quest;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 

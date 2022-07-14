@@ -3,6 +3,13 @@ package com.vincentmet.customquests.api;
 import com.vincentmet.customquests.network.messages.MessageReinitQuestingCanvas;
 import com.vincentmet.customquests.network.messages.PacketHandler;
 import com.vincentmet.customquests.network.messages.sync.*;
+import com.vincentmet.customquests.network.messages.sync.stc.clear.MessageStcSyncTempClearAllChapters;
+import com.vincentmet.customquests.network.messages.sync.stc.clear.MessageStcSyncTempClearAllParties;
+import com.vincentmet.customquests.network.messages.sync.stc.clear.MessageStcSyncTempClearAllPlayers;
+import com.vincentmet.customquests.network.messages.sync.stc.clear.MessageStcSyncTempClearAllQuests;
+import com.vincentmet.customquests.network.messages.sync.stc.delete.MessageStcSyncDeleteAllChapters;
+import com.vincentmet.customquests.network.messages.sync.stc.delete.MessageStcSyncDeleteAllQuests;
+import com.vincentmet.customquests.network.messages.sync.stc.update.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;
 

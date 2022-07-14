@@ -1,4 +1,4 @@
-package com.vincentmet.customquests.network.messages.sync;
+package com.vincentmet.customquests.network.messages.sync.stc.clear;
 
 import com.vincentmet.customquests.api.EditorClientProcessor;
 import net.minecraft.network.FriendlyByteBuf;

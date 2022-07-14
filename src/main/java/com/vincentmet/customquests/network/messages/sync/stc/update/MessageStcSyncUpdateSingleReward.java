@@ -1,4 +1,4 @@
-package com.vincentmet.customquests.network.messages.sync;
+package com.vincentmet.customquests.network.messages.sync.stc.update;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

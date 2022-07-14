@@ -7,9 +7,6 @@ buildscript {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
-plugins {
-    id 'com.matthewprenger.cursegradle' version '1.4.0'
-}
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
@@ -84,28 +81,5 @@ jar {
                 "Implementation-Vendor"   : project.property('group'),
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
-    }
-}
-def reobfFile = file("$buildDir/reobfJar/output.jar")
-jar.finalizedBy('reobfJar')
-
-curseforge {
-    if (project.hasProperty('CF_API_KEY')){
-        apiKey = project.getProperty('CF_API_KEY')
-    }
-    project {
-        id = "${project.property('curseforge_project.id')}"
-        changelogType = 'markdown'
-        changelog = file('CHANGELOG.md')
-        releaseType = "release"
-        addGameVersion "Forge"
-        addGameVersion "${project.property('mc.version')}"
-        addGameVersion "${project.property('java.version')}"
-        mainArtifact(jar) {
-            displayName = "CustomQuests-${project.property('mc.version')}-${project.property('version')}.jar"
-        }
-    }
-    options {
-        javaVersionAutoDetect = false
     }
 }

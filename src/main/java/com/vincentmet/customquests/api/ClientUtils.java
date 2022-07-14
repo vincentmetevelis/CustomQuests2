@@ -166,17 +166,17 @@ public class ClientUtils{
 
 				public static class Tasks{
 					public static void requestUpdateTasksLogic(int questId, LogicType logicType){
-						PacketHandler.CHANNEL.sendToServer(new MessageEditorRequestUpdateTasksLogic(questId, logicType));
+						//PacketHandler.CHANNEL.sendToServer(new MessageEditorRequestUpdateTasksLogic(questId, logicType));//todo
 					}
 
 					public static class Task{
 						public static void requestUpdateTaskType(int questId, int taskId, ResourceLocation taskType){
-							PacketHandler.CHANNEL.sendToServer(new MessageEditorRequestUpdateTaskType(questId, taskId, taskType));
+							//PacketHandler.CHANNEL.sendToServer(new MessageEditorRequestUpdateTaskType(questId, taskId, taskType));//todo
 						}
 
 						public static class Subtasks{
 							public static void requestUpdateSubtasksLogic(int questId, int taskId, LogicType logicType){
-								PacketHandler.CHANNEL.sendToServer(new MessageEditorRequestUpdateSubtasksLogic(questId, taskId, logicType));
+								//PacketHandler.CHANNEL.sendToServer(new MessageEditorRequestUpdateSubtasksLogic(questId, taskId, logicType));//todo
 							}
 
 							public static class Subtask{

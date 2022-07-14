@@ -9,7 +9,16 @@ import com.vincentmet.customquests.network.messages.command.MessageOpenEditor;
 import com.vincentmet.customquests.network.messages.editor.cts.requests.create.*;
 import com.vincentmet.customquests.network.messages.editor.cts.requests.delete.*;
 import com.vincentmet.customquests.network.messages.editor.cts.requests.update.chapter.*;
+import com.vincentmet.customquests.network.messages.editor.cts.requests.update.quest.*;
 import com.vincentmet.customquests.network.messages.sync.*;
+import com.vincentmet.customquests.network.messages.sync.stc.clear.*;
+import com.vincentmet.customquests.network.messages.sync.stc.delete.MessageStcSyncDeleteAllChapters;
+import com.vincentmet.customquests.network.messages.sync.stc.delete.MessageStcSyncDeleteAllQuests;
+import com.vincentmet.customquests.network.messages.sync.stc.delete.MessageStcSyncDeleteSingleQuest;
+import com.vincentmet.customquests.network.messages.sync.stc.update.MessageStcSyncUpdateSingleChapter;
+import com.vincentmet.customquests.network.messages.sync.stc.update.MessageStcSyncUpdateSingleParty;
+import com.vincentmet.customquests.network.messages.sync.stc.update.MessageStcSyncUpdateSinglePlayer;
+import com.vincentmet.customquests.network.messages.sync.stc.update.MessageStcSyncUpdateSingleQuest;
 import com.vincentmet.customquests.standardcontent.messages.MessageCheckboxClick;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
@@ -41,12 +50,17 @@ public class PacketHandler{
 		CHANNEL.registerMessage(nextID(), MessageUpdateSinglePlayer.class, MessageUpdateSinglePlayer::encode, MessageUpdateSinglePlayer::decode, MessageUpdateSinglePlayer::handle);
 		CHANNEL.registerMessage(nextID(), MessageUpdateSinglePlayerQuestProgress.class, MessageUpdateSinglePlayerQuestProgress::encode, MessageUpdateSinglePlayerQuestProgress::decode, MessageUpdateSinglePlayerQuestProgress::handle);
 		CHANNEL.registerMessage(nextID(), MessageStcSyncUpdateSingleParty.class, MessageStcSyncUpdateSingleParty::encode, MessageStcSyncUpdateSingleParty::decode, MessageStcSyncUpdateSingleParty::handle);
+		CHANNEL.registerMessage(nextID(), MessageStcSyncUpdateSinglePlayer.class, MessageStcSyncUpdateSinglePlayer::encode, MessageStcSyncUpdateSinglePlayer::decode, MessageStcSyncUpdateSinglePlayer::handle);
 		CHANNEL.registerMessage(nextID(), MessageUpdateDelivery.class, MessageUpdateDelivery::encode, MessageUpdateDelivery::decode, MessageUpdateDelivery::handle);
 		CHANNEL.registerMessage(nextID(), MessageStcSyncDeleteAllChapters.class, MessageStcSyncDeleteAllChapters::encode, MessageStcSyncDeleteAllChapters::decode, MessageStcSyncDeleteAllChapters::handle);
-		CHANNEL.registerMessage(nextID(), MessageStcSyncUpdateSingleChapter.class, MessageStcSyncUpdateSingleChapter::encode, MessageStcSyncUpdateSingleChapter::decode, MessageStcSyncUpdateSingleChapter::handle);
 		CHANNEL.registerMessage(nextID(), MessageStcSyncDeleteAllQuests.class, MessageStcSyncDeleteAllQuests::encode, MessageStcSyncDeleteAllQuests::decode, MessageStcSyncDeleteAllQuests::handle);
 		CHANNEL.registerMessage(nextID(), MessageStcSyncDeleteSingleQuest.class, MessageStcSyncDeleteSingleQuest::encode, MessageStcSyncDeleteSingleQuest::decode, MessageStcSyncDeleteSingleQuest::handle);
 		CHANNEL.registerMessage(nextID(), MessageStcSyncTempClearSingleTask.class, MessageStcSyncTempClearSingleTask::encode, MessageStcSyncTempClearSingleTask::decode, MessageStcSyncTempClearSingleTask::handle);
+		CHANNEL.registerMessage(nextID(), MessageStcSyncTempClearSingleReward.class, MessageStcSyncTempClearSingleReward::encode, MessageStcSyncTempClearSingleReward::decode, MessageStcSyncTempClearSingleReward::handle);
+		CHANNEL.registerMessage(nextID(), MessageStcSyncTempClearSingleSubtask.class, MessageStcSyncTempClearSingleSubtask::encode, MessageStcSyncTempClearSingleSubtask::decode, MessageStcSyncTempClearSingleSubtask::handle);
+		CHANNEL.registerMessage(nextID(), MessageStcSyncTempClearSingleSubreward.class, MessageStcSyncTempClearSingleSubreward::encode, MessageStcSyncTempClearSingleSubreward::decode, MessageStcSyncTempClearSingleSubreward::handle);
+		CHANNEL.registerMessage(nextID(), MessageStcSyncTempClearAllChapters.class, MessageStcSyncTempClearAllChapters::encode, MessageStcSyncTempClearAllChapters::decode, MessageStcSyncTempClearAllChapters::handle);
+		CHANNEL.registerMessage(nextID(), MessageStcSyncTempClearAllQuests.class, MessageStcSyncTempClearAllQuests::encode, MessageStcSyncTempClearAllQuests::decode, MessageStcSyncTempClearAllQuests::handle);
 		CHANNEL.registerMessage(nextID(), MessageStcSyncTempClearAllPlayers.class, MessageStcSyncTempClearAllPlayers::encode, MessageStcSyncTempClearAllPlayers::decode, MessageStcSyncTempClearAllPlayers::handle);
 		CHANNEL.registerMessage(nextID(), MessageStcSyncTempClearAllParties.class, MessageStcSyncTempClearAllParties::encode, MessageStcSyncTempClearAllParties::decode, MessageStcSyncTempClearAllParties::handle);
 		CHANNEL.registerMessage(nextID(), MessageUpdateServerSettings.class, MessageUpdateServerSettings::encode, MessageUpdateServerSettings::decode, MessageUpdateServerSettings::handle);
@@ -69,11 +83,22 @@ public class PacketHandler{
 		CHANNEL.registerMessage(nextID(), MessageEditorRequestDeleteSubreward.class, MessageEditorRequestDeleteSubreward::encode, MessageEditorRequestDeleteSubreward::decode, MessageEditorRequestDeleteSubreward::handle);
 		CHANNEL.registerMessage(nextID(), MessageEditorRequestDeleteTask.class, MessageEditorRequestDeleteTask::encode, MessageEditorRequestDeleteTask::decode, MessageEditorRequestDeleteTask::handle);
 		CHANNEL.registerMessage(nextID(), MessageEditorRequestDeleteSubtask.class, MessageEditorRequestDeleteSubtask::encode, MessageEditorRequestDeleteSubtask::decode, MessageEditorRequestDeleteSubtask::handle);
+		//Editor update chapter
 		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateChapterIcon.class, MessageEditorRequestUpdateChapterIcon::encode, MessageEditorRequestUpdateChapterIcon::decode, MessageEditorRequestUpdateChapterIcon::handle);
 		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateChapterTitleType.class, MessageEditorRequestUpdateChapterTitleType::encode, MessageEditorRequestUpdateChapterTitleType::decode, MessageEditorRequestUpdateChapterTitleType::handle);
 		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateChapterTitleText.class, MessageEditorRequestUpdateChapterTitleText::encode, MessageEditorRequestUpdateChapterTitleText::decode, MessageEditorRequestUpdateChapterTitleText::handle);
 		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateChapterTextType.class, MessageEditorRequestUpdateChapterTextType::encode, MessageEditorRequestUpdateChapterTextType::decode, MessageEditorRequestUpdateChapterTextType::handle);
 		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateChapterTextText.class, MessageEditorRequestUpdateChapterTextText::encode, MessageEditorRequestUpdateChapterTextText::decode, MessageEditorRequestUpdateChapterTextText::handle);
+		//Editor update quest
+		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateQuestButtonShape.class, MessageEditorRequestUpdateQuestButtonShape::encode, MessageEditorRequestUpdateQuestButtonShape::decode, MessageEditorRequestUpdateQuestButtonShape::handle);
+		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateQuestButtonIcon.class, MessageEditorRequestUpdateQuestButtonIcon::encode, MessageEditorRequestUpdateQuestButtonIcon::decode, MessageEditorRequestUpdateQuestButtonIcon::handle);
+		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateQuestButtonScale.class, MessageEditorRequestUpdateQuestButtonScale::encode, MessageEditorRequestUpdateQuestButtonScale::decode, MessageEditorRequestUpdateQuestButtonScale::handle);
+		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateQuestTitleType.class, MessageEditorRequestUpdateQuestTitleType::encode, MessageEditorRequestUpdateQuestTitleType::decode, MessageEditorRequestUpdateQuestTitleType::handle);
+		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateQuestTitleText.class, MessageEditorRequestUpdateQuestTitleText::encode, MessageEditorRequestUpdateQuestTitleText::decode, MessageEditorRequestUpdateQuestTitleText::handle);
+		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateQuestSubtitleType.class, MessageEditorRequestUpdateQuestSubtitleType::encode, MessageEditorRequestUpdateQuestSubtitleType::decode, MessageEditorRequestUpdateQuestSubtitleType::handle);
+		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateQuestSubtitleText.class, MessageEditorRequestUpdateQuestSubtitleText::encode, MessageEditorRequestUpdateQuestSubtitleText::decode, MessageEditorRequestUpdateQuestSubtitleText::handle);
+		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateQuestTextType.class, MessageEditorRequestUpdateQuestTextType::encode, MessageEditorRequestUpdateQuestTextType::decode, MessageEditorRequestUpdateQuestTextType::handle);
+		CHANNEL.registerMessage(nextID(), MessageEditorRequestUpdateQuestTextText.class, MessageEditorRequestUpdateQuestTextText::encode, MessageEditorRequestUpdateQuestTextText::decode, MessageEditorRequestUpdateQuestTextText::handle);
 
 		//Standard Content
 		CHANNEL.registerMessage(nextID(), MessageCheckboxClick.class, MessageCheckboxClick::encode, MessageCheckboxClick::decode, MessageCheckboxClick::handle);
