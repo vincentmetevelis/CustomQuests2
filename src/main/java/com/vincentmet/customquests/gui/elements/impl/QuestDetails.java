@@ -128,7 +128,7 @@ public class QuestDetails implements IHoverRenderable, CQGuiEventListener {
 		if(screenManager.getCurrentlySelectedQuestId()>=0){
 			textToRender.clear();
 			IntCounter cumulativeHeight = new IntCounter(textContentY.getAsInt() - textScrollDistance, FONT.lineHeight + NEWLINE_MARGIN.getAsInt());
-			FormattedText questText = new TextComponent(TextUtils.colorify(QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getText().getText()));
+			FormattedText questText = new TextComponent(QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getText().getStyledText());
 			for(FormattedCharSequence line : FONT.split(questText, textContentWidth.getAsInt())){
 				textToRender.add(new Triple<>(line, textContentX.getAsInt(), cumulativeHeight.getValue()));
 				cumulativeHeight.count();
@@ -304,7 +304,7 @@ public class QuestDetails implements IHoverRenderable, CQGuiEventListener {
 	private void renderHoverText(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){/*NOOP*/}
 	
 	private void renderTasks(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
-		//Render logic type outside of the grey rect
+		//Render logic type outside the grey rect
 		taskLogicText.render(matrixStack, mouseX, mouseY, partialTicks);
 		
 		//Render stuff in the box
@@ -427,7 +427,7 @@ public class QuestDetails implements IHoverRenderable, CQGuiEventListener {
 	
 	private int getTextContentHeight(){
 		if(screenManager.getCurrentlySelectedQuestId()>=0){
-			return FONT.split(new TextComponent(TextUtils.colorify(QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getText().getText())), textContentWidth.getAsInt()).size() * (FONT.lineHeight + NEWLINE_MARGIN.getAsInt());
+			return FONT.split(new TextComponent(QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getText().getStyledText()), textContentWidth.getAsInt()).size() * (FONT.lineHeight + NEWLINE_MARGIN.getAsInt());
 		}
 		return 0;
 	}

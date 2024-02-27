@@ -127,7 +127,7 @@ public class Config {
         }
     }
     
-    public static class ServerConfig{
+    public static class ServerConfig{//Only used serverside
         public static boolean CAN_REWARD_ONLY_BE_CLAIMED_ONCE = false;
         public static boolean GIVE_DEVICE_ON_FIRST_LOGIN = false;
         public static boolean DEBUG_MODE = false;
@@ -135,7 +135,7 @@ public class Config {
         public static boolean EDIT_MODE = false;
     }
     
-    public static class ServerToClientSyncedConfig{
+    public static class ServerToClientSyncedConfig{//Only used clientside
         public static boolean CAN_REWARD_ONLY_BE_CLAIMED_ONCE = false;
         public static boolean GIVE_DEVICE_ON_FIRST_LOGIN = false;
         public static boolean DEBUG_MODE = false;

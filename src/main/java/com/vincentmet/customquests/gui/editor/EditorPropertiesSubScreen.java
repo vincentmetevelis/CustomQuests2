@@ -50,7 +50,6 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, CQGuiEventLi
             screenManager.setToParent();
             parent.actionQueue.push(() -> parent.reInit());
             parent.actionQueue.push(() -> parent.resetSelectorScroll());
-            
         }, new ArrayList<>());
         removeQuestButton = new VariableButton(x, ()->0, ()->20, ()->18, VariableButton.ButtonTexture.DEFAULT_NORMAL, "-", new Vec2i(), mouseButton -> {
             ClientUtils.EditorMessages.Delete.requestDeleteQuest(screenManager.getSelectedQuestId());
@@ -66,76 +65,64 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, CQGuiEventLi
         }, new ArrayList<>());
         
         keyValueList.clear();
-        IntCounter cumulativeHeight = new IntCounter(y.getAsInt() + KEY_VALUE_SPACER.getAsInt(), KEY_VALUE_HEIGHT.getAsInt() + KEY_VALUE_SPACER.getAsInt());
+        List<IEditorEntry> editorEntries = new ArrayList<>();
         switch(screenManager.getSelection()){
             case CHAPTER:
-                ChapterHelper.getEditorChapterEntries(screenManager.getSelectedChapterId()).forEach(iEditorEntry -> {
-                    Container<Integer> chapterEntriesYSupplier = new Container<>(cumulativeHeight.getValue());
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, chapterEntriesYSupplier::get, width, KEY_VALUE_HEIGHT));
-                    cumulativeHeight.count();
-                });
+                editorEntries = ChapterHelper.getEditorChapterEntries(screenManager.getSelectedChapterId());
                 break;
             case CHAPTER_TITLE:
-                ChapterHelper.getEditorChapterTitleEntries(screenManager.getSelectedChapterId()).forEach(iEditorEntry -> {
-                    Container<Integer> chapterEntryTitleYSupplier = new Container<>(cumulativeHeight.getValue());
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, chapterEntryTitleYSupplier::get, width, KEY_VALUE_HEIGHT));
-                    cumulativeHeight.count();
-                });
+                editorEntries = ChapterHelper.getEditorChapterTitleEntries(screenManager.getSelectedChapterId());
                 break;
             case CHAPTER_TEXT:
-                ChapterHelper.getEditorChapterTextEntries(screenManager.getSelectedChapterId()).forEach(iEditorEntry -> {
-                    Container<Integer> chapterEntryTextYSupplier = new Container<>(cumulativeHeight.getValue());
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, chapterEntryTextYSupplier::get, width, KEY_VALUE_HEIGHT));
-                    cumulativeHeight.count();
-                });
+                editorEntries = ChapterHelper.getEditorChapterTextEntries(screenManager.getSelectedChapterId());
                 break;
             case CHAPTER_QUESTLIST:
-                ChapterHelper.getEditorChapterQuestlistEntries(screenManager.getSelectedChapterId()).forEach(iEditorEntry -> {
-                    Container<Integer> chapterEntryQuestsYSupplier = new Container<>(cumulativeHeight.getValue());
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, chapterEntryQuestsYSupplier::get, width, KEY_VALUE_HEIGHT));
-                    cumulativeHeight.count();
-                });
+                editorEntries = ChapterHelper.getEditorChapterQuestlistEntries(screenManager.getSelectedChapterId());
                 break;
             case QUEST:
-                QuestHelper.getEditorQuestEntries(screenManager.getSelectedQuestId()).forEach(iEditorEntry -> {
-                    Container<Integer> questEntriesYSupplier = new Container<>(cumulativeHeight.getValue());
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, questEntriesYSupplier::get, width, KEY_VALUE_HEIGHT));
-                    cumulativeHeight.count();
-                });
+                editorEntries = QuestHelper.getEditorQuestEntries(screenManager.getSelectedQuestId());
                 break;
             case QUEST_BUTTON:
-                QuestHelper.getEditorQuestButtonEntries(screenManager.getSelectedQuestId()).forEach(iEditorEntry -> {
-                    Container<Integer> questEntryButtonYSupplier = new Container<>(cumulativeHeight.getValue());
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, questEntryButtonYSupplier::get, width, KEY_VALUE_HEIGHT));
-                    cumulativeHeight.count();
-                });
+                editorEntries = QuestHelper.getEditorQuestButtonEntries(screenManager.getSelectedQuestId());
                 break;
             case QUEST_TITLE:
-                QuestHelper.getEditorQuestTitleEntries(screenManager.getSelectedQuestId()).forEach(iEditorEntry -> {
-                    Container<Integer> questEntryTitleYSupplier = new Container<>(cumulativeHeight.getValue());
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, questEntryTitleYSupplier::get, width, KEY_VALUE_HEIGHT));
-                    cumulativeHeight.count();
-                });
+                editorEntries = QuestHelper.getEditorQuestTitleEntries(screenManager.getSelectedQuestId());
                 break;
             case QUEST_SUBTITLE:
-                QuestHelper.getEditorQuestSubtitleEntries(screenManager.getSelectedQuestId()).forEach(iEditorEntry -> {
-                    Container<Integer> questEntrySubtitleYSupplier = new Container<>(cumulativeHeight.getValue());
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, questEntrySubtitleYSupplier::get, width, KEY_VALUE_HEIGHT));
-                    cumulativeHeight.count();
-                });
+                editorEntries = QuestHelper.getEditorQuestSubtitleEntries(screenManager.getSelectedQuestId());
                 break;
             case QUEST_TEXT:
-                QuestHelper.getEditorQuestTextEntries(screenManager.getSelectedQuestId()).forEach(iEditorEntry -> {
-                    Container<Integer> questEntryTextYSupplier = new Container<>(cumulativeHeight.getValue());
-                    keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, questEntryTextYSupplier::get, width, KEY_VALUE_HEIGHT));
-                    cumulativeHeight.count();
-                });
+                editorEntries = QuestHelper.getEditorQuestTextEntries(screenManager.getSelectedQuestId());
+                break;
+            case QUEST_DEPENDENCIES:
+                editorEntries = QuestHelper.getEditorQuestDependenciesEntries(screenManager.getSelectedQuestId());
+                break;//todo allow for add/remove quest ids
+            case QUEST_TASKS:
+                editorEntries = QuestHelper.getEditorQuestTasksEntries(screenManager.getSelectedQuestId());
+                break;
+            case QUEST_TASK:
+                editorEntries = QuestHelper.getEditorQuestTaskEntries(screenManager.getSelectedQuestId(), screenManager.getSelectedTaskId());
+                break;
+            case QUEST_TASK_SUBTASKS:
+                editorEntries = QuestHelper.getEditorQuestSubtasksEntries(screenManager.getSelectedQuestId(), screenManager.getSelectedTaskId());
+                break;
+            case QUEST_TASK_SUBTASK:
+                editorEntries = QuestHelper.getEditorQuestSubtaskEntries(screenManager.getSelectedQuestId(), screenManager.getSelectedTaskId(), screenManager.getSelectedTaskId());
+                break;
+            case QUEST_POSITION:
+                editorEntries = QuestHelper.getEditorQuestPositionEntries(screenManager.getSelectedQuestId());
                 break;
             //todo continue this one over time
         }
+        IntCounter cumulativeHeight = new IntCounter(y.getAsInt() + KEY_VALUE_SPACER.getAsInt(), KEY_VALUE_HEIGHT.getAsInt() + KEY_VALUE_SPACER.getAsInt());
+        editorEntries.forEach(iEditorEntry -> {
+            Container<Integer> ySupplier = new Container<>(cumulativeHeight.getValue());
+            keyValueList.add(new KeyValueEntry(screenManager, iEditorEntry, x, ySupplier::get, width, KEY_VALUE_HEIGHT));
+            cumulativeHeight.count();
+        });
         applyScrollLimits();
     }
-    
+
     @Override
     public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks){
         keyValueList.forEach(keyValueEntry -> keyValueEntry.render(matrixStack, mouseX, mouseY, partialTicks));
@@ -309,7 +296,7 @@ public class EditorPropertiesSubScreen implements IHoverRenderable, CQGuiEventLi
     private int getContentHeight(){
         //todo maybe a switch here, some somehow make a getter in the classes for this one, OR calculate by the amount of entries from the already existing getter + array_length-1 when applicable
         /*if(screenManager.getCurrentlySelectedQuestId()>=0){
-            return FONT.trimStringToWidth(new StringTextComponent(TextUtils.colorify(QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getText().getText())), textContentWidth.getAsInt()).size() * (FONT.FONT_HEIGHT + NEWLINE_MARGIN);
+            return FONT.trimStringToWidth(new StringTextComponent(TextUtils.colorify(QuestingStorage.getSidedQuestsMap().get(screenManager.getCurrentlySelectedQuestId()).getStyledText().getStyledText())), textContentWidth.getAsInt()).size() * (FONT.FONT_HEIGHT + NEWLINE_MARGIN);
         }*/
         return 0;
     }

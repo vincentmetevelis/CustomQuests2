@@ -347,7 +347,7 @@ public class EditorScreen extends Screen {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button){
-        selectorList.mouseClicked(mouseX, mouseY, button);
+        selectorList.mouseClicked(mouseX, mouseY, button);//fixme add check if mouse click & hover are outside GLScissorStack (already fixed this in MKM mod, just partially copy it over! (getIntersectionArea()))
         parentButton.mouseClicked(mouseX, mouseY, button);
         chaptersButton.mouseClicked(mouseX, mouseY, button);
         questsButton.mouseClicked(mouseX, mouseY, button);

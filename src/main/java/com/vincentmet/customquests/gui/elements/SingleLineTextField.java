@@ -147,10 +147,11 @@ public class SingleLineTextField implements IHoverRenderable, CQGuiEventListener
     
     private void removeCharBeforeCursor(){
         if(getCursorPos() > 0){
+            int lastCursorPos = getCursorPos();
+            setCursorOneToLeft();
             StringBuilder currentText = new StringBuilder(text);
-            currentText.deleteCharAt(getCursorPos()-1);
+            currentText.deleteCharAt(lastCursorPos-1);
             text = currentText.toString();
-            if(getCursorPos() < getMaxCursorPos())setCursorOneToLeft();
         }
     }
     

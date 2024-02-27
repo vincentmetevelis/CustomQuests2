@@ -58,9 +58,8 @@ public class QuestList extends HashSet<Integer> implements IJsonArrayProcessor, 
 	public void addPageEntries(List<IEditorEntry> list) {
 		forEach(questId -> {
 			list.add(new EditorEntryWrapper(new TextComponent(""), new ResourceLocation(Ref.MODID, "integer"), () -> questId, newValueObject -> {
-				//todo no clue on how to add/remove ids from the list, maybe use the selectorlist for it?
+				//todo maybe create a new screen for it, passing important data to it, including the instance of the editor screen, then go back to that instance on close or on save, instead of opening a new screen
 			}));
-			//todo add height to the editor keyvalue??? or allow for scene switching with parameters/parents
 		});
 	}
 }

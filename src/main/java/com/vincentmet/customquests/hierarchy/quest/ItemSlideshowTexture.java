@@ -13,18 +13,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemSlideshowTexture implements IQuestingTexture, ICurrentItemStackProvider{
-	private ResourceLocation ogResourceLocation;
-	private List<ItemStack> items = new ArrayList<>();
-	private int delay = 20;
+	private final ResourceLocation OG_RESOURCE_LOCATION;
+	private final List<ItemStack> items = new ArrayList<>();
+	private final int DELAY = 20;
 	
 	public ItemSlideshowTexture(ResourceLocation ogResourceLocation, List<ItemStack> items){
-		this.items = items;
-		this.ogResourceLocation = ogResourceLocation;
+		this.items.addAll(items);
+		this.OG_RESOURCE_LOCATION = ogResourceLocation;
 	}
 	
 	public ItemSlideshowTexture(ResourceLocation ogResourceLocation, ItemStack item){
 		this.items.add(item);
-		this.ogResourceLocation = ogResourceLocation;
+		this.OG_RESOURCE_LOCATION = ogResourceLocation;
 	}
     
     @Override
@@ -36,7 +36,7 @@ public class ItemSlideshowTexture implements IQuestingTexture, ICurrentItemStack
 	public void render(PoseStack matrixStack, float scale, int x, int y, float offsetX, float offsetY, int mouseX, int mouseY){
 		if(!items.isEmpty()){
 			int arrSize = items.size();
-			int currentIndex = (int)(System.currentTimeMillis()/50/delay%arrSize);
+			int currentIndex = (int)(System.currentTimeMillis()/50/DELAY%arrSize);
 			ItemRenderHelper.renderGuiItem(items.get(currentIndex), x, y, scale, offsetX, offsetY);
 		}
 	}
@@ -44,7 +44,7 @@ public class ItemSlideshowTexture implements IQuestingTexture, ICurrentItemStack
 	public ItemStack getCurrentItemStack(){
 		if(!items.isEmpty()){
 			int arrSize = items.size();
-			int currentIndex = (int)(System.currentTimeMillis()/50/delay%arrSize);
+			int currentIndex = (int)(System.currentTimeMillis()/50/DELAY%arrSize);
 			return items.get(currentIndex);
 		}
 		return ItemStack.EMPTY;
@@ -52,11 +52,11 @@ public class ItemSlideshowTexture implements IQuestingTexture, ICurrentItemStack
 	
 	@Override
 	public String toString(){
-		return ogResourceLocation.toString();
+		return OG_RESOURCE_LOCATION.toString();
 	}
 	
 	@Override
 	public ResourceLocation getResourceLocation(){
-		return ogResourceLocation;
+		return OG_RESOURCE_LOCATION;
 	}
 }

@@ -9,7 +9,7 @@ public class WorldHelper{
     }
     
     public static boolean isPlayerInBiome(Player player, ResourceLocation biome){
-        return player.getLevel().getBiome(player.blockPosition()).getRegistryName().equals(biome);
+        return player.getLevel().getBiome(player.blockPosition()).is(biome);
     }
     
     public static boolean isPlayerInRange(Player player, int x, int y, int z, int range){

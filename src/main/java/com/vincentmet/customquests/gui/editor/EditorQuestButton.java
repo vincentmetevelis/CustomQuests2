@@ -26,7 +26,7 @@ public class EditorQuestButton implements ScrollableListEntry{
         this.y = y;
         this.width = width;
         this.icon = quest.getButton().getIcon();
-        this.button = new VariableButton(0, 0, x, y, width, HEIGHT, VariableButton.ButtonTexture.DEFAULT_NORMAL, quest.getQuestId() + " - " + TextUtils.colorify(quest.getTitle().getText()), new Vec2i(10, 0), onClickCallback, new ArrayList<>());
+        this.button = new VariableButton(0, 0, x, y, width, HEIGHT, VariableButton.ButtonTexture.DEFAULT_NORMAL, quest.getQuestId() + " - " + quest.getTitle().getStyledText(), new Vec2i(10, 0), onClickCallback, new ArrayList<>());
     }
     
     @Override

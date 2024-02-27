@@ -142,9 +142,12 @@ public class ProgressHelper{
 	
 	public static void deleteProgress(UUID uuid){
 		QuestingPlayer questingPlayer = QuestingStorage.getSidedPlayersMap().get(uuid.toString());
+		System.out.println("Clearing QuestingPlayer Progress on " + EffectiveSide.get().toString());//todo
 		questingPlayer.getIndividualProgress().clear();
 		questingPlayer.getIndividualProgress().getIndividuallyCompletedQuests().clear();
+		System.out.println(questingPlayer.getIndividualProgress().getJson() + " on " + EffectiveSide.get().toString());//todo
 		CQHelper.generateMissingProgress(uuid);
+		System.out.println(questingPlayer.getIndividualProgress().getJson() + " on " + EffectiveSide.get().toString());//todo
 	}
 
 	public static void forAllPlayers(Consumer<UUID> consumer){

@@ -33,7 +33,7 @@ public class DeliveryBlock extends BaseEntityBlock {
 			if(te instanceof DeliveryBlockTileEntity){
 				if(player.getItemInHand(hand).getItem() == Items.CARROT_ON_A_STICK){
 					((DeliveryBlockTileEntity)te).setCurrentSubmitter(player);
-					LOGGER.info("Setting player to: " + player.getDisplayName().getString());
+					//LOGGER.info("Setting player to: " + player.getDisplayName().getString());
 				}else{
 					Minecraft.getInstance().setScreen(new DeliveryScreen(pos));
 				}

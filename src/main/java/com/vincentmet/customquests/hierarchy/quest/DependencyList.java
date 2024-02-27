@@ -105,6 +105,7 @@ public class DependencyList extends HashSet<Integer> implements IJsonObjectProce
 
 	@Override
 	public void addPageEntries(List<IEditorEntry> list) {
-		//todo list.add(new EditorEntryWrapper());
+		//todo list.add(new EditorEntryWrapper(logictype));
+		//todo list.add(add/remove id in new list?)
 	}
 }

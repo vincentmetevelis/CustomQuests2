@@ -11,7 +11,6 @@ public class TextUtils{
         string = string.replaceAll("~SINGLEQUOTE~", "\'");
         string = string.replaceAll("~DOUBLEQUOTE~", "\"");
         string = string.replaceAll("~BACKSLASH~", "\\\\");
-        string = string.replaceAll("~TAB~", "\t");
         return string;
     }
 }

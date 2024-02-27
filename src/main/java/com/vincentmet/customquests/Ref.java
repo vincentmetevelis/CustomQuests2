@@ -10,14 +10,14 @@ import java.nio.file.Path;
 
 public class Ref{
 	public static final String MODID = "customquests";
-	public static final String VERSION_MOD = "2.3.0-DEV5";
-	public static final String VERSION_MC = "1.18.1";
+	public static final String VERSION_MOD = "2.4.0";
+	public static final String VERSION_MC = "1.18.2";
 	public static final String VERSION_COMBINED = VERSION_MC + "-" + VERSION_MOD;
 	public static Path currentWorldDirectory;
 	public static Path currentProgressDirectory;
 	public static Path questsBackupDirectory;
 	public static Path progressBackupDirectory;
-	public static MinecraftServer currentServerInstance;//todo preferable not use this one at all
+	public static MinecraftServer currentServerInstance;
 	public static final int NO_PARTY = -1;
 	public static final ResourceLocation INVALID_RESOURCELOCATION = new ResourceLocation(MODID, "invalid");
 	

@@ -7,9 +7,13 @@ import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.api.CQRegistry;
 import com.vincentmet.customquests.api.IJsonObjectProcessor;
 import com.vincentmet.customquests.api.IJsonObjectProvider;
+import com.vincentmet.customquests.gui.editor.IEditorEntry;
+import com.vincentmet.customquests.gui.editor.IEditorPage;
 import net.minecraft.resources.ResourceLocation;
 
-public class Task implements IJsonObjectProcessor, IJsonObjectProvider{
+import java.util.List;
+
+public class Task implements IJsonObjectProcessor, IJsonObjectProvider, IEditorPage {
 	private final int questId;
 	private final int taskId;
 	private ResourceLocation taskType;
@@ -83,5 +87,10 @@ public class Task implements IJsonObjectProcessor, IJsonObjectProvider{
 	
 	public int getId(){
 		return taskId;
+	}
+
+	@Override
+	public void addPageEntries(List<IEditorEntry> list) {
+		//todo
 	}
 }

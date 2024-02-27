@@ -5,10 +5,14 @@ import com.vincentmet.customquests.api.CQRegistry;
 import com.vincentmet.customquests.api.IJsonObjectProcessor;
 import com.vincentmet.customquests.api.IJsonObjectProvider;
 import com.vincentmet.customquests.api.ITaskType;
+import com.vincentmet.customquests.gui.editor.IEditorEntry;
+import com.vincentmet.customquests.gui.editor.IEditorPage;
 import com.vincentmet.customquests.helpers.JsonContainer;
 import net.minecraft.resources.ResourceLocation;
 
-public class SubTask implements IJsonObjectProvider, IJsonObjectProcessor{
+import java.util.List;
+
+public class SubTask implements IJsonObjectProvider, IJsonObjectProcessor, IEditorPage {
 	private final ResourceLocation type;
 	private final int questId;
 	private final int taskId;
@@ -58,5 +62,10 @@ public class SubTask implements IJsonObjectProvider, IJsonObjectProcessor{
 	
 	public int getSubtaskId(){
 		return subtaskId;
+	}
+
+	@Override
+	public void addPageEntries(List<IEditorEntry> list) {
+		//todo
 	}
 }

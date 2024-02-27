@@ -294,6 +294,15 @@ public class EditorClientProcessor {
             QuestingStorage.getSidedQuestsMap().values().forEach(quest -> quest.getDependencyList().remove(questId));//Delete the quest from all quest dependencies
         }
 
+        public static void deleteSingleParty(int partyId){
+            Clear.Parties.clearSingleParty(partyId);
+            QuestingStorage.getSidedPlayersMap().values().stream().filter(player -> player.getParty() == partyId).forEach(player -> player.setParty(Ref.NO_PARTY));//Sets the players party to none if they are in the party to delete
+        }
+
+        public static void deleteSinglePlayer(UUID uuid){
+            Clear.Players.clearSinglePlayer(uuid);
+        }
+
         public static void deleteSingleTask(int questId, int taskId){
             Clear.Quests.Tasks.clearSingleTask(questId, taskId);
             Clear.Parties.Progress.Tasks.clearSingleTaskProgress(questId, taskId);

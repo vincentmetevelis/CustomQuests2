@@ -175,7 +175,7 @@ public class ItemCraftTaskType implements ITaskType, IItemStacksProvider{
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
 					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(ogRL != null){
-						if(!TagHelper.doesTagExist(ogRL) && !ForgeRegistries.ITEMS.containsKey(ogRL)){
+						if(!TagHelper.Items.doesTagExist(ogRL) && !ForgeRegistries.ITEMS.containsKey(ogRL)){
 							Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > item': Value is not a valid item that exists in the game, please use a valid item, defaulting to 'minecraft:grass_block'!");
 							ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 						}
@@ -245,8 +245,8 @@ public class ItemCraftTaskType implements ITaskType, IItemStacksProvider{
 		}
 
 		CompoundTag nbt = ApiUtils.getNbtFromJson(ogNBT);
-		if(TagHelper.doesTagExist(ogRL)){
-			TagHelper.getEntries(ogRL).stream().map(item1 ->{
+		if(TagHelper.Items.doesTagExist(ogRL)){
+			TagHelper.Items.getEntries(ogRL).stream().map(item1 ->{
 				ItemStack stack = new ItemStack(item1, count);
 				if(nbt!=null){
 					if(stack.getTag() != null){

@@ -92,7 +92,7 @@ public class PartyHelper {
 	}
 	
 	//NEW STUFF
-	public static void completeQuest(int partyId, int questId){
+	public static void completeQuest(int partyId, int questId){//fixme this triggers the quest completed popup on the clients in the party, probably same for methods below, but please test that
 		if(doesPartyExist(partyId) && QuestHelper.doesQuestExist(questId)){
 			Party party = QuestingStorage.getSidedPartiesMap().get(partyId);
 			party.getCollectiveProgress().get(questId).setAllTasksCompleted(true);
@@ -101,7 +101,7 @@ public class PartyHelper {
 		}
 	}
 	
-	public static void completeTask(int partyId, int questId, int taskId){
+	public static void completeTask(int partyId, int questId, int taskId){//fixme doesnt followup the sync, probably copy how i did it at the players to the parties
 		if(doesPartyExist(partyId) && QuestHelper.doesTaskExist(questId, taskId)){
 			Party party = QuestingStorage.getSidedPartiesMap().get(partyId);
 			party.getCollectiveProgress().get(questId).get(taskId).setAllSubtasksCompleted(true);
@@ -109,7 +109,7 @@ public class PartyHelper {
 		}
 	}
 	
-	public static void completeSubtask(int partyId, int questId, int taskId, int subtaskId){
+	public static void completeSubtask(int partyId, int questId, int taskId, int subtaskId){//fixme doesnt followup the sync, probably copy how i did it at the players to the parties
 		if(doesPartyExist(partyId) && QuestHelper.doesSubtaskExist(questId, taskId, subtaskId)){
 			Party party = QuestingStorage.getSidedPartiesMap().get(partyId);
 			party.getCollectiveProgress().get(questId).get(taskId).get(subtaskId).setCompleted(true);

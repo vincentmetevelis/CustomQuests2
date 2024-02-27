@@ -4,17 +4,20 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.CQRegistry;
-import com.vincentmet.customquests.api.IJsonObjectProcessor;
-import com.vincentmet.customquests.api.IJsonObjectProvider;
-import com.vincentmet.customquests.api.LogicType;
+import com.vincentmet.customquests.api.*;
+import com.vincentmet.customquests.gui.editor.EditorEntryWrapper;
+import com.vincentmet.customquests.gui.editor.IEditorEntry;
+import com.vincentmet.customquests.gui.editor.IEditorPage;
 import com.vincentmet.customquests.helpers.IntCounter;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class Tasks extends HashMap<Integer, Task> implements IJsonObjectProvider, IJsonObjectProcessor{
+public class Tasks extends HashMap<Integer, Task> implements IJsonObjectProvider, IJsonObjectProcessor, IEditorPage {
 	private LogicType logicType = LogicType.AND;
 	private final int questId;
 	
@@ -152,5 +155,17 @@ public class Tasks extends HashMap<Integer, Task> implements IJsonObjectProvider
 	
 	public int getQuestId(){
 		return questId;
+	}
+
+	@Override
+	public void addPageEntries(List<IEditorEntry> list) {
+		list.add(new EditorEntryWrapper(new TextComponent("Logic"), new ResourceLocation(Ref.MODID, "plaintext"), () -> logicType.toString(), newValueObject -> {
+			if (Arrays.stream(LogicType.values()).anyMatch(logicType1 -> logicType1.toString().equals(newValueObject.toString().toUpperCase()))){
+				setLogicType(LogicType.valueOf(newValueObject.toString().toUpperCase()));
+			}else{
+				setLogicType(LogicType.AND);
+			}
+			EditorGuiHelper.Update.Quest.Tasks.requestUpdateLogic(questId, getLogicType());
+		}));
 	}
 }

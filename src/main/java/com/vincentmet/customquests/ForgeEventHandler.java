@@ -6,11 +6,7 @@ import com.vincentmet.customquests.event.CheckCycleEvent;
 import com.vincentmet.customquests.event.DataLoadingEvent;
 import com.vincentmet.customquests.event.QuestEvent;
 import com.vincentmet.customquests.helpers.PlayerBoundSubtaskReference;
-import com.vincentmet.customquests.network.messages.PacketHandler;
-import com.vincentmet.customquests.network.messages.button.MessageRewardClaim;
 import com.vincentmet.customquests.standardcontent.tasktypes.*;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -36,11 +32,11 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = Ref.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class ForgeEventHandler{//todo separate client events and server events!!!!!!!
+public class ForgeEventHandler{
 	@SubscribeEvent
 	public static void onWorldStart(WorldEvent.Load event){
 		//Main
-		if(event.getWorld() instanceof ServerLevel && event.getWorld().dimensionType().equalTo(DimensionType.DEFAULT_OVERWORLD)){
+		if(event.getWorld() instanceof ServerLevel && event.getWorld().dimensionType().equals(DimensionType.DEFAULT_OVERWORLD)){
 			Ref.currentServerInstance = ((ServerLevel)event.getWorld()).getServer();
 			Ref.currentWorldDirectory = ((ServerLevel)event.getWorld()).getServer().getWorldPath(new LevelResource("."));
 			Ref.currentProgressDirectory = Ref.currentWorldDirectory.resolve(Ref.MODID);
@@ -63,8 +59,7 @@ public class ForgeEventHandler{//todo separate client events and server events!!
 		ServerUtils.Packets.SyncToClient.Config.syncConfigToPlayer((ServerPlayer)event.getPlayer());
 		
 		if(Config.SidedConfig.giveDeviceOnFirstLogin()){
-			if(event.getPlayer() instanceof ServerPlayer){
-				ServerPlayer player = (ServerPlayer)event.getPlayer();
+			if(event.getPlayer() instanceof ServerPlayer player){
 				if(player.getStats().getValue(Stats.CUSTOM.get(Stats.LEAVE_GAME)) == 0){
 					ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(Objects.Items.QUESTING_DEVICE));
 				}
@@ -75,7 +70,7 @@ public class ForgeEventHandler{//todo separate client events and server events!!
 	@SubscribeEvent
 	public static void onWorldSave(WorldEvent.Save event){
 		//Main
-		if(event.getWorld() instanceof ServerLevel && event.getWorld().dimensionType().equalTo(DimensionType.DEFAULT_OVERWORLD)){
+		if(event.getWorld() instanceof ServerLevel && event.getWorld().dimensionType().equals(DimensionType.DEFAULT_OVERWORLD)){
 			CQHelper.writeQuestsAndChaptersToFile(Ref.PATH_CONFIG, Ref.FILENAME_QUESTS + Ref.FILE_EXT_JSON);
 			CQHelper.writePlayersAndPartiesToFile(Ref.currentProgressDirectory, Ref.FILENAME_PARTIES + Ref.FILE_EXT_JSON);
 		}
@@ -184,7 +179,7 @@ public class ForgeEventHandler{//todo separate client events and server events!!
 	}
 	
 	@SubscribeEvent
-	public static void onQuestComplete(QuestEvent.Completed event){//fixme something in here calls a client side only class on the dedicated server @AlleCraft
+	public static void onPlayerQuestComplete(QuestEvent.Completed event){//fixme something in here calls a client side only class on the dedicated server @AlleCraft (maybe (haven't had this crash in a while, lets see if it still persists after release))
 		//Main
 		ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer(event.getPlayer());//todo perhaps change to sendSingleQuestToAllPlayers(ServerPlayer, questId, taskId) to reduce network data
 		MinecraftServer server = event.getPlayer().getServer();
@@ -197,7 +192,7 @@ public class ForgeEventHandler{//todo separate client events and server events!!
 						try{
 							String title = new TranslatableComponent("customquests.general.quest_completed").getString();
 							server.getCommands().getDispatcher().execute("title " + playerEntity.getDisplayName().getString() + " title \"" + title + "\"", server.createCommandSourceStack().withSuppressedOutput());
-							server.getCommands().getDispatcher().execute("title " + playerEntity.getDisplayName().getString() + " subtitle \"" + TextUtils.colorify(QuestHelper.getQuestFromId(event.getQuestId()).getTitle().getText())  + " #" + event.getQuestId() + "\"", server.createCommandSourceStack().withSuppressedOutput());
+							server.getCommands().getDispatcher().execute("title " + playerEntity.getDisplayName().getString() + " subtitle \"" + QuestHelper.getQuestFromId(event.getQuestId()).getTitle().getStyledText()  + " #" + event.getQuestId() + "\"", server.createCommandSourceStack().withSuppressedOutput());
 						}catch(CommandSyntaxException ignored){}
 					}
 				});
@@ -205,7 +200,7 @@ public class ForgeEventHandler{//todo separate client events and server events!!
 				try{
 					String title = new TranslatableComponent("customquests.general.quest_completed").getString();
 					server.getCommands().getDispatcher().execute("title " + event.getPlayer().getDisplayName().getString() + " title \"" + title + "\"", server.createCommandSourceStack().withSuppressedOutput());
-					server.getCommands().getDispatcher().execute("title " + event.getPlayer().getDisplayName().getString() + " subtitle \"" + TextUtils.colorify(QuestHelper.getQuestFromId(event.getQuestId()).getTitle().getText())  + " #" + event.getQuestId() + "\"", server.createCommandSourceStack().withSuppressedOutput());
+					server.getCommands().getDispatcher().execute("title " + event.getPlayer().getDisplayName().getString() + " subtitle \"" + QuestHelper.getQuestFromId(event.getQuestId()).getTitle().getStyledText()  + " #" + event.getQuestId() + "\"", server.createCommandSourceStack().withSuppressedOutput());
 				}catch(CommandSyntaxException ignored){}
 			}
 		}
@@ -287,18 +282,5 @@ public class ForgeEventHandler{//todo separate client events and server events!!
 		XpSubmitTaskType.TRACKING_LIST.clear();
 		BlockMinedTaskType.TRACKING_LIST.clear();
 		BlockPlacedTaskType.TRACKING_LIST.clear();
-	}
-	
-	@SubscribeEvent
-	public static void onClientTick(TickEvent.ClientTickEvent event){
-		if(Objects.KeyBinds.OPEN_QUESTING_SCREEN.isDown() && (Minecraft.getInstance().screen == null || Minecraft.getInstance().screen instanceof InventoryScreen)){
-			ClientUtils.openQuestingScreen();
-		}
-		if(Objects.KeyBinds.CLAIM_ALL_REWARDS.isDown()){
-			QuestingStorage.getSidedQuestsMap().entrySet()
-						   .stream()
-						   .filter(entry -> CombinedProgressHelper.canClaimReward(Minecraft.getInstance().player.getUUID(), entry.getKey()))
-						   .forEach(entry ->PacketHandler.CHANNEL.sendToServer(new MessageRewardClaim(entry.getKey(), -1)));
-		}
 	}
 }

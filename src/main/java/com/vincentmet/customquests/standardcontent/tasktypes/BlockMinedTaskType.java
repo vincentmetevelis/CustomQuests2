@@ -164,7 +164,7 @@ public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
 					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(ogRL != null){
-						if(!TagHelper.doesTagExist(ogRL) && !ForgeRegistries.BLOCKS.containsKey(ogRL)){
+						if(!TagHelper.Items.doesTagExist(ogRL) && !ForgeRegistries.BLOCKS.containsKey(ogRL)){
 							Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > block': Value is not a valid block that exists in the game, please use a valid block, defaulting to 'minecraft:grass_block'!");
 							ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 						}
@@ -210,8 +210,8 @@ public class BlockMinedTaskType implements ITaskType, IItemStacksProvider{
 			count = 1;
 		}
 		
-		if(TagHelper.doesTagExist(ogRL)){
-			TagHelper.getEntries(ogRL).stream().map(item1 ->new ItemStack(item1, count)).forEach(items::add);
+		if(TagHelper.Items.doesTagExist(ogRL)){
+			TagHelper.Items.getEntries(ogRL).stream().map(item1 ->new ItemStack(item1, count)).forEach(items::add);
 			icon = new ItemSlideshowTexture(ogRL, items);
 		}else{
 			ItemStack stack = new ItemStack(ForgeRegistries.BLOCKS.getValue(ogRL), count);

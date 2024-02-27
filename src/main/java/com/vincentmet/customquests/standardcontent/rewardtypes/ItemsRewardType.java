@@ -106,7 +106,7 @@ public class ItemsRewardType implements IRewardType, IItemStacksProvider{
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
 					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(ogRL != null){
-						if(!TagHelper.doesTagExist(ogRL) && !ForgeRegistries.ITEMS.containsKey(ogRL)){
+						if(!TagHelper.Items.doesTagExist(ogRL) && !ForgeRegistries.ITEMS.containsKey(ogRL)){
 							Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > rewards > entries > " + rewardId + " > content > item': Value is not a valid item that exists in the game, please use a valid item, defaulting to 'minecraft:grass_block'!");
 							ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 						}

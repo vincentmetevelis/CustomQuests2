@@ -27,7 +27,7 @@ public class EditorChapterButton implements ScrollableListEntry{
         this.y = y;
         this.width = width;
         this.icon = chapter.getIcon();
-        this.button = new VariableButton(0, 0, x, y, width, HEIGHT, VariableButton.ButtonTexture.DEFAULT_NORMAL, chapter.getId() + " - " + TextUtils.colorify(chapter.getTitle().getText()), new Vec2i(10, 0), onClickCallback, new ArrayList<>());
+        this.button = new VariableButton(0, 0, x, y, width, HEIGHT, VariableButton.ButtonTexture.DEFAULT_NORMAL, chapter.getId() + " - " + chapter.getTitle().getStyledText(), new Vec2i(10, 0), onClickCallback, new ArrayList<>());
     }
     
     @Override

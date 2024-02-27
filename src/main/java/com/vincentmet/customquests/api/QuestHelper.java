@@ -3,9 +3,7 @@ package com.vincentmet.customquests.api;
 import com.google.gson.JsonObject;
 import com.vincentmet.customquests.Ref;
 import com.vincentmet.customquests.gui.editor.IEditorEntry;
-import com.vincentmet.customquests.hierarchy.quest.Quest;
-import com.vincentmet.customquests.hierarchy.quest.SubTask;
-import com.vincentmet.customquests.hierarchy.quest.Task;
+import com.vincentmet.customquests.hierarchy.quest.*;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
@@ -28,6 +26,20 @@ public class QuestHelper{
 	public static SubTask getSubtaskFromId(int questId, int taskId, int subtaskId){
 		if(doesSubtaskExist(questId, taskId, subtaskId)){
 			return QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().get(subtaskId);
+		}
+		return null;
+	}
+
+	public static Reward getRewardFromId(int questId, int rewardId){
+		if(doesRewardExist(questId, rewardId)){
+			return QuestingStorage.getSidedQuestsMap().get(questId).getRewards().get(rewardId);
+		}
+		return null;
+	}
+
+	public static SubReward getSubrewardFromId(int questId, int rewardId, int subrewardId){
+		if(doesSubrewardExist(questId, rewardId, subrewardId)){
+			return QuestingStorage.getSidedQuestsMap().get(questId).getRewards().get(rewardId).getSubRewards().get(subrewardId);
 		}
 		return null;
 	}
@@ -132,6 +144,56 @@ public class QuestHelper{
 		List<IEditorEntry> entries = new ArrayList<>();
 		if(doesQuestExist(questId)){
 			QuestingStorage.getSidedQuestsMap().get(questId).getText().addPageEntries(entries);
+		}
+		return entries;
+	}
+
+	public static List<IEditorEntry> getEditorQuestDependenciesEntries(int questId){
+		List<IEditorEntry> entries = new ArrayList<>();
+		if(doesQuestExist(questId)){
+			QuestingStorage.getSidedQuestsMap().get(questId).getDependencyList().addPageEntries(entries);
+		}
+		return entries;
+	}
+
+	public static List<IEditorEntry> getEditorQuestTasksEntries(int questId){
+		List<IEditorEntry> entries = new ArrayList<>();
+		if(doesQuestExist(questId)){
+			QuestingStorage.getSidedQuestsMap().get(questId).getTasks().addPageEntries(entries);
+		}
+		return entries;
+	}
+
+	public static List<IEditorEntry> getEditorQuestTaskEntries(int questId, int taskId){
+		List<IEditorEntry> entries = new ArrayList<>();
+		if(doesTaskExist(questId, taskId)){
+			QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).addPageEntries(entries);
+		}
+		return entries;
+	}
+
+	public static List<IEditorEntry> getEditorQuestSubtasksEntries(int questId, int taskId){
+		List<IEditorEntry> entries = new ArrayList<>();
+		if(doesTaskExist(questId, taskId)){
+			QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().addPageEntries(entries);
+		}
+		return entries;
+	}
+
+	public static List<IEditorEntry> getEditorQuestSubtaskEntries(int questId, int taskId, int subtaskId){
+		List<IEditorEntry> entries = new ArrayList<>();
+		if(doesSubtaskExist(questId, taskId, subtaskId)){
+			QuestingStorage.getSidedQuestsMap().get(questId).getTasks().get(taskId).getSubtasks().get(subtaskId).addPageEntries(entries);
+		}
+		return entries;
+	}
+
+	//todo reward entries here
+
+	public static List<IEditorEntry> getEditorQuestPositionEntries(int questId){
+		List<IEditorEntry> entries = new ArrayList<>();
+		if(doesQuestExist(questId)){
+			QuestingStorage.getSidedQuestsMap().get(questId).getPosition().addPageEntries(entries);
 		}
 		return entries;
 	}

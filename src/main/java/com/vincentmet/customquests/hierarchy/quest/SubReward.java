@@ -111,8 +111,12 @@ public class SubReward implements IJsonObjectProvider, IJsonObjectProcessor{
 		return subreward;
 	}
 	
-	public ResourceLocation getRewardType(){
+	public ResourceLocation getSubrewardType(){
 		return rewardType;
+	}
+
+	public void setSubrewardType(ResourceLocation newType){
+
 	}
 	
 	public int getSubRewardId(){

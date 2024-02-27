@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 
 import static com.vincentmet.customquests.Ref.CustomQuests.LOGGER;
 
-public class MessageUpdateSinglePlayer{
+public class MessageUpdateSinglePlayer{//todo is this class still needed? if so, probably need to rename and move to correct folder
 	public JsonObject json;//used for receiving packet only
 	public String uuid;
 	

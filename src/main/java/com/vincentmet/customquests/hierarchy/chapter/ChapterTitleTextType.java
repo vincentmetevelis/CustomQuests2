@@ -31,17 +31,7 @@ public class ChapterTitleTextType implements IJsonObjectProcessor, IJsonObjectPr
             if(jsonElement.isJsonPrimitive()){
                 JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
                 if(jsonPrimitive.isString()){
-                    String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-                    ResourceLocation jsonResourceLocationValue = new ResourceLocation(jsonPrimitiveStringValue);
-                    for(Map.Entry<ResourceLocation, Supplier<ITextType>> entry : CQRegistry.getTextTypes().entrySet()){
-                        if(entry.getKey().toString().equals(jsonResourceLocationValue.toString())){
-                            setType(entry.getValue().get());
-                        }
-                    }
-                    if(type == null){
-                        Ref.CustomQuests.LOGGER.warn("'Chapter > " + parentId + " > title > type': Value does not match a registered TextType, please download the addon mod it belongs to, or change it to something valid. Defaulting to 'customquests:plaintext'");
-                        setType(new PlainTextTextType());
-                    }
+                    setType(new ResourceLocation(jsonPrimitive.getAsString()));
                 }else{
                     Ref.CustomQuests.LOGGER.warn("'Chapter > " + parentId + " > title > type': Value is not a String, defaulting to 'customquests:plaintext'!");
                     setType(new PlainTextTextType());
@@ -60,7 +50,7 @@ public class ChapterTitleTextType implements IJsonObjectProcessor, IJsonObjectPr
             if(jsonElement.isJsonPrimitive()){
                 JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
                 if(jsonPrimitive.isString()){
-                    type.setOgText(jsonPrimitive.getAsString());
+                    setText(jsonPrimitive.getAsString());
                 }else{
                     Ref.CustomQuests.LOGGER.warn("'Chapter > " + parentId + " > title > text': Value is not a String, defaulting to an empty String!");
                 }
@@ -79,22 +69,39 @@ public class ChapterTitleTextType implements IJsonObjectProcessor, IJsonObjectPr
         json.addProperty("text", type.getOgText());
         return json;
     }
-    
+
     public void setType(ITextType type){
-        String ogText = "";
-        if(this.type != null){
-            ogText = this.type.getOgText();
+        if(type != null){
+            String ogText = "";
+            if(this.type!=null){
+                ogText = this.type.getOgText();
+            }
+            this.type = type;
+            this.type.setOgText(ogText);
+        }else{
+            Ref.CustomQuests.LOGGER.warn("'Chapter > " + parentId + " > title > type': Value does not match a registered TextType or is null, please download the addon mod it belongs to, or change it to something valid. Defaulting to 'customquests:plaintext'");
+            setType(new PlainTextTextType());
         }
-        this.type = type;
-        this.type.setOgText(ogText);
+    }
+
+    public void setType(ResourceLocation typeRL){
+        for(Map.Entry<ResourceLocation, Supplier<ITextType>> entry : CQRegistry.getTextTypes().entrySet()){
+            if(entry.getKey().toString().equals(typeRL.toString())){
+                setType(entry.getValue().get());
+            }
+        }
     }
     
     public ITextType getType(){
         return type;
     }
     
-    public String getText(){
-        return type.getText();
+    public String getStyledText(){
+        return type.getStyledText();
+    }
+
+    public String getOgText(){
+        return type.getOgText();
     }
 
     public void setText(String newText){
@@ -104,20 +111,12 @@ public class ChapterTitleTextType implements IJsonObjectProcessor, IJsonObjectPr
     @Override
     public void addPageEntries(List<IEditorEntry> list) {
         list.add(new EditorEntryWrapper(new TextComponent("Type"), new ResourceLocation(Ref.MODID, "resourcelocation"), () -> type.getId().toString(), newValueObject -> {
-            ResourceLocation rlValue = new ResourceLocation(newValueObject.toString());
-            for(Map.Entry<ResourceLocation, Supplier<ITextType>> entry : CQRegistry.getTextTypes().entrySet()){
-                if(entry.getKey().toString().equals(rlValue.toString())){
-                    setType(entry.getValue().get());
-                }
-            }
-            if(type == null){
-                setType(new PlainTextTextType());
-            }
-            ClientUtils.EditorMessages.Update.Chapter.Title.requestUpdateChapterTitleType(parentId, getType().getId());
-        }));//todo add a custom dropdown selector for available text-types here and change to text string components to translation components
+            setType(new ResourceLocation(newValueObject.toString()));
+            EditorGuiHelper.Update.Chapter.Title.requestUpdateType(parentId, getType().getId());
+        }));
         list.add(new EditorEntryWrapper(new TextComponent("Text"), new ResourceLocation(Ref.MODID, "plaintext"), () -> type.getOgText(), newValueObject -> {
             setText(newValueObject.toString());
-            ClientUtils.EditorMessages.Update.Chapter.Title.requestUpdateChapterTitleText(parentId, getText());
+            EditorGuiHelper.Update.Chapter.Title.requestUpdateText(parentId, getOgText());
         }));
     }
 }

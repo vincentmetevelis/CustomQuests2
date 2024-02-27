@@ -1,17 +1,26 @@
 package com.vincentmet.customquests.api;
 
-import com.google.gson.JsonObject;
 import com.vincentmet.customquests.gui.editor.IEditorEntry;
-import com.vincentmet.customquests.hierarchy.chapter.*;
+import com.vincentmet.customquests.hierarchy.chapter.Chapter;
+import com.vincentmet.customquests.hierarchy.chapter.QuestList;
 import com.vincentmet.customquests.hierarchy.quest.Quest;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.util.thread.EffectiveSide;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 public class ChapterHelper{
 	public static boolean doesChapterExist(int chapterId){
 		return QuestingStorage.getSidedChaptersMap().get(chapterId) != null;
+	}
+
+	public static Chapter getChapterFromId(int chapterId){
+		if(doesChapterExist(chapterId)){
+			return QuestingStorage.getSidedChaptersMap().get(chapterId);
+		}
+		return null;
 	}
 
 	public static boolean areQuestsInSameChapter(int questId1, int questId2){

@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 public class Quest implements IJsonObjectProvider, IJsonObjectProcessor, IEditorPage {
 	private final int questId;
 	private final QuestButton button;
-	private TextType title;
-	private TextType subtitle;
-	private TextType text;
+	private final QuestTitleTextType title;
+	private final QuestSubtitleTextType subtitle;
+	private final QuestTextTextType text;
 	private boolean isGlobal;
 	private final DependencyList dependencyList;
 	private final LockingList lockingList;
@@ -23,7 +23,7 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor, IEditor
 	private final Rewards rewards;
 	private final Position position;
 	
-	public Quest(int questId, QuestButton button, TextType title, TextType subtitle, TextType text, boolean isGlobal, DependencyList dependencyList, LockingList lockingList, UnlockingList unlockingList, Tasks tasks, Rewards rewards, Position position){
+	public Quest(int questId, QuestButton button, QuestTitleTextType title, QuestSubtitleTextType subtitle, QuestTextTextType text, boolean isGlobal, DependencyList dependencyList, LockingList lockingList, UnlockingList unlockingList, Tasks tasks, Rewards rewards, Position position){
 		this.questId = questId;
 		this.button = button;
 		this.title = title;
@@ -39,7 +39,7 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor, IEditor
 	}
 	
 	public Quest(int questId){
-		this(questId, new QuestButton(questId), new TextType(questId, "Quest", "title"), new TextType(questId, "Quest", "subtitle"), new TextType(questId, "Quest", "text"), false, new DependencyList(questId), new LockingList(questId), new UnlockingList(questId), new Tasks(questId), new Rewards(questId), new Position(questId));
+		this(questId, new QuestButton(questId), new QuestTitleTextType(questId), new QuestSubtitleTextType(questId), new QuestTextTextType(questId), false, new DependencyList(questId), new LockingList(questId), new UnlockingList(questId), new Tasks(questId), new Rewards(questId), new Position(questId));
 	}
 	
 	@Override
@@ -234,15 +234,15 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor, IEditor
 		return button;
 	}
 	
-	public TextType getTitle(){
+	public QuestTitleTextType getTitle(){
 		return title;
 	}
 	
-	public TextType getSubtitle(){
+	public QuestSubtitleTextType getSubtitle(){
 		return subtitle;
 	}
 	
-	public TextType getText(){
+	public QuestTextTextType getText(){
 		return text;
 	}
 	
@@ -273,7 +273,7 @@ public class Quest implements IJsonObjectProvider, IJsonObjectProcessor, IEditor
 	public Position getPosition(){
 		return position;
 	}
-	
+
 	public Chapter getChapter(){
 		if(hasChapter()){
 			return QuestingStorage.getSidedChaptersMap().values().stream().filter(chapter->chapter.getQuests().contains(questId)).collect(Collectors.toList()).get(0);

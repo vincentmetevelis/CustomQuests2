@@ -16,7 +16,8 @@
 	
 	"customquests.command.use_subcommand": "Please use a subcommand",
 	"customquests.command.wip": "Command is Work In Progress",
-	
+	"customquests.command.party_doesnt_exist": "Party doesn't exist!",
+
 	"customquests.command.reload.success": "Successfully reloaded questing files!",
 	
 	"customquests.command.party.list.no_parties": "No parties to list!",
@@ -58,6 +59,8 @@
 	"customquests.command.info.modid": "Modid: %s",
 	"customquests.command.info.mod_version": "Mod Version: %s",
 	"customquests.command.info.mc_version": "Minecraft Version: %s",
+
+	"customquests.command.open_editor.not_enabled": "Please enable the editor first in the config before opening the GUI!",
 	
 	"customquests.command.uuid": "Your UUID is: %s",
 	

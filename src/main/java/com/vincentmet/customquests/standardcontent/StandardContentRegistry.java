@@ -65,7 +65,7 @@ public class StandardContentRegistry{
 	public static void registerEditorFieldTypes(){
 		//CQRegistry.registerEditorEntryDataTypes(RegexTextFieldType::new);//todo continue here?!
 		CQRegistry.registerEditorEntryDataTypes(IntegerFieldType::new);
-		//CQRegistry.registerEditorEntryDataTypes(DoubleFieldType::new);//todo continue here?!
+		CQRegistry.registerEditorEntryDataTypes(DoubleFieldType::new);
 		CQRegistry.registerEditorEntryDataTypes(ResourceLocationFieldType::new);
 		CQRegistry.registerEditorEntryDataTypes(PlainTextFieldType::new);
 		//CQRegistry.registerEditorEntryDataTypes(BooleanFieldType::new);//todo continue here?!

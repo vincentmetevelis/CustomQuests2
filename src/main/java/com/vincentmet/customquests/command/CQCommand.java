@@ -30,6 +30,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.util.thread.EffectiveSide;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -46,7 +47,7 @@ public class CQCommand{
                 .then(registerPartyCommand())
                 .then(registerProgressCommand())
                 .then(registerGiveCommand())
-                .then(registerEditorCommand())
+                //.then(registerEditorCommand())//todo uncomment when devving editor
                 .then(registerSettingsCommand())
                 .then(registerInfoCommand())
                 .then(registerReloadCommand())
@@ -252,7 +253,7 @@ public class CQCommand{
                                 .then(Commands.literal("task")
                                         .then(Commands.argument("quest_id", IntegerArgumentType.integer(0))
                                                 .then(Commands.argument("task_id", IntegerArgumentType.integer(0))
-                                                        .executes(context -> {//todo test
+                                                        .executes(context -> {
                                                             int questId = context.getArgument("quest_id", Integer.class);
                                                             int taskId = context.getArgument("task_id", Integer.class);
                                                             if(QuestHelper.doesTaskExist(questId, taskId)){
@@ -268,7 +269,7 @@ public class CQCommand{
                                         .then(Commands.argument("quest_id", IntegerArgumentType.integer(0))
                                                 .then(Commands.argument("task_id", IntegerArgumentType.integer(0))
                                                         .then(Commands.argument("subtask_id", IntegerArgumentType.integer(0))
-                                                                .executes(context -> {//todo test
+                                                                .executes(context -> {
                                                                     int questId = context.getArgument("quest_id", Integer.class);
                                                                     int taskId = context.getArgument("task_id", Integer.class);
                                                                     int subtaskId = context.getArgument("subtask_id", Integer.class);
@@ -295,6 +296,8 @@ public class CQCommand{
                                                                 ChapterHelper.getQuests(chapterId).forEach(questId -> {
                                                                     PartyHelper.completeQuest(partyId, questId);
                                                                 });
+                                                            }else{
+                                                                context.getSource().sendFailure(new TranslatableComponent(Ref.MODID + ".command.party_doesnt_exist"));
                                                             }
                                                             return 0;
                                                         })
@@ -427,6 +430,7 @@ public class CQCommand{
                                 .executes(context -> {
                                     QuestingStorage.getSidedPlayersMap().forEach((uuid, questingPlayer) -> ProgressHelper.deleteProgress(UUID.fromString(uuid)));
                                     QuestingStorage.getSidedPartiesMap().forEach((partyId, party) -> PartyHelper.deleteProgress(partyId));
+                                    //todo, all above is working final and has the right values, so the reward claim error lays below
                                     context.getSource().getServer().getPlayerList().getPlayers().forEach(ServerUtils.Packets.SyncToClient.Progress::syncAllProgressAndPartiesToPlayer);
                                     context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.progress.delete.all.success"), false);
                                     return 0;
@@ -434,7 +438,7 @@ public class CQCommand{
                         )
                         .then(Commands.literal("player")
                             .then(Commands.argument("player_name", EntityArgument.players())
-                                .executes(context -> {
+                                .executes(context -> {//fixme this command does not delete a player's progress (the all players one does!)
                                     Collection<ServerPlayer> serverPlayerEntities = EntityArgument.getPlayers(context, "player_name");
                                     serverPlayerEntities.forEach(playerEntity -> {
                                         ProgressHelper.deleteProgress(playerEntity.getUUID());
@@ -487,12 +491,14 @@ public class CQCommand{
     }
     
     public static ArgumentBuilder<CommandSourceStack, ?> registerEditorCommand(){
-        return Commands.literal("editor")
+        return Commands.literal("editor")//todo add OP check?!
                 .executes(context->{
                     try{
                         if(Config.SidedConfig.isEditModeOn()){
                             ServerPlayer player = context.getSource().getPlayerOrException();
                             PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(()->player), new MessageOpenEditor());
+                        }else{
+                            context.getSource().sendFailure(new TranslatableComponent(Ref.MODID + ".command.open_editor.not_enabled"));
                         }
                     }catch(CommandSyntaxException ignored){}
                     return 0;
@@ -522,7 +528,7 @@ public class CQCommand{
                          return 0;
                      })
                 )
-                .then(Commands.literal("edit_mode")
+                /*.then(Commands.literal("edit_mode")//todo uncomment when devving the editor
                      .then(Commands.argument("value", BoolArgumentType.bool())
                            .executes(context -> {
                                Config.ServerConfig.EDIT_MODE = BoolArgumentType.getBool(context, "value");
@@ -535,7 +541,7 @@ public class CQCommand{
                          context.getSource().sendSuccess(new TranslatableComponent(Ref.MODID + ".command.settings.get", "edit_mode", ChatFormatting.GOLD + String.valueOf(Config.SidedConfig.isEditModeOn())), false);
                          return 0;
                      })
-                )
+                )*/
                 .then(Commands.literal("give_device_on_first_login")
                      .then(Commands.argument("value", BoolArgumentType.bool())
                            .executes(context -> {
@@ -609,7 +615,7 @@ public class CQCommand{
                     CQHelper.readAllFilesAndPutIntoHashmaps();
                     MinecraftForge.EVENT_BUS.post(new DataLoadingEvent.Post());
                     context.getSource().getServer().getPlayerList().getPlayers().forEach(playerEntity->{
-                        CQHelper.generateMissingProgress(playerEntity.getUUID());
+                        CQHelper.generateMissingProgress();
                         CQHelper.generateMissingPartyProgress();
                         ServerUtils.Packets.SyncToClient.Data.syncAllChaptersAndQuestsToPlayer(playerEntity);
                         ServerUtils.Packets.SyncToClient.Progress.syncAllProgressAndPartiesToPlayer(playerEntity);

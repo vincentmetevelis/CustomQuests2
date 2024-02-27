@@ -79,8 +79,8 @@ public class QuestingCanvas implements IHoverRenderable, CQGuiEventListener {
 		        })
 		        .forEach(entry -> {
 					List<Component> questInfoList = new ArrayList<>();
-					questInfoList.add(new TextComponent(TextUtils.colorify(entry.getValue().getTitle().getText()) + ChatFormatting.RESET + " #" + entry.getKey()));
-					questInfoList.add(new TextComponent(TextUtils.colorify(entry.getValue().getSubtitle().getText())));
+					questInfoList.add(new TextComponent(entry.getValue().getTitle().getStyledText() + ChatFormatting.RESET + " #" + entry.getKey()));
+					questInfoList.add(new TextComponent(entry.getValue().getSubtitle().getStyledText()));
 					if(!CombinedProgressHelper.isQuestUnlocked(PLAYER.getUUID(), entry.getValue().getQuestId())){
 						questInfoList.add(new TextComponent(""));
 						if(entry.getValue().getDependencyList().getLogicType() == LogicType.OR){
@@ -90,7 +90,7 @@ public class QuestingCanvas implements IHoverRenderable, CQGuiEventListener {
 						}
 						entry.getValue().getDependencyList().asQuestList().forEach(quest -> {
 							if(!CombinedProgressHelper.isQuestCompleted(PLAYER.getUUID(), quest.getQuestId())){
-								questInfoList.add(new TextComponent("  - " + TextUtils.colorify(quest.getTitle().getText()) + ChatFormatting.RESET + " #" + quest.getQuestId()));
+								questInfoList.add(new TextComponent("  - " + quest.getTitle().getStyledText() + ChatFormatting.RESET + " #" + quest.getQuestId()));
 							}
 						});
 					}

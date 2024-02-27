@@ -135,6 +135,11 @@ public class CQHelper{
 	}
 	
 	public static void generateMissingProgress(){
+		Ref.currentServerInstance.getPlayerList().getPlayers().forEach(player -> {
+			if(!QuestingStorage.getSidedPlayersMap().containsKey(player.getStringUUID())){
+				QuestingStorage.getSidedPlayersMap().put(player.getStringUUID(), new QuestingPlayer(player.getUUID()));
+			}
+		});
 		QuestingStorage.getSidedPlayersMap().forEach((uuid, questingPlayer) -> {
 			generateMissingProgress(UUID.fromString(uuid));
 		});

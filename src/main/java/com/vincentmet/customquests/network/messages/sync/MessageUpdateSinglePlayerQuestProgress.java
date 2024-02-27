@@ -29,7 +29,7 @@ public class MessageUpdateSinglePlayerQuestProgress{
 		if(ProgressHelper.doesPlayerExist(uuid)){
 			jsonObject = QuestingStorage.getSidedPlayersMap().get(uuid.toString()).getIndividualProgress().get(questId).getJson();
 		}else{
-			ServerUtils.Packets.Delete.deleteSinglePlayerAtAllClients(uuid);
+			ServerUtils.Packets.Delete.deleteSinglePlayerAtAllClients(uuid);//todo is this class and the call on this line still needed? if so, probably need to rename and move to correct folder
 		}
 	}
 

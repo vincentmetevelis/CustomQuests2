@@ -180,7 +180,7 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
 					ogRL = ResourceLocation.tryParse(jsonPrimitiveStringValue);
 					if(ogRL != null){
-						if(!TagHelper.doesTagExist(ogRL) && !ForgeRegistries.ITEMS.containsKey(ogRL)){
+						if(!TagHelper.Items.doesTagExist(ogRL) && !ForgeRegistries.ITEMS.containsKey(ogRL)){
 							Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > item': Value is not a valid item that exists in the game, please use a valid item, defaulting to 'minecraft:grass_block'!");
 							ogRL = Blocks.GRASS_BLOCK.getRegistryName();
 						}
@@ -236,6 +236,8 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 						Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Value is not valid NBT, defaulting to null!");
 						ogNBT = null;
 					}
+				}else if(jsonPrimitive.isJsonNull()){//todo apply this null check to other json to nbt code
+					//NOOP, Json is already null, so no need to default to it
 				}else{
 					Ref.CustomQuests.LOGGER.warn("'Quest > " + questId + " > tasks > entries > " + taskId + " > sub_tasks > entries > " + subtaskId + " > nbt': Value is not a String, defaulting to null!");
 					ogNBT = null;
@@ -250,8 +252,8 @@ public class ItemDetectTaskType implements ITaskType, IItemStacksProvider{
 		}
 		
 		CompoundTag nbt = ApiUtils.getNbtFromJson(ogNBT);
-		if(TagHelper.doesTagExist(ogRL)){
-			TagHelper.getEntries(ogRL).stream().map(item1 ->{
+		if(TagHelper.Items.doesTagExist(ogRL)){
+			TagHelper.Items.getEntries(ogRL).stream().map(item1 ->{
 				ItemStack stack = new ItemStack(item1, count);
 				if(nbt!=null){
 					if(stack.getTag() != null){

@@ -5,10 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.vincentmet.customquests.Ref;
-import com.vincentmet.customquests.api.ClientUtils;
-import com.vincentmet.customquests.api.IJsonObjectProcessor;
-import com.vincentmet.customquests.api.IJsonObjectProvider;
-import com.vincentmet.customquests.api.IQuestingTexture;
+import com.vincentmet.customquests.api.*;
 import com.vincentmet.customquests.gui.editor.EditorEntryWrapper;
 import com.vincentmet.customquests.gui.editor.IEditorEntry;
 import com.vincentmet.customquests.gui.editor.IEditorPage;
@@ -24,10 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor, IEditorPage {
+	private static final IQuestingTexture DEFAULT_ICON = new ItemSlideshowTexture(Blocks.GRASS_BLOCK.getRegistryName(), new ItemStack(Blocks.GRASS_BLOCK));
 	private final int id;
 	private IQuestingTexture icon;
-	private ChapterTitleTextType title;
-	private ChapterTextTextType text;
+	private final ChapterTitleTextType title;
+	private final ChapterTextTextType text;
 	private final QuestList quests;
 	
 	public Chapter(int id, IQuestingTexture icon, ChapterTitleTextType title, ChapterTextTextType text, QuestList quests){
@@ -49,31 +47,18 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor, IEdit
 			if(jsonElement.isJsonPrimitive()){
 				JsonPrimitive jsonPrimitive = jsonElement.getAsJsonPrimitive();
 				if(jsonPrimitive.isString()){
-					String jsonPrimitiveStringValue = jsonPrimitive.getAsString();
-					ResourceLocation jsonResourceLocationValue = new ResourceLocation(jsonPrimitiveStringValue);
-					if(TagHelper.doesTagExist(jsonResourceLocationValue)){
-						List<ItemStack> tagStacks = new ArrayList<>();
-						TagHelper.getEntries(jsonResourceLocationValue).stream().map(ItemStack::new).forEach(tagStacks::add);
-						setIcon(new ItemSlideshowTexture(jsonResourceLocationValue, tagStacks));
-					}else{
-						if(ForgeRegistries.ITEMS.containsKey(jsonResourceLocationValue)){
-							setIcon(new ItemSlideshowTexture(jsonResourceLocationValue, new ItemStack(ForgeRegistries.ITEMS.getValue(jsonResourceLocationValue))));
-						}else{
-							Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > icon': No valid item/tag for '" + jsonPrimitiveStringValue + "' found, defaulting to 'minecraft:grass_block'");
-							setIcon(new ItemSlideshowTexture(Blocks.GRASS_BLOCK.getRegistryName(), new ItemStack(Blocks.GRASS_BLOCK)));
-						}
-					}
+					setIcon(new ResourceLocation(jsonPrimitive.getAsString()));
 				}else{
-					Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > icon': Value is not a String, defaulting to 'minecraft:grass_block'");
-					setIcon(new ItemSlideshowTexture(Blocks.GRASS_BLOCK.getRegistryName(), new ItemStack(Blocks.GRASS_BLOCK)));
+					Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > icon': Value is not a String, defaulting to '"+Blocks.GRASS_BLOCK.getRegistryName()+"'!");
+					setIcon(DEFAULT_ICON);
 				}
 			}else{
-				Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > icon': Value is not a JsonPrimitive, please use a String, defaulting to 'minecraft:grass_block'");
-				setIcon(new ItemSlideshowTexture(Blocks.GRASS_BLOCK.getRegistryName(), new ItemStack(Blocks.GRASS_BLOCK)));
+				Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > icon': Value is not a JsonPrimitive, please use a String, defaulting to '"+Blocks.GRASS_BLOCK.getRegistryName()+"'!");
+				setIcon(DEFAULT_ICON);
 			}
 		}else{
-			Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > icon': Not detected, defaulting to 'minecraft:grass_block'");
-			setIcon(new ItemSlideshowTexture(Blocks.GRASS_BLOCK.getRegistryName(), new ItemStack(Blocks.GRASS_BLOCK)));
+			Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > icon': Not detected, defaulting to '"+Blocks.GRASS_BLOCK.getRegistryName()+"'!");
+			setIcon(DEFAULT_ICON);
 		}
 		
 		if(json.has("title")){
@@ -146,36 +131,37 @@ public class Chapter implements IJsonObjectProvider, IJsonObjectProcessor, IEdit
 	public QuestList getQuests(){
 		return quests;
 	}
-	
+
 	public void setIcon(IQuestingTexture icon){
-		this.icon = icon;
+		if (icon != null && icon.isValid()){
+			this.icon = icon;
+		}else{
+			Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > icon': The given texture is either null or invalid, defaulting to '"+Blocks.GRASS_BLOCK.getRegistryName()+"'!");
+			setIcon(DEFAULT_ICON);
+		}
 	}
 
-	public void setTitle(ChapterTitleTextType title){
-		this.title = title;
-	}
-	
-	public void setText(ChapterTextTextType text){
-		this.text = text;
+	public void setIcon(ResourceLocation iconRL){
+		if(TagHelper.Items.doesTagExist(iconRL)){
+			List<ItemStack> tagStacks = new ArrayList<>();
+			TagHelper.Items.getEntries(iconRL).stream().map(ItemStack::new).forEach(tagStacks::add);
+			setIcon(new ItemSlideshowTexture(iconRL, tagStacks));
+		}else{
+			if(ForgeRegistries.ITEMS.containsKey(iconRL)){
+				setIcon(new ItemSlideshowTexture(iconRL, new ItemStack(ForgeRegistries.ITEMS.getValue(iconRL))));
+			}else{
+				Ref.CustomQuests.LOGGER.warn("'Quest > " + id + " > icon': There is no valid item/tag with ResourceLocation '" + iconRL + "' found, defaulting to '"+Blocks.GRASS_BLOCK.getRegistryName()+"'!");
+				setIcon(DEFAULT_ICON);
+			}
+		}
 	}
 
 	@Override
 	public void addPageEntries(List<IEditorEntry> list) {
 		list.add(new EditorEntryWrapper(new TranslatableComponent(Ref.MODID + ".editor.keys.icon"), new ResourceLocation(Ref.MODID, "resourcelocation"), () -> getIcon().getResourceLocation().toString(), newValueObject -> {
 			ResourceLocation newRL = ResourceLocation.tryParse(newValueObject.toString());
-			if(TagHelper.doesTagExist(newRL)){
-				List<ItemStack> tagStacks = new ArrayList<>();
-				TagHelper.getEntries(newRL).stream().map(ItemStack::new).forEach(tagStacks::add);
-				setIcon(new ItemSlideshowTexture(newRL, tagStacks));
-			}else{
-				if(ForgeRegistries.ITEMS.containsKey(newRL)){
-					setIcon(new ItemSlideshowTexture(newRL, new ItemStack(ForgeRegistries.ITEMS.getValue(newRL))));
-				}else{
-					Ref.CustomQuests.LOGGER.warn("'Chapter > " + id + " > icon': No valid item/tag for '" + newRL + "' found, defaulting to 'minecraft:grass_block'");
-					setIcon(new ItemSlideshowTexture(Blocks.GRASS_BLOCK.getRegistryName(), new ItemStack(Blocks.GRASS_BLOCK)));
-				}
-			}
-			ClientUtils.EditorMessages.Update.Chapter.requestUpdateChapterIcon(id, getIcon().getResourceLocation());
+			setIcon(newRL);
+			EditorGuiHelper.Update.Chapter.requestUpdateIcon(id, getIcon().getResourceLocation());
 		}));//todo add a custom dropdown selector (or a scroll-through-button(i.e. vanilla world type buttons in world gen menu)) for available text-types here && text components
 	}
 }

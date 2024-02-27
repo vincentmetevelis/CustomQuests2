@@ -103,8 +103,8 @@ public class QuestingScreen extends Screen {
 		chapterList.clear();
 		QuestingStorage.getSidedChaptersMap().forEach((chapterID, chapter) -> {
 			List<Component> chapterInfoList = new ArrayList<>();
-			chapterInfoList.add(new TextComponent(TextUtils.colorify(chapter.getTitle().getText()) + ChatFormatting.RESET + " #" + chapterID));
-			chapterInfoList.add(new TextComponent(TextUtils.colorify(chapter.getText().getText())));
+			chapterInfoList.add(new TextComponent(chapter.getTitle().getStyledText() + ChatFormatting.RESET + " #" + chapterID));
+			chapterInfoList.add(new TextComponent(chapter.getText().getStyledText()));
 			
 			ButtonState buttonState = ButtonState.DISABLED;
 			if(ChapterHelper.isChapterUnlocked(localPlayer.getUUID(), chapter)){
@@ -112,7 +112,7 @@ public class QuestingScreen extends Screen {
 			}
 
 			Container<Integer> chapterYSupplier = new Container<>(cumulativeHeight.getValue());
-			chapterList.add(new ChapterButton(chapterListX, chapterYSupplier::get, chapterListWidth, BUTTON_HEIGHT, chapter.getIcon(), TextUtils.colorify(chapter.getTitle().getText()), buttonState, (mouseButton) -> {
+			chapterList.add(new ChapterButton(chapterListX, chapterYSupplier::get, chapterListWidth, BUTTON_HEIGHT, chapter.getIcon(), chapter.getTitle().getStyledText(), buttonState, (mouseButton) -> {
 				screenManager.setCurrentlySelectedChapterId(chapter.getId());
 				questingCanvas.applyDraggingLimits();
 				questingCanvas.reInit(questingCanvasX.getAsInt(), questingCanvasY.getAsInt(), questingCanvasWidth.getAsInt(), questingCanvasHeight.getAsInt());

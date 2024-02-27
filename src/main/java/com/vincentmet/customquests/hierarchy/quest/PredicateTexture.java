@@ -11,9 +11,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.function.Supplier;
 
 public class PredicateTexture implements IQuestingTexture{
-	private ResourceLocation texture;
-	private int texU, texV, texWidth, texHeight, texSizeX, texSizeY;
-	private Supplier<Boolean> showing;
+	private final ResourceLocation texture;
+	private final int texU, texV, texWidth, texHeight, texSizeX, texSizeY;
+	private final Supplier<Boolean> showing;
 	
 	public PredicateTexture(ResourceLocation texture, int texU, int texV, int texWidth, int texHeight, int texSizeX, int texSizeY, Supplier<Boolean> showing){
 		this.texture = texture;

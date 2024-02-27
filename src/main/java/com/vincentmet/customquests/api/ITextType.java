@@ -6,5 +6,5 @@ public interface ITextType{
     ResourceLocation getId();
     String getOgText();
     void setOgText(String newText);
-    String getText();
+    String getStyledText();
 }

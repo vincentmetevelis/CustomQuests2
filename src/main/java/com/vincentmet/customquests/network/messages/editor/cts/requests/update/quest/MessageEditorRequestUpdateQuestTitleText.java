@@ -37,7 +37,7 @@ public class MessageEditorRequestUpdateQuestTitleText {
 			ServerPlayer sender = ctx.get().getSender();
 			if(sender != null && message != null){
 				if(ApiUtils.hasPlayerEditorAccess(sender) && QuestHelper.doesQuestExist(message.questId)){
-					EditorServerProcessor.Update.Quest.Subtitle.updateText(message.questId, message.text);
+					EditorServerProcessor.Update.Quest.Title.updateText(message.questId, message.text);
 				}
 			}
 		}).thenRun(() -> ctx.get().setPacketHandled(true));

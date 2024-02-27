@@ -35,7 +35,7 @@ public class TranslationTextType implements ITextType{
     }
     
     @Override
-    public String getText(){
+    public String getStyledText(){
         if(translationKey != null){
             return TextUtils.colorify(translationKey.getString());
         }
